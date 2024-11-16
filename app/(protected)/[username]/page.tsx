@@ -1,10 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Github, Instagram, Linkedin, ShareIcon, Twitter } from "lucide-react";
+import {
+  Github,
+  Instagram,
+  Linkedin,
+  LogOut,
+  Menu,
+  ShareIcon,
+  Twitter,
+  User,
+} from "lucide-react";
+import { redirect } from "next/navigation";
+import { useState } from "react";
 
 export default function UserProfile() {
   const [customAmount, setCustomAmount] = useState("");
@@ -16,12 +33,44 @@ export default function UserProfile() {
           <div className="font-bold flex items-center justify-center">
             DAOnation
           </div>
-          <Button
-            variant="outline"
-            className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-          >
-            Connect Wallet
-          </Button>
+          <div className="flex gap-x-4">
+            <Button
+              variant="outline"
+              className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
+            >
+              Connect Wallet
+            </Button>
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
+                  >
+                    <Menu />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 bg-zinc-800 border-zinc-700 mt-2"
+                  align="end"
+                >
+                  <DropdownMenuItem
+                    className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
+                    // Todo: maybe router.push ?
+                    onClick={() => redirect("/edit-profile")}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-zinc-700" />
+                  <DropdownMenuItem className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </header>
 
         <main className="flex flex-col gap-8 items-start">
@@ -57,8 +106,7 @@ export default function UserProfile() {
                   variant="outline"
                   className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
                 >
-                  <ShareIcon className="mr-2 h-4 w-4" />
-                  Share
+                  <ShareIcon className="h-4 w-4" />
                 </Button>
               </div>
             </div>
