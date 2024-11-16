@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { Github, Instagram, Linkedin, Twitter, Upload } from "lucide-react";
+import { ArrowLeft, Github, Instagram, Linkedin, Twitter, Upload } from "lucide-react";
 import { useState } from "react";
 
 export default function UserProfileEdit() {
@@ -66,9 +66,17 @@ export default function UserProfileEdit() {
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">
-          Edit Your Profile
-        </h1>
+        <div className="flex justify-between">
+          <h1 className="text-3xl font-bold mb-8 text-center cursor-pointer hover:bg-zinc-700 rounded-full p-2">
+            <ArrowLeft />
+          </h1>{" "}
+          <h1 className="text-3xl font-bold mb-8 text-center">
+            Edit Your Profile
+          </h1>{" "}
+          <h1 className="invisible text-3xl font-bold mb-8 text-center">
+            Hidden
+          </h1>
+        </div>
 
         <Card className="bg-zinc-800 border-none mb-8 pb-12 pt-3">
           <CardContent className="space-y-4 pt-4 pb-6">
@@ -136,13 +144,17 @@ export default function UserProfileEdit() {
                 <Label htmlFor="username">
                   Username <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="username"
-                  name="username"
-                  className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                  
-                />
-                {formErrors.username && (
+                <div className="flex items-center">
+                  <div className="text-zinc-400 px-3 py-1.5 rounded-l-md border border-zinc-400/30">
+                    daonation.xyz/
+                  </div>
+                  <Input
+                    id="username"
+                    name="username"
+                    className="bg-zinc-700 border-zinc-600 text-zinc-100 rounded-l-none"
+                  />
+                </div>
+                {formErrors?.username && (
                   <p className="text-red-500 text-sm mt-1">
                     {formErrors.username}
                   </p>
@@ -156,7 +168,6 @@ export default function UserProfileEdit() {
                   id="displayName"
                   name="displayName"
                   className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                  
                 />
                 {formErrors.displayName && (
                   <p className="text-red-500 text-sm mt-1">
@@ -173,7 +184,6 @@ export default function UserProfileEdit() {
                   name="description"
                   className="bg-zinc-700 border-zinc-600 text-zinc-100"
                   rows={4}
-                  
                 />
                 {formErrors.description && (
                   <p className="text-red-500 text-sm mt-1">
@@ -192,7 +202,6 @@ export default function UserProfileEdit() {
                       placeholder="Twitter"
                       name="twitter"
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                      
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -201,7 +210,6 @@ export default function UserProfileEdit() {
                       placeholder="Instagram"
                       name="instagram"
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                      
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -210,7 +218,6 @@ export default function UserProfileEdit() {
                       placeholder="GitHub"
                       name="github"
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                      
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -219,7 +226,6 @@ export default function UserProfileEdit() {
                       placeholder="LinkedIn"
                       name="linkedin"
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                      
                     />
                   </div>
                 </div>
@@ -228,14 +234,11 @@ export default function UserProfileEdit() {
                   formErrors.github ||
                   formErrors.linkedin) && (
                   <p className="text-red-500 text-sm mt-1">
-                    All social media links are 
+                    All social media links are
                   </p>
                 )}
               </div>
-              <Button
-                type="submit"
-                className="w-full text-white"
-              >
+              <Button type="submit" className="w-full text-white">
                 Save Changes
               </Button>
             </form>
