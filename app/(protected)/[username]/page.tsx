@@ -31,20 +31,20 @@ export default function UserProfile() {
                 <img
                   src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhZGllbnR8ZW58MHx8MHx8fDA%3D"
                   alt="Cover"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer"
                 />
               </div>
-              <div className="absolute left-4 -bottom-16 sm:left-8 sm:-bottom-20">
+              <div className="absolute left-4 -bottom-16 sm:-bottom-20">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-zinc-900">
                   <img
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzl8fHByb2ZpbGV8ZW58MHx8MHx8fDA%3D"
                     alt="Profile"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-pointer"
                   />
                 </div>
               </div>
             </div>
-            <div className="mt-20 sm:mt-24 ml-4 sm:ml-8">
+            <div className="mt-20 sm:mt-24">
               <h1 className="text-2xl font-semibold mb-4">John Deo</h1>
               <div className="flex gap-4 mb-6">
                 <Button
