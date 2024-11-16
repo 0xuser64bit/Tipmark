@@ -77,15 +77,17 @@ export default function Home() {
         </p>
         <div className="flex space-x-4">
           <a
-            href="#"
+            href="https://x.com/user64bit"
             className="text-zinc-400 hover:text-zinc-100 transition-colors"
+            target="_blank"
           >
             <Twitter className="h-5 w-5" />
             <span className="sr-only">Twitter</span>
           </a>
           <a
-            href="#"
+            href="https://github.com/user-64bit"
             className="text-zinc-400 hover:text-zinc-100 transition-colors"
+            target="_blank"
           >
             <Github className="h-5 w-5" />
             <span className="sr-only">GitHub</span>

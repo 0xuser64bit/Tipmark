@@ -6,10 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { ArrowLeft, Github, Instagram, Linkedin, Twitter, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  Github,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Upload,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function UserProfileEdit() {
+  const router = useRouter();
   const [coverImage, setCoverImage] = useState(
     "/placeholder.svg?height=200&width=800"
   );
@@ -67,7 +76,10 @@ export default function UserProfileEdit() {
     <div className="min-h-screen bg-zinc-900 text-zinc-100 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between">
-          <h1 className="text-3xl font-bold mb-8 text-center cursor-pointer hover:bg-zinc-700 rounded-full p-2">
+          <h1
+            className="text-3xl font-bold mb-8 text-center cursor-pointer hover:bg-zinc-700 rounded-full p-2"
+            onClick={() => router.back()}
+          >
             <ArrowLeft />
           </h1>{" "}
           <h1 className="text-3xl font-bold mb-8 text-center">
