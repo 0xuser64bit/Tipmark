@@ -14,16 +14,18 @@ import {
   Twitter,
   Upload,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function UserProfileEdit() {
   const router = useRouter();
+  const session = useSession();
   const [coverImage, setCoverImage] = useState(
-    "/placeholder.svg?height=200&width=800"
+    session.data?.user?.image
   );
   const [profileImage, setProfileImage] = useState(
-    "/placeholder.svg?height=200&width=200"
+    session.data?.user?.image
   );
   const [formErrors, setFormErrors] = useState<any>({
     username: "",
@@ -100,7 +102,7 @@ export default function UserProfileEdit() {
                 transition={{ duration: 0.5 }}
               >
                 <img
-                  src={coverImage}
+                  src={coverImage as string}
                   alt="Cover"
                   className="w-full h-full object-cover"
                 />
@@ -126,7 +128,7 @@ export default function UserProfileEdit() {
               >
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-zinc-900">
                   <img
-                    src={profileImage}
+                    src={profileImage as string}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

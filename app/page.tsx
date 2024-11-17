@@ -1,6 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Github, Twitter } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function Home() {
   return (
@@ -37,7 +41,16 @@ export default function Home() {
           DAOnation is a decentralized platform that empowers creators and
           supporters to connect through cryptocurrency donations.
         </p>
-        <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button
+          size="lg"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={async () => {
+            await signIn("google", {
+              redirect: true,
+              callbackUrl: "/edit-profile",
+            });
+          }}
+        >
           Launch App
         </Button>
 

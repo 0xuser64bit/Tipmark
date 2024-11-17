@@ -20,11 +20,13 @@ import {
   Twitter,
   User,
 } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useState } from "react";
 
 export default function UserProfile() {
   const [customAmount, setCustomAmount] = useState("");
+  const session = useSession();
 
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
@@ -40,36 +42,46 @@ export default function UserProfile() {
             >
               Connect Wallet
             </Button>
-            <div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
+            {session.data?.user && (
+              <div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
+                    >
+                      <Menu />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 bg-zinc-800 border-zinc-700 mt-2"
+                    align="end"
                   >
-                    <Menu />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 bg-zinc-800 border-zinc-700 mt-2"
-                  align="end"
-                >
-                  <DropdownMenuItem
-                    className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-                    // Todo: maybe router.push ?
-                    onClick={() => redirect("/edit-profile")}
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-zinc-700" />
-                  <DropdownMenuItem className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                    <DropdownMenuItem
+                      className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
+                      // Todo: maybe router.push ?
+                      onClick={() => redirect("/edit-profile")}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-zinc-700" />
+                    <DropdownMenuItem
+                      className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
+                      onClick={async () =>
+                        await signOut({
+                          redirect: true,
+                          callbackUrl: "/",
+                        })
+                      }
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
           </div>
         </header>
 
