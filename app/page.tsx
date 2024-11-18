@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Github, Twitter } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { redirect } from "next/navigation";
 
 export default function Home() {
   return (

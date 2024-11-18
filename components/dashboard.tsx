@@ -2,95 +2,45 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Github,
-  Instagram,
-  Linkedin,
-  LogOut,
-  Menu,
-  ShareIcon,
-  Twitter,
-  User,
-} from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { Github, Instagram, Linkedin, ShareIcon, Twitter } from "lucide-react";
 import { useState } from "react";
+import { Footer } from "./footer";
+import { Header } from "./header";
 
-export default function UserProfile() {
+export default function Dashboard({
+  profileImage,
+  coverImage,
+  username,
+  displayName,
+  description,
+  x_url,
+  github_url,
+  instagram_url,
+  linkedin_url,
+}: {
+  profileImage: string;
+  coverImage: string;
+  username: string;
+  displayName: string;
+  description: string;
+  x_url: string;
+  github_url: string;
+  instagram_url: string;
+  linkedin_url: string;
+}) {
   const [customAmount, setCustomAmount] = useState("");
-  const session = useSession();
 
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
       <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        <header className="flex justify-between items-center mb-6">
-          <div className="font-bold flex items-center justify-center">
-            DAOnation
-          </div>
-          <div className="flex gap-x-4">
-            <Button
-              variant="outline"
-              className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-            >
-              Connect Wallet
-            </Button>
-            {session.data?.user && (
-              <div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-                    >
-                      <Menu />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-56 bg-zinc-800 border-zinc-700 mt-2"
-                    align="end"
-                  >
-                    <DropdownMenuItem
-                      className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-                      // Todo: maybe router.push ?
-                      onClick={() => redirect("/edit-profile")}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-zinc-700" />
-                    <DropdownMenuItem
-                      className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-                      onClick={async () =>
-                        await signOut({
-                          redirect: true,
-                          callbackUrl: "/",
-                        })
-                      }
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
-        </header>
-
+        <Header />
         <main className="flex flex-col gap-8 items-start">
           <div className="w-full">
             <div className="relative">
               <div className="w-full h-48 sm:h-64 overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhZGllbnR8ZW58MHx8MHx8fDA%3D"
+                  src={coverImage}
                   alt="Cover"
                   className="w-full h-full object-cover cursor-pointer"
                 />
@@ -98,7 +48,7 @@ export default function UserProfile() {
               <div className="absolute left-4 -bottom-16 sm:-bottom-20">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-zinc-900">
                   <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzl8fHByb2ZpbGV8ZW58MHx8MHx8fDA%3D"
+                    src={profileImage}
                     alt="Profile"
                     className="w-full h-full object-cover cursor-pointer"
                   />
@@ -106,7 +56,7 @@ export default function UserProfile() {
               </div>
             </div>
             <div className="mt-20 sm:mt-24">
-              <h1 className="text-2xl font-semibold mb-4">John Deo</h1>
+              <h1 className="text-2xl font-semibold mb-4">{displayName}</h1>
               <div className="flex gap-4 mb-6">
                 <Button
                   variant="outline"
@@ -127,41 +77,40 @@ export default function UserProfile() {
               <div className="flex-1">
                 <Card className="w-full bg-zinc-800/50 border-none mb-6">
                   <CardContent className="p-4">
-                    <p className="text-zinc-300">
-                      Description or about me by John Deo. Here you can write a
-                      brief introduction about yourself, your work, or your
-                      interests. This is a great place to showcase your
-                      personality and connect with your supporters.
-                    </p>
+                    <p className="text-zinc-300">{description}</p>
                   </CardContent>
                 </Card>
                 <div className="w-full bg-zinc-800/50 rounded-lg p-4">
                   <div className="flex justify-center gap-6 text-zinc-400">
                     <a
-                      href="#"
+                      href={"https://x.com/" + x_url}
                       className="hover:text-zinc-100 transition-colors"
                       aria-label="Twitter"
+                      target="_blank"
                     >
                       <Twitter className="h-5 w-5" />
                     </a>
                     <a
-                      href="#"
+                      href={"https://instagram.com/" + instagram_url}
                       className="hover:text-zinc-100 transition-colors"
                       aria-label="Instagram"
+                      target="_blank"
                     >
                       <Instagram className="h-5 w-5" />
                     </a>
                     <a
-                      href="#"
+                      href={"https://github.com/" + github_url}
                       className="hover:text-zinc-100 transition-colors"
                       aria-label="GitHub"
+                      target="_blank"
                     >
                       <Github className="h-5 w-5" />
                     </a>
                     <a
-                      href="#"
+                      href={"https://linkedin.com/" + linkedin_url}
                       className="hover:text-zinc-100 transition-colors"
                       aria-label="LinkedIn"
+                      target="_blank"
                     >
                       <Linkedin className="h-5 w-5" />
                     </a>
@@ -211,29 +160,7 @@ export default function UserProfile() {
           </div>
         </main>
       </div>
-
-      <footer className="mt-auto py-4">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center text-zinc-400 text-sm gap-2">
-          <p>All Rights reserved @DAOnation</p>
-          <div className="flex gap-4">
-            <a
-              href="#"
-              className="hover:text-zinc-100 transition-colors"
-              aria-label="GitHub"
-            >
-              <Github />
-            </a>
-            <span>|</span>
-            <a
-              href="#"
-              className="hover:text-zinc-100 transition-colors"
-              aria-label="Twitter"
-            >
-              <Twitter />
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
