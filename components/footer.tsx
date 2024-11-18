@@ -7,17 +7,19 @@ export const Footer = () => {
         <p>All Rights reserved @DAOnation</p>
         <div className="flex gap-4">
           <a
-            href="#"
+            href="https://github.com/user-64bit"
             className="hover:text-zinc-100 transition-colors"
             aria-label="GitHub"
+            target="_blank"
           >
             <Github />
           </a>
           <span>|</span>
           <a
-            href="#"
+            href="https://x.com/user64bit"
             className="hover:text-zinc-100 transition-colors"
             aria-label="Twitter"
+            target="_blank"
           >
             <Twitter />
           </a>

@@ -3,9 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Github, Twitter } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function Home() {
+  const session = useSession();
+  if (session?.data?.user) {
+    redirect("/dashboard");
+  }
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
       <header className="max-w-6xl mx-auto w-full p-6 flex justify-between items-center">
@@ -85,7 +90,7 @@ export default function Home() {
 
       <footer className="max-w-6xl mx-auto w-full p-6 flex justify-between items-center border-t border-zinc-800">
         <p className="text-sm text-zinc-400">
-          © 2023 DAOnation. All rights reserved.
+          © {new Date().getFullYear()} DAOnation. All rights reserved.
         </p>
         <div className="flex space-x-4">
           <a

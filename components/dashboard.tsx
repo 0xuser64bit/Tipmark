@@ -3,7 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Github, Instagram, Linkedin, ShareIcon, Twitter } from "lucide-react";
+import {
+  Check,
+  Github,
+  Instagram,
+  Linkedin,
+  ShareIcon,
+  Twitter,
+} from "lucide-react";
 import { useState } from "react";
 import { Footer } from "./footer";
 import { Header } from "./header";
@@ -30,6 +37,13 @@ export default function Dashboard({
   linkedin_url: string;
 }) {
   const [customAmount, setCustomAmount] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`https://daonation.xyz/` + username);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
@@ -56,7 +70,12 @@ export default function Dashboard({
               </div>
             </div>
             <div className="mt-20 sm:mt-24">
-              <h1 className="text-2xl font-semibold mb-4">{displayName}</h1>
+              <div className="mb-4">
+                <h1 className="text-2xl font-semibold">{displayName}</h1>
+                <span className="text-muted-foreground text-sm">
+                  @{username}
+                </span>
+              </div>
               <div className="flex gap-4 mb-6">
                 <Button
                   variant="outline"
@@ -67,8 +86,13 @@ export default function Dashboard({
                 <Button
                   variant="outline"
                   className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
+                  onClick={() => handleCopy()}
                 >
-                  <ShareIcon className="h-4 w-4" />
+                  {copied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <ShareIcon className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
