@@ -50,7 +50,7 @@ export default function Home() {
             });
           }}
         >
-          Launch App
+          Get Started
         </Button>
 
         <div className="mt-16 grid gap-8 md:grid-cols-3 max-w-4xl">
