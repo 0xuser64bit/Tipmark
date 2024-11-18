@@ -2,7 +2,8 @@ import getUserByUsername from "@/actions/getUserByUsername";
 import Dashboard from "@/components/dashboard";
 
 export default async function UserProfilePage({ params }: { params: any }) {
-  const data = await getUserByUsername({ username: params.username });
+    const { username } = await params
+  const data = await getUserByUsername({ username });
   return (
     <Dashboard
       profileImage={data?.profile_image!}
