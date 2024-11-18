@@ -14,6 +14,8 @@ import {
 import { useState } from "react";
 import { Footer } from "./footer";
 import { Header } from "./header";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Dashboard({
   profileImage,
@@ -101,7 +103,12 @@ export default function Dashboard({
               <div className="flex-1">
                 <Card className="w-full bg-zinc-800/50 border-none mb-6">
                   <CardContent className="p-4">
-                    <p className="text-zinc-300">{description}</p>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      className="text-zinc-300"
+                    >
+                      {description}
+                    </ReactMarkdown>
                   </CardContent>
                 </Card>
                 <div className="w-full bg-zinc-800/50 rounded-lg p-4">

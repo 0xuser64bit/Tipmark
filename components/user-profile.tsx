@@ -19,6 +19,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Spinner } from "./spinner";
 import { useEdgeStore } from "@/lib/edgestore";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function UserProfile({
   coverImageValue,
@@ -48,6 +50,7 @@ export default function UserProfile({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { edgestore } = useEdgeStore();
+  const [previewMode, setPreviewMode] = useState(false);
   const [coverImage, setCoverImage] = useState(
     coverImageValue ||
       "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhZGllbnR8ZW58MHx8MHx8fDA%3D"
@@ -283,14 +286,42 @@ export default function UserProfile({
                 <Label htmlFor="description">
                   Description <span className="text-red-500">*</span>
                 </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  defaultValue={descriptionValue}
-                  placeholder={"A Cool Description about you"}
-                  className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                  rows={4}
-                />
+                <div className="flex justify-end space-x-2 mb-2">
+                  <Button
+                    type="button"
+                    onClick={() => setPreviewMode(false)}
+                    className={`text-sm ${
+                      !previewMode ? "bg-blue-600" : "bg-zinc-700"
+                    }`}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setPreviewMode(true)}
+                    className={`text-sm ${
+                      previewMode ? "bg-blue-600" : "bg-zinc-700"
+                    }`}
+                  >
+                    Preview
+                  </Button>
+                </div>
+                {previewMode ? (
+                  <div className="bg-zinc-700 border border-zinc-600 rounded-md p-4 min-h-[150px] prose prose-invert max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {descriptionValue}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <Textarea
+                    id="description"
+                    name="description"
+                    defaultValue={descriptionValue}
+                    placeholder="A Cool Description about you (Markdown supported)"
+                    className="bg-zinc-700 border-zinc-600 text-zinc-100"
+                    rows={6}
+                  />
+                )}
                 {formErrors.description && (
                   <p className="text-red-500 text-sm mt-1">
                     {formErrors.description}
