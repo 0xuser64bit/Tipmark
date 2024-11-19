@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { UnifiedWalletButton } from "@jup-ag/wallet-adapter";
 
 export const Header = () => {
   const session = useSession();
@@ -20,12 +21,7 @@ export const Header = () => {
         DAOnation
       </div>
       <div className="flex gap-x-4">
-        <Button
-          variant="outline"
-          className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-        >
-          Connect Wallet
-        </Button>
+        <UnifiedWalletButton />
         {session.data?.user && (
           <div>
             <DropdownMenu>

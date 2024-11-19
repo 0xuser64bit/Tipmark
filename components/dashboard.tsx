@@ -1,21 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Check,
-  Github,
-  Instagram,
-  Linkedin,
-  ShareIcon,
-  Twitter,
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, ShareIcon } from "lucide-react";
 import { useState } from "react";
-import { Footer } from "./footer";
-import { Header } from "./header";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Footer } from "./footer";
+import { Header } from "./header";
 import { SocialsCard } from "./socials-card";
 import { SupportUserCard } from "./support-user";
 
