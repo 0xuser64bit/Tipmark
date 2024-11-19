@@ -125,10 +125,10 @@ export default function UserProfile({
         const username = formData.get("username") as string;
         const display_name = formData.get("displayName") as string;
         const description = formData.get("description") as string;
-        const x_url = formData.get("twitter") as string;
-        const instagram_url = formData.get("instagram") as string;
-        const github_url = formData.get("github") as string;
-        const linkedin_url = formData.get("linkedin") as string;
+        const x_username = formData.get("twitter") as string;
+        const instagram_username = formData.get("instagram") as string;
+        const github_username = formData.get("github") as string;
+        const linkedin_username = formData.get("linkedin") as string;
 
         const { data, error, statusCode } = await UpdateUserProfileAction({
           username,
@@ -137,10 +137,10 @@ export default function UserProfile({
           email,
           display_name,
           description,
-          x_url,
-          instagram_url,
-          github_url,
-          linkedin_url,
+          x_username,
+          instagram_username,
+          github_username,
+          linkedin_username,
           blockchainKeys,
         });
         if (statusCode === 200) {
@@ -368,7 +368,7 @@ export default function UserProfile({
                   <div className="flex items-center space-x-2">
                     <Linkedin className="w-5 h-5 text-zinc-400" />
                     <Input
-                      placeholder="url or # if not"
+                      placeholder="username or # if not"
                       name="linkedin"
                       defaultValue={linkedinValue}
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"

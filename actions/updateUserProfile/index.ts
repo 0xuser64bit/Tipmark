@@ -9,10 +9,10 @@ export default async function UpdateUserProfileAction({
   email,
   display_name,
   description,
-  x_url,
-  instagram_url,
-  github_url,
-  linkedin_url,
+  x_username,
+  instagram_username,
+  github_username,
+  linkedin_username,
   blockchainKeys,
 }: {
   username: string;
@@ -21,10 +21,10 @@ export default async function UpdateUserProfileAction({
   email: string;
   display_name: string;
   description: string;
-  x_url: string;
-  instagram_url: string;
-  github_url: string;
-  linkedin_url: string;
+  x_username: string;
+  instagram_username: string;
+  github_username: string;
+  linkedin_username: string;
   blockchainKeys: any;
 }) {
   // Todo: do same for other blockchains
@@ -52,10 +52,10 @@ export default async function UpdateUserProfileAction({
       cover_image,
       display_name,
       description,
-      x_url,
-      instagram_url,
-      github_url,
-      linkedin_url,
+      x_username,
+      instagram_username,
+      github_username,
+      linkedin_username,
       solana_public_key,
     },
   });

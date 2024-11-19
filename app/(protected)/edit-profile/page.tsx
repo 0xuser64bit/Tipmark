@@ -19,10 +19,10 @@ export default async function UserProfilePage() {
         usernameValue={data?.username || ""}
         displayNameValue={data?.display_name || ""}
         descriptionValue={data?.description || ""}
-        instagramValue={data?.instagram_url || ""}
-        linkedinValue={data?.linkedin_url || ""}
-        twitterValue={data?.x_url || ""}
-        githubValue={data?.github_url || ""}
+        instagramValue={data?.instagram_username || ""}
+        linkedinValue={data?.linkedin_username || ""}
+        twitterValue={data?.x_username || ""}
+        githubValue={data?.github_username || ""}
         solanaPublicKeyValue={data?.solana_public_key || ""}
         email={session?.user?.email!}
       />

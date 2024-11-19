@@ -16,6 +16,8 @@ import { Footer } from "./footer";
 import { Header } from "./header";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { SocialsCard } from "./socials-card";
+import { SupportUserCard } from "./support-user";
 
 export default function Dashboard({
   profileImage,
@@ -23,22 +25,21 @@ export default function Dashboard({
   username,
   displayName,
   description,
-  x_url,
-  github_url,
-  instagram_url,
-  linkedin_url,
+  x_username,
+  github_username,
+  instagram_username,
+  linkedin_username,
 }: {
   profileImage: string;
   coverImage: string;
   username: string;
   displayName: string;
   description: string;
-  x_url: string;
-  github_url: string;
-  instagram_url: string;
-  linkedin_url: string;
+  x_username: string;
+  github_username: string;
+  instagram_username: string;
+  linkedin_username: string;
 }) {
-  const [customAmount, setCustomAmount] = useState("");
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -111,82 +112,14 @@ export default function Dashboard({
                     </ReactMarkdown>
                   </CardContent>
                 </Card>
-                <div className="w-full bg-zinc-800/50 rounded-lg p-4">
-                  <div className="flex justify-center gap-6 text-zinc-400">
-                    <a
-                      href={"https://x.com/" + x_url}
-                      className="hover:text-zinc-100 transition-colors"
-                      aria-label="Twitter"
-                      target="_blank"
-                    >
-                      <Twitter className="h-5 w-5" />
-                    </a>
-                    <a
-                      href={"https://instagram.com/" + instagram_url}
-                      className="hover:text-zinc-100 transition-colors"
-                      aria-label="Instagram"
-                      target="_blank"
-                    >
-                      <Instagram className="h-5 w-5" />
-                    </a>
-                    <a
-                      href={"https://github.com/" + github_url}
-                      className="hover:text-zinc-100 transition-colors"
-                      aria-label="GitHub"
-                      target="_blank"
-                    >
-                      <Github className="h-5 w-5" />
-                    </a>
-                    <a
-                      href={"https://linkedin.com/" + linkedin_url}
-                      className="hover:text-zinc-100 transition-colors"
-                      aria-label="LinkedIn"
-                      target="_blank"
-                    >
-                      <Linkedin className="h-5 w-5" />
-                    </a>
-                  </div>
-                </div>
+                <SocialsCard
+                  x_username={x_username}
+                  instagram_username={instagram_username}
+                  github_username={github_username}
+                  linkedin_username={linkedin_username}
+                />
               </div>
-              <div className="lg:w-80">
-                <Card className="w-full border-none bg-zinc-800/50 shadow-lg text-zinc-100">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-center">
-                      Support John Deo
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Button className="w-full bg-zinc-700 text-zinc-100 border-none transition-colors hover:bg-zinc-600">
-                      Send 0.1 SOL
-                    </Button>
-
-                    <Button className="w-full bg-zinc-700 text-zinc-100 border-none transition-colors hover:bg-zinc-600">
-                      Send 0.5 SOL
-                    </Button>
-
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Custom amount</p>
-                      <div className="flex gap-2">
-                        <Input
-                          type="number"
-                          className="flex-1 bg-zinc-700 border-none text-zinc-100 placeholder-zinc-400"
-                          placeholder="Amount"
-                          min="0"
-                          step="0.1"
-                          value={customAmount}
-                          onChange={(e) => setCustomAmount(e.target.value)}
-                        />
-                        <span className="flex items-center text-sm">SOL</span>
-                      </div>
-                    </div>
-                    {customAmount && customAmount !== "0" && (
-                      <Button className="w-full bg-zinc-700 text-zinc-100 border-none transition-colors hover:bg-zinc-600">
-                        Send {customAmount} SOL
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              <SupportUserCard displayName={displayName} />
             </div>
           </div>
         </main>

@@ -14,18 +14,18 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  email             String   @unique
-  username          String?
-  description       String?
-  display_name      String?
-  profile_image     String?
-  cover_image       String?
-  x_url             String?
-  instagram_url     String?
-  github_url        String?
-  linkedin_url      String?
-  solana_public_key String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  email              String   @unique
+  username           String?
+  description        String?
+  display_name       String?
+  profile_image      String?
+  cover_image        String?
+  x_username         String?
+  instagram_username String?
+  github_username    String?
+  linkedin_username  String?
+  solana_public_key  String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }

@@ -11,10 +11,10 @@ export default async function UserProfilePage({ params }: { params: any }) {
       username={data?.username!}
       displayName={data?.display_name!}
       description={data?.description!}
-      x_url={data?.x_url!}
-      github_url={data?.github_url!}
-      instagram_url={data?.instagram_url!}
-      linkedin_url={data?.linkedin_url!}
+      x_username={data?.x_username!}
+      github_username={data?.github_username!}
+      instagram_username={data?.instagram_username!}
+      linkedin_username={data?.linkedin_username!}
     />
   );
 }
