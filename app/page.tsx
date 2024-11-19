@@ -1,8 +1,9 @@
 "use client";
 
+import { LandingFooter } from "@/components/LandingFooter";
+import { LandingHeader } from "@/components/LandingHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Github, Twitter } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
@@ -13,29 +14,7 @@ export default function Home() {
   }
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
-      <header className="max-w-6xl mx-auto w-full p-6 flex justify-between items-center">
-        <div className="text-2xl font-bold">DAOnation</div>
-        <nav>
-          <ul className="flex space-x-4">
-            <li>
-              <a
-                href="#about"
-                className="hover:text-zinc-300 transition-colors"
-              >
-                About
-              </a>
-            </li>
-            <li>
-              <a
-                href="#get-started"
-                className="hover:text-zinc-300 transition-colors"
-              >
-                Get Started
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </header>
+      <LandingHeader />
 
       <main className="flex-grow flex flex-col justify-center items-center text-center p-6">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
@@ -88,29 +67,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="max-w-6xl mx-auto w-full p-6 flex justify-between items-center border-t border-zinc-800">
-        <p className="text-sm text-zinc-400">
-          © {new Date().getFullYear()} DAOnation. All rights reserved.
-        </p>
-        <div className="flex space-x-4">
-          <a
-            href="https://x.com/user64bit"
-            className="text-zinc-400 hover:text-zinc-100 transition-colors"
-            target="_blank"
-          >
-            <Twitter className="h-5 w-5" />
-            <span className="sr-only">Twitter</span>
-          </a>
-          <a
-            href="https://github.com/user-64bit"
-            className="text-zinc-400 hover:text-zinc-100 transition-colors"
-            target="_blank"
-          >
-            <Github className="h-5 w-5" />
-            <span className="sr-only">GitHub</span>
-          </a>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }
