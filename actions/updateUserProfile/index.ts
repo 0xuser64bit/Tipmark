@@ -39,7 +39,7 @@ export default async function UpdateUserProfileAction({
 
   // Todo: fix this
   if (existingUser && existingUser.email !== email) {
-    return { response: "Username is already taken", code: 400 };
+    return { data: null, error: "Username is already taken", statusCode: 409 };
   }
 
   const user = await db.user.update({

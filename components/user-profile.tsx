@@ -145,6 +145,11 @@ export default function UserProfile({
         });
         if (statusCode === 200) {
           router.push("/dashboard");
+        } else if (statusCode === 409) {
+          setFormErrors((prev: any) => ({
+            ...prev,
+            username: "Username is already taken",
+          }));
         } else {
           console.log(data);
         }
