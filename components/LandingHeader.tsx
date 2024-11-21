@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Badge } from "./ui/badge";
 
 export const LandingHeader = () => {
   return (
@@ -9,6 +10,9 @@ export const LandingHeader = () => {
         onClick={() => redirect("/")}
       >
         DAOnation
+        <Badge variant="outline" className="text-white ms-2">
+          Devnet
+        </Badge>
       </div>
       <nav>
         <ul className="flex space-x-4">

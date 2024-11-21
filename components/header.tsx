@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Badge } from "./ui/badge";
 
 export const Header = () => {
   const session = useSession();
@@ -19,6 +20,9 @@ export const Header = () => {
     <header className="flex justify-between items-center mb-6">
       <div className="font-bold flex items-center justify-center">
         DAOnation
+        <Badge variant="outline" className="text-white ms-2">
+          Devnet
+        </Badge>
       </div>
       <div className="flex gap-x-4">
         <WalletMultiButton />
