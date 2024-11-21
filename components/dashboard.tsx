@@ -21,6 +21,7 @@ export default function Dashboard({
   github_username,
   instagram_username,
   linkedin_username,
+  solana_address,
 }: {
   profileImage: string;
   coverImage: string;
@@ -31,6 +32,7 @@ export default function Dashboard({
   github_username: string;
   instagram_username: string;
   linkedin_username: string;
+  solana_address: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -111,7 +113,7 @@ export default function Dashboard({
                   linkedin_username={linkedin_username}
                 />
               </div>
-              <SupportUserCard displayName={displayName} />
+              <SupportUserCard displayName={displayName} solana_address={solana_address} />
             </div>
           </div>
         </main>

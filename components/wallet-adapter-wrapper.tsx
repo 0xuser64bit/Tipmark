@@ -1,29 +1,28 @@
 "use client";
 
-import { UnifiedWalletProvider } from "@jup-ag/wallet-adapter";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { clusterApiUrl } from "@solana/web3.js";
+import React from "react";
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 export const WalletAdapterWrapper = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = clusterApiUrl(network);
+
   return (
-    <UnifiedWalletProvider
-      wallets={[]}
-      config={{
-        autoConnect: false,
-        env: "devnet",
-        metadata: {
-          name: "UnifiedWallet",
-          description: "UnifiedWallet",
-          url: "https://jup.ag",
-          iconUrls: ["https://jup.ag/favicon.ico"],
-        },
-        theme: "jupiter",
-        lang: "en",
-      }}
-    >
-      {children}
-    </UnifiedWalletProvider>
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={[]} autoConnect>
+        <WalletModalProvider>{children}</WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 };

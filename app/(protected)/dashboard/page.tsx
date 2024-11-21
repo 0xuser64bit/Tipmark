@@ -21,6 +21,7 @@ export default async function DashboardPage() {
           github_username={data?.github_username!}
           instagram_username={data?.instagram_username!}
           linkedin_username={data?.linkedin_username!}
+          solana_address={data?.solana_public_key!}
         />
       </WalletAdapterWrapper>
     </>

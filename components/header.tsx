@@ -1,5 +1,6 @@
 "use client";
 
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { LogOut, Menu, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
@@ -11,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { UnifiedWalletButton } from "@jup-ag/wallet-adapter";
 
 export const Header = () => {
   const session = useSession();
@@ -21,7 +21,7 @@ export const Header = () => {
         DAOnation
       </div>
       <div className="flex gap-x-4">
-        <UnifiedWalletButton />
+        <WalletMultiButton />
         {session.data?.user && (
           <div>
             <DropdownMenu>
