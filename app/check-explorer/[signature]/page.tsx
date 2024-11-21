@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,11 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, ExternalLink, PartyPopperIcon as Party } from "lucide-react";
+import { ExternalLink, PartyPopperIcon as Party } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export const CheckExplorerPage = () => {
+export default function CheckExplorerPage() {
   const params = useParams();
   const { signature } = params;
   const [explorerUrl, setExplorerUrl] = useState("");
@@ -67,6 +67,4 @@ export const CheckExplorerPage = () => {
       </Card>
     </div>
   );
-};
-
-export default CheckExplorerPage;
+}
