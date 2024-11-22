@@ -10,7 +10,7 @@ export default async function getUserByUsername({
 }) {
   const user = await db.user.findFirst({
     where: {
-      username,
+      username: username.toLocaleLowerCase(),
     },
   });
 

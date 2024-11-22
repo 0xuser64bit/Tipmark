@@ -22,6 +22,20 @@ import { useEdgeStore } from "@/lib/edgestore";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+interface UserProfileProps {
+  coverImageValue: string;
+  profileImageValue: string;
+  usernameValue: string;
+  displayNameValue: string;
+  descriptionValue: string;
+  instagramValue: string;
+  linkedinValue: string;
+  twitterValue: string;
+  githubValue: string;
+  solanaPublicKeyValue: string;
+  email: string;
+}
+
 export default function UserProfile({
   coverImageValue,
   profileImageValue,
@@ -34,19 +48,7 @@ export default function UserProfile({
   githubValue,
   solanaPublicKeyValue,
   email,
-}: {
-  coverImageValue: string;
-  profileImageValue: string;
-  usernameValue: string;
-  displayNameValue: string;
-  descriptionValue: string;
-  instagramValue: string;
-  linkedinValue: string;
-  twitterValue: string;
-  githubValue: string;
-  solanaPublicKeyValue: string;
-  email: string;
-}) {
+}: UserProfileProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { edgestore } = useEdgeStore();
@@ -131,7 +133,7 @@ export default function UserProfile({
         const linkedin_username = formData.get("linkedin") as string;
 
         const { data, error, statusCode } = await UpdateUserProfileAction({
-          username,
+          username: username.toLocaleLowerCase(),
           profile_image: profileImage,
           cover_image: coverImage,
           email,

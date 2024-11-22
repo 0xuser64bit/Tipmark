@@ -16,7 +16,7 @@ export default async function UserProfilePage() {
       <UserProfile
         coverImageValue={data?.cover_image || ""}
         profileImageValue={data?.profile_image || ""}
-        usernameValue={data?.username || ""}
+        usernameValue={data?.username?.toLocaleLowerCase() || ""}
         displayNameValue={data?.display_name || ""}
         descriptionValue={data?.description || ""}
         instagramValue={data?.instagram_username || ""}

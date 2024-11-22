@@ -5,19 +5,30 @@ import { WalletAdapterWrapper } from "@/components/wallet-adapter-wrapper";
 export default async function UserProfilePage({ params }: { params: any }) {
   const { username } = await params;
   const data = await getUserByUsername({ username });
+  const {
+    profile_image,
+    cover_image,
+    display_name,
+    description,
+    x_username,
+    github_username,
+    instagram_username,
+    linkedin_username,
+    solana_public_key,
+  } = data;
   return (
     <WalletAdapterWrapper>
       <Dashboard
-        profileImage={data?.profile_image!}
-        coverImage={data?.cover_image!}
-        username={data?.username!}
-        displayName={data?.display_name!}
-        description={data?.description!}
-        x_username={data?.x_username!}
-        github_username={data?.github_username!}
-        instagram_username={data?.instagram_username!}
-        linkedin_username={data?.linkedin_username!}
-        solana_address={data?.solana_public_key!}
+        profileImage={profile_image!}
+        coverImage={cover_image!}
+        username={username.toLocaleLowerCase()!}
+        displayName={display_name!}
+        description={description!}
+        x_username={x_username!}
+        github_username={github_username!}
+        instagram_username={instagram_username!}
+        linkedin_username={linkedin_username!}
+        solana_address={solana_public_key!}
       />
     </WalletAdapterWrapper>
   );

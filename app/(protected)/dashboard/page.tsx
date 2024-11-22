@@ -41,7 +41,7 @@ export default async function DashboardPage() {
         <Dashboard
           profileImage={profile_image}
           coverImage={cover_image}
-          username={username}
+          username={username.toLocaleLowerCase()}
           displayName={display_name}
           description={description}
           x_username={x_username}

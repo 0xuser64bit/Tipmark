@@ -11,6 +11,19 @@ import { Header } from "./header";
 import { SocialsCard } from "./socials-card";
 import { SupportUserCard } from "./support-user";
 
+interface DashboardProps {
+  profileImage: string;
+  coverImage: string;
+  username: string;
+  displayName: string;
+  description: string;
+  x_username: string;
+  github_username: string;
+  instagram_username: string;
+  linkedin_username: string;
+  solana_address: string;
+}
+
 export default function Dashboard({
   profileImage,
   coverImage,
@@ -22,18 +35,7 @@ export default function Dashboard({
   instagram_username,
   linkedin_username,
   solana_address,
-}: {
-  profileImage: string;
-  coverImage: string;
-  username: string;
-  displayName: string;
-  description: string;
-  x_username: string;
-  github_username: string;
-  instagram_username: string;
-  linkedin_username: string;
-  solana_address: string;
-}) {
+}: DashboardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -113,7 +115,10 @@ export default function Dashboard({
                   linkedin_username={linkedin_username}
                 />
               </div>
-              <SupportUserCard displayName={displayName} solana_address={solana_address} />
+              <SupportUserCard
+                displayName={displayName}
+                solana_address={solana_address}
+              />
             </div>
           </div>
         </main>
