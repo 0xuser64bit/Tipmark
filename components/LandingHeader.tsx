@@ -5,7 +5,7 @@ export const LandingHeader = () => {
   return (
     <header className="max-w-6xl mx-auto w-full p-6 flex justify-between items-center">
       <div
-        className="text-2xl font-bold"
+        className="text-2xl font-bold flex items-center"
         role="button"
         onClick={() => redirect("/")}
       >
