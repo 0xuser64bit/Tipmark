@@ -80,7 +80,7 @@ export default function Dashboard({
                   variant="outline"
                   className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
                 >
-                  Support Me
+                  Get Card
                 </Button>
                 <Button
                   variant="outline"
