@@ -10,6 +10,7 @@ import { Footer } from "./footer";
 import { Header } from "./header";
 import { SocialsCard } from "./socials-card";
 import { SupportUserCard } from "./support-user";
+import { GetCard } from "./get-card";
 
 interface DashboardProps {
   profileImage: string;
@@ -76,12 +77,12 @@ export default function Dashboard({
                 </span>
               </div>
               <div className="flex gap-4 mb-6">
-                <Button
-                  variant="outline"
-                  className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-                >
-                  Get Card
-                </Button>
+                <GetCard 
+                  name={displayName}
+                  username={username}
+                  profileUrl={"https://daonation.xyz/" + username}
+                  imageUrl={profileImage}
+                />
                 <Button
                   variant="outline"
                   className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
