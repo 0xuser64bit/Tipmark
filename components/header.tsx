@@ -1,7 +1,7 @@
 "use client";
 
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { LogOut, Menu, User } from "lucide-react";
+import { DollarSign, LogOut, Menu, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { Button } from "./ui/button";
@@ -57,7 +57,15 @@ export const Header = () => {
                   onClick={() => redirect("/edit-profile")}
                 >
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <span>Account</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-zinc-700" />
+                <DropdownMenuItem
+                  className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
+                  onClick={() => {}}
+                >
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-zinc-700" />
                 <DropdownMenuItem

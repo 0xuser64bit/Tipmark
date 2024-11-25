@@ -1,10 +1,10 @@
 import getUserByEmail from "@/actions/getUserByEmail";
-import Dashboard from "@/components/dashboard";
+import Home from "@/components/home";
 import { WalletAdapterWrapper } from "@/components/wallet-adapter-wrapper";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export default async function DashboardPage() {
+export default async function HomePage() {
   const session = await auth();
   const data = await getUserByEmail({
     email: session?.user?.email!,
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   return (
     <>
       <WalletAdapterWrapper>
-        <Dashboard
+        <Home
           profileImage={profile_image}
           coverImage={cover_image}
           username={username.toLocaleLowerCase()}

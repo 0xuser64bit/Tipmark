@@ -12,7 +12,7 @@ import { SocialsCard } from "./socials-card";
 import { SupportUserCard } from "./support-user";
 import { GetCard } from "./get-card";
 
-interface DashboardProps {
+interface HomeProps {
   profileImage: string;
   coverImage: string;
   username: string;
@@ -26,7 +26,7 @@ interface DashboardProps {
   email: string;
 }
 
-export default function Dashboard({
+export default function Home({
   profileImage,
   coverImage,
   username,
@@ -38,7 +38,7 @@ export default function Dashboard({
   linkedin_username,
   solana_address,
   email,
-}: DashboardProps) {
+}: HomeProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {

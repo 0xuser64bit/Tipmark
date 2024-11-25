@@ -146,7 +146,7 @@ export default function UserProfile({
           blockchainKeys,
         });
         if (statusCode === 200) {
-          router.push("/dashboard");
+          router.push("/home");
         } else if (statusCode === 409) {
           setFormErrors((prev: any) => ({
             ...prev,
@@ -176,7 +176,7 @@ export default function UserProfile({
         <div className="flex justify-between">
           <h1
             className="text-3xl font-bold mb-8 text-center cursor-pointer hover:bg-zinc-700 rounded-full p-2"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/home")}
           >
             <ArrowLeft />
           </h1>{" "}

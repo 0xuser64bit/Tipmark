@@ -7,10 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
-export default function Home() {
+export default function LandingPage() {
   const session = useSession();
   if (session?.data?.user) {
-    redirect("/dashboard");
+    redirect("/home");
   }
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">

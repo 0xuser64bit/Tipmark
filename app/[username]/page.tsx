@@ -1,5 +1,5 @@
 import getUserByUsername from "@/actions/getUserByUsername";
-import Dashboard from "@/components/dashboard";
+import Home from "@/components/home";
 import { WalletAdapterWrapper } from "@/components/wallet-adapter-wrapper";
 
 export default async function UserProfilePage({ params }: { params: any }) {
@@ -19,7 +19,7 @@ export default async function UserProfilePage({ params }: { params: any }) {
   } = data;
   return (
     <WalletAdapterWrapper>
-      <Dashboard
+      <Home
         profileImage={profile_image!}
         coverImage={cover_image!}
         username={username.toLocaleLowerCase()!}
