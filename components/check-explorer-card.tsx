@@ -21,7 +21,7 @@ export const CheckExplorerCard = ({
   const [explorerUrl, setExplorerUrl] = useState("");
 
   useEffect(() => {
-    setExplorerUrl(` https://solscan.io/tx/${signature}?cluster=devnet`);
+    setExplorerUrl(`https://solscan.io/tx/${signature}?cluster=devnet`);
   }, [signature]);
   return (
     <Card className="w-full max-w-md bg-zinc-800 border-zinc-700 overflow-hidden">

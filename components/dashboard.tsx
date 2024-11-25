@@ -5,97 +5,46 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, DollarSign } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { DropdownSettings } from "./dropdown";
 
-const data = [
-  {
-    month: "Jan",
-    total: 1234,
-  },
-  {
-    month: "Feb",
-    total: 2100,
-  },
-  {
-    month: "Mar",
-    total: 1800,
-  },
-  {
-    month: "Apr",
-    total: 1600,
-  },
-  {
-    month: "May",
-    total: 2800,
-  },
-  {
-    month: "Jun",
-    total: 2400,
-  },
-  {
-    month: "Jul",
-    total: 2100,
-  },
-  {
-    month: "Aug",
-    total: 3200,
-  },
-  {
-    month: "Sep",
-    total: 2800,
-  },
-  {
-    month: "Oct",
-    total: 2000,
-  },
-  {
-    month: "Nov",
-    total: 2500,
-  },
-  {
-    month: "Dec",
-    total: 3500,
-  },
-];
+interface DashboardProps {
+  totalEarning: string;
+  last30daysEarning: string;
+  last7daysEarning: string;
+  totalTrasactions: string;
+  recentTransactions: {
+    hash: string;
+    amount: string;
+    fromPublicKey: string;
+    createdAt: Date;
+  }[];
+  chartData: {
+    month: string;
+    total: number;
+  }[];
+}
 
-const recentDonations = [
-  {
-    name: "Crypto Foundation",
-    publicKey: "2bmDBC2NhL2MFYJja5soLF49DBjGvsJ7MtPahA4caUDx",
-    amount: 199.99,
-  },
-  {
-    name: "Web3 Initiative",
-    publicKey: "2bmDBC2NhL2MFYJja5soLF49DBjGvsJ7MtPahA4caUDx",
-    amount: 39.99,
-  },
-  {
-    name: "DeFi Project",
-    publicKey: "2bmDBC2NhL2MFYJja5soLF49DBjGvsJ7MtPahA4caUDx",
-    amount: 299.99,
-  },
-  {
-    name: "Blockchain Academy",
-    publicKey: "2bmDBC2NhL2MFYJja5soLF49DBjGvsJ7MtPahA4caUDx",
-    amount: 99.99,
-  },
-  {
-    name: "NFT Charity",
-    publicKey: "2bmDBC2NhL2MFYJja5soLF49DBjGvsJ7MtPahA4caUDx",
-    amount: 39.99,
-  },
-];
-
-export default function Dashboard() {
+export default function Dashboard({
+  totalEarning,
+  last30daysEarning,
+  last7daysEarning,
+  totalTrasactions,
+  recentTransactions,
+  chartData,
+}: DashboardProps) {
   return (
     <div className="flex-col md:flex">
       <div>
-        <div className="flex h-16 items-center border-b border-zinc-700 ml-8">
+        <div className="flex h-16 justify-between items-center border-b border-zinc-700 ml-8">
           <div
             className="flex items-center space-x-4"
             role="button"
             onClick={() => redirect("/home")}
           >
             <span className="font-bold">DAOnation</span>
+          </div>
+          <div>
+            <DropdownSettings />
           </div>
         </div>
       </div>
@@ -112,8 +61,8 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-zinc-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">45.89 SOL</div>
-              <p className="text-xs text-zinc-400">around 3400+ USD</p>
+              <div className="text-2xl font-bold">+{totalEarning} SOL</div>
+              <p className="text-xs text-zinc-400">around $$$+ USD</p>
             </CardContent>
           </Card>
           <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
@@ -124,8 +73,8 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-zinc-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+2,350</div>
-              <p className="text-xs text-zinc-400">around 1400+ USD</p>
+              <div className="text-2xl font-bold">+{last30daysEarning} SOL</div>
+              <p className="text-xs text-zinc-400">around $$$+ USD</p>
             </CardContent>
           </Card>
           <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
@@ -136,8 +85,8 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-zinc-400" />{" "}
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12,234</div>
-              <p className="text-xs text-zinc-400">around 340+ USD</p>
+              <div className="text-2xl font-bold">+{last7daysEarning} SOL</div>
+              <p className="text-xs text-zinc-400">around $$$+ USD</p>
             </CardContent>
           </Card>
           <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
@@ -148,8 +97,8 @@ export default function Dashboard() {
               <Activity className="h-4 w-4 text-zinc-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+573</div>
-              <p className="text-xs text-zinc-400">+201 since last hour</p>
+              <div className="text-2xl font-bold">+{totalTrasactions}</div>
+              <p className="text-xs text-zinc-400">+XXX since last hour</p>
             </CardContent>
           </Card>
         </div>
@@ -161,7 +110,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data}>
+                <BarChart data={chartData}>
                   <XAxis
                     dataKey="month"
                     stroke="#888888"
@@ -187,35 +136,39 @@ export default function Dashboard() {
               <CardTitle>Recent Transactions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 sm:space-y-6">
-                {recentDonations.map((donation, i) => (
-                  <div
-                    className="flex sm:flex-row items-start sm:items-center gap-2 sm:gap-4"
+              <div className="space-y-1">
+                {recentTransactions.map((transaction, i) => (
+                  <a
                     key={i}
+                    href={`https://solscan.io/tx/${transaction.hash}?cluster=devnet`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarImage src="/sol.png" alt={donation.name} />
-                      <AvatarFallback>{donation.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-grow min-w-0">
-                      <p className="text-sm font-medium leading-none hidden md:block">
-                        {donation.publicKey}
-                      </p>
-                      <p className="text-sm font-medium leading-none md:hidden block">
-                        {donation.publicKey.substring(0, 4) +
-                          "..." +
-                          donation.publicKey.substring(
-                            donation.publicKey.length - 4
-                          )}
-                      </p>
-                      <p className="text-sm text-zinc-400 mt-1">
-                        {donation.name}
-                      </p>
+                    <div className="flex sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:bg-zinc-500/10 cursor-pointer px-4 py-3 rounded-lg">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarImage src="/sol.png" alt={"SOL"} />
+                        <AvatarFallback>{"D"}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-grow min-w-0">
+                        <p className="text-sm font-medium leading-none hidden md:block">
+                          {transaction.fromPublicKey}
+                        </p>
+                        <p className="text-sm font-medium leading-none md:hidden block">
+                          {transaction.fromPublicKey.substring(0, 4) +
+                            "..." +
+                            transaction.fromPublicKey.substring(
+                              transaction.fromPublicKey.length - 4
+                            )}
+                        </p>
+                        <p className="text-sm text-zinc-400 mt-1">
+                          {transaction.createdAt.toDateString()}
+                        </p>
+                      </div>
+                      <div className="font-medium text-sm sm:text-base sm:ml-auto">
+                        +{transaction.amount} SOL
+                      </div>
                     </div>
-                    <div className="font-medium text-sm sm:text-base sm:ml-auto">
-                      +{donation.amount} SOL
-                    </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </CardContent>
