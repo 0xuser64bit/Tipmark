@@ -62,7 +62,7 @@ export const Header = () => {
                 <DropdownMenuSeparator className="bg-zinc-700" />
                 <DropdownMenuItem
                   className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-                  onClick={() => {}}
+                  onClick={() => redirect("/dashboard")}
                 >
                   <DollarSign className="mr-2 h-4 w-4" />
                   <span>Dashboard</span>
