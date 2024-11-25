@@ -14,6 +14,7 @@ import { Spinner } from "./spinner";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
+import { toast } from "sonner";
 
 export const SupportUserCard = ({
   displayName,
@@ -84,7 +85,7 @@ export const SupportUserCard = ({
         toPubkey: solana_address,
       });
     } catch (error) {
-      console.log("Error sending transaction:", error);
+      toast.error("Error sending transaction");
     } finally {
       setIsLoading(false);
     }
