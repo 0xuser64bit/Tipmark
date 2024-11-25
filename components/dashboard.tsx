@@ -170,6 +170,11 @@ export default function Dashboard({
                     </div>
                   </a>
                 ))}
+                {recentTransactions.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground text-red-500 font-semibold">
+                    No recent transactions
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
