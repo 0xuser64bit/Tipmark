@@ -4,7 +4,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, DollarSign } from "lucide-react";
 import { redirect } from "next/navigation";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { DropdownSettings } from "./dropdown";
 
 interface DashboardProps {
@@ -23,6 +31,22 @@ interface DashboardProps {
     total: number;
   }[];
 }
+
+const ShowMonthlyDataTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-zinc-900 border border-zinc-700 p-2 rounded-md shadow-md">
+        <p className="text-zinc-100">{`${label} : ${payload[0].value} SOL`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 export default function Dashboard({
   totalEarning,
@@ -125,6 +149,10 @@ export default function Dashboard({
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => `${value} SOL`}
+                  />
+                  <Tooltip
+                    content={<ShowMonthlyDataTooltip />}
+                    cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
                   />
                   <Bar dataKey="total" fill="#ffffff" radius={[4, 4, 0, 0]} />
                 </BarChart>
