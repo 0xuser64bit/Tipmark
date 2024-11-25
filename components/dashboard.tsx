@@ -23,6 +23,7 @@ interface DashboardProps {
   instagram_username: string;
   linkedin_username: string;
   solana_address: string;
+  email: string;
 }
 
 export default function Dashboard({
@@ -36,6 +37,7 @@ export default function Dashboard({
   instagram_username,
   linkedin_username,
   solana_address,
+  email,
 }: DashboardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -119,6 +121,7 @@ export default function Dashboard({
               <SupportUserCard
                 displayName={displayName}
                 solana_address={solana_address}
+                email={email}
               />
             </div>
           </div>

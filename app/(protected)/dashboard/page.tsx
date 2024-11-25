@@ -20,6 +20,7 @@ export default async function DashboardPage() {
     instagram_username,
     linkedin_username,
     solana_public_key,
+    email,
   } = data!;
   if (
     !profile_image ||
@@ -31,7 +32,8 @@ export default async function DashboardPage() {
     !github_username ||
     !instagram_username ||
     !linkedin_username ||
-    !solana_public_key
+    !solana_public_key ||
+    !email
   ) {
     redirect("/edit-profile");
   }
@@ -49,6 +51,7 @@ export default async function DashboardPage() {
           instagram_username={instagram_username}
           linkedin_username={linkedin_username}
           solana_address={solana_public_key}
+          email={email}
         />
       </WalletAdapterWrapper>
     </>

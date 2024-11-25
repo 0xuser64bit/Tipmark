@@ -1,25 +1,28 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Input } from "./ui/input";
+import { addTransactionToDB } from "@/actions/addTransactionToDB";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Spinner } from "./spinner";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { redirect, useRouter } from "next/navigation";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
 
 export const SupportUserCard = ({
   displayName,
   solana_address,
+  email,
 }: {
   displayName: string;
   solana_address: string;
+  email: string;
 }) => {
   const router = useRouter();
   const [customAmount, setCustomAmount] = useState("");
@@ -28,27 +31,58 @@ export const SupportUserCard = ({
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
 
+  const checkTransactionStatus = async ({
+    signature,
+    amount,
+    fromPubkey,
+    toPubkey,
+  }: {
+    signature: string;
+    amount: string;
+    fromPubkey: string;
+    toPubkey: string;
+  }) => {
+    const status = await connection.getSignatureStatus(signature, {
+      searchTransactionHistory: true,
+    });
+    const transaction = await addTransactionToDB({
+      userId: email,
+      hash: signature,
+      amount: amount,
+      fromPublicKey: fromPubkey,
+      toPublicKey: toPubkey,
+      status: status.value?.confirmationStatus!,
+    });
+    if (status && transaction) {
+      router.push(`/check-explorer/${signature}`);
+    }
+  };
+
   const handleSupportUser = async (e: any, amount?: string) => {
     e.preventDefault();
-    console.log("Sending transaction...", connection, publicKey);
     if (!connection || !publicKey) {
       setWalletConnected(false);
-      console.log("Wallet isn't connected... :(");
       return;
     }
     setIsLoading(true);
     let transferAmount = amount ? parseFloat(amount) : parseFloat(customAmount);
     try {
-      const transition = new Transaction();
-      transition.add(
+      const transaction = new Transaction();
+      transaction.add(
         SystemProgram.transfer({
           fromPubkey: publicKey,
           toPubkey: new PublicKey(solana_address),
           lamports: LAMPORTS_PER_SOL * transferAmount,
         })
       );
-      const signature = await sendTransaction(transition, connection);
-      router.push(`/check-explorer/${signature}`);
+      const signature = await sendTransaction(transaction, connection);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await checkTransactionStatus({
+        signature,
+        amount: transferAmount.toString(),
+        fromPubkey: publicKey.toString(),
+        toPubkey: solana_address,
+      });
     } catch (error) {
       console.log("Error sending transaction:", error);
     } finally {

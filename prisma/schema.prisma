@@ -14,8 +14,8 @@ datasource db {
 }
 
 model User {
-  id                 String   @id @default(uuid())
-  email              String   @unique
+  id                 String        @id @default(uuid())
+  email              String        @unique
   username           String?
   description        String?
   display_name       String?
@@ -26,6 +26,20 @@ model User {
   github_username    String?
   linkedin_username  String?
   solana_public_key  String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  Transaction        Transaction[]
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  user          User     @relation(fields: [user_id], references: [email])
+  user_id       String
+  hash          String
+  amount        String
+  fromPublicKey String
+  toPublicKey   String
+  status        String // confirmed, finalized, processed
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

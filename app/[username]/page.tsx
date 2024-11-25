@@ -15,6 +15,7 @@ export default async function UserProfilePage({ params }: { params: any }) {
     instagram_username,
     linkedin_username,
     solana_public_key,
+    email,
   } = data;
   return (
     <WalletAdapterWrapper>
@@ -29,6 +30,7 @@ export default async function UserProfilePage({ params }: { params: any }) {
         instagram_username={instagram_username!}
         linkedin_username={linkedin_username!}
         solana_address={solana_public_key!}
+        email={email!}
       />
     </WalletAdapterWrapper>
   );
