@@ -2,7 +2,7 @@ import { validateSignature } from "@/actions/validateSignature";
 import { CheckExplorerCard } from "@/components/check-explorer-card";
 
 export default async function CheckExplorerPage({ params }: { params: any }) {
-  const { signature } = params;
+  const { signature } = await params;
   await validateSignature(signature);
 
   return (
