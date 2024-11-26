@@ -56,7 +56,7 @@ export default function Home({
             <div className="relative">
               <div className="w-full h-48 sm:h-64 overflow-hidden">
                 <img
-                  src={coverImage}
+                  src={coverImage ?? "/dummy-cover.png"}
                   alt="Cover"
                   className="w-full h-full object-cover cursor-pointer"
                 />
@@ -64,7 +64,7 @@ export default function Home({
               <div className="absolute left-4 -bottom-16 sm:-bottom-20">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-zinc-900">
                   <img
-                    src={profileImage}
+                    src={profileImage ?? "/sol.png"}
                     alt="Profile"
                     className="w-full h-full object-cover cursor-pointer"
                   />
@@ -79,7 +79,7 @@ export default function Home({
                 </span>
               </div>
               <div className="flex gap-4 mb-6">
-                <GetCard 
+                <GetCard
                   name={displayName}
                   username={username}
                   profileUrl={"https://daonation.xyz/" + username}

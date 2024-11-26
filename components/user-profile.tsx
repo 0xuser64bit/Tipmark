@@ -55,11 +55,11 @@ export default function UserProfile({
   const [previewMode, setPreviewMode] = useState(false);
   const [coverImage, setCoverImage] = useState(
     coverImageValue ||
-      "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3JhZGllbnR8ZW58MHx8MHx8fDA%3D"
+      "/dummy-cover.png"
   );
   const [profileImage, setProfileImage] = useState(
     profileImageValue ||
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzl8fHByb2ZpbGV8ZW58MHx8MHx8fDA%3D"
+      "/sol.png"
   );
   const [formErrors, setFormErrors] = useState<any>({
     username: "",
