@@ -77,6 +77,7 @@ export const SupportUserCard = ({
         })
       );
       const signature = await sendTransaction(transaction, connection);
+      // Hack: wait for transaction to be confirmed
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await checkTransactionStatus({
         signature,

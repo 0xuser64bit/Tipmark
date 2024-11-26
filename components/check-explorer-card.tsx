@@ -39,7 +39,7 @@ export const CheckExplorerCard = ({
             alt="Celebration GIF"
             width={200}
             height={200}
-            className="rounded-full mx-auto object-cover"
+            className="rounded-lg mx-auto object-cover"
           />
         </div>
         <p className="text-zinc-300 mb-4 animate-pulse">

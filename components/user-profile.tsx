@@ -439,7 +439,7 @@ export default function UserProfile({
                   htmlFor="terms"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Let your supporters send you small message.
+                  Recieve updates from DAOnation
                 </label>
               </div>
               <Button
