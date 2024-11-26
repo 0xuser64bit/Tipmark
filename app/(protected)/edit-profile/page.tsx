@@ -25,6 +25,7 @@ export default async function UserProfilePage() {
         githubValue={data?.github_username || ""}
         solanaPublicKeyValue={data?.solana_public_key || ""}
         email={session?.user?.email!}
+        updates={data?.updates || false}
       />
     </>
   );

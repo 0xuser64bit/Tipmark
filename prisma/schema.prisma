@@ -26,6 +26,7 @@ model User {
   github_username    String?
   linkedin_username  String?
   solana_public_key  String?
+  updates            Boolean?      @default(false)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   Transaction        Transaction[]

@@ -21,6 +21,7 @@ import { Spinner } from "./spinner";
 import { useEdgeStore } from "@/lib/edgestore";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Checkbox } from "./ui/checkbox";
 
 interface UserProfileProps {
   coverImageValue: string;
@@ -34,6 +35,7 @@ interface UserProfileProps {
   githubValue: string;
   solanaPublicKeyValue: string;
   email: string;
+  updates: boolean;
 }
 
 export default function UserProfile({
@@ -48,18 +50,17 @@ export default function UserProfile({
   githubValue,
   solanaPublicKeyValue,
   email,
+  updates,
 }: UserProfileProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { edgestore } = useEdgeStore();
   const [previewMode, setPreviewMode] = useState(false);
   const [coverImage, setCoverImage] = useState(
-    coverImageValue ||
-      "/dummy-cover.png"
+    coverImageValue || "/dummy-cover.png"
   );
   const [profileImage, setProfileImage] = useState(
-    profileImageValue ||
-      "/sol.png"
+    profileImageValue || "/sol.png"
   );
   const [formErrors, setFormErrors] = useState<any>({
     username: "",
@@ -131,6 +132,7 @@ export default function UserProfile({
         const instagram_username = formData.get("instagram") as string;
         const github_username = formData.get("github") as string;
         const linkedin_username = formData.get("linkedin") as string;
+        const updates = formData.get("updates") as string;
 
         const { data, error, statusCode } = await UpdateUserProfileAction({
           username: username.toLocaleLowerCase(),
@@ -144,6 +146,7 @@ export default function UserProfile({
           github_username,
           linkedin_username,
           blockchainKeys,
+          updates: updates === "on",
         });
         if (statusCode === 200) {
           router.push("/home");
@@ -424,6 +427,20 @@ export default function UserProfile({
                       {formErrors.blockchainKeys[currentBlockchain]}
                     </p>
                   )}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="terms"
+                  name="updates"
+                  defaultChecked={updates}
+                  className="border-white"
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Let your supporters send you small message.
+                </label>
               </div>
               <Button
                 type="submit"

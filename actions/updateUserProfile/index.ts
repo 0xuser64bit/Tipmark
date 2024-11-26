@@ -14,6 +14,7 @@ export default async function UpdateUserProfileAction({
   github_username,
   linkedin_username,
   blockchainKeys,
+  updates,
 }: {
   username: string;
   profile_image: string;
@@ -26,6 +27,7 @@ export default async function UpdateUserProfileAction({
   github_username: string;
   linkedin_username: string;
   blockchainKeys: any;
+  updates?: boolean;
 }) {
   // Todo: do same for other blockchains
   const solana_public_key = blockchainKeys.solana;
@@ -57,6 +59,7 @@ export default async function UpdateUserProfileAction({
       github_username,
       linkedin_username,
       solana_public_key,
+      updates,
     },
   });
   if (!user) {
