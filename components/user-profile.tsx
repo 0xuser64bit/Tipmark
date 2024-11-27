@@ -135,7 +135,7 @@ export default function UserProfile({
         const updates = formData.get("updates") as string;
 
         const { data, error, statusCode } = await UpdateUserProfileAction({
-          username: username.toLocaleLowerCase(),
+          username: username.trim().split(" ").join("-").toLocaleLowerCase(),
           profile_image: profileImage,
           cover_image: coverImage,
           email,
