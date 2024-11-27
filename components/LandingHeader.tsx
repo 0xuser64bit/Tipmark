@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Badge } from "./ui/badge";
+import { signIn } from "next-auth/react";
 
 export const LandingHeader = () => {
   return (
@@ -26,7 +27,13 @@ export const LandingHeader = () => {
           </li>
           <li>
             <a
-              href="#get-started"
+              role="button"
+              onClick={async () => {
+                await signIn("google", {
+                  redirect: true,
+                  callbackUrl: "/edit-profile",
+                });
+              }}
               className="hover:text-zinc-300 transition-colors"
             >
               Get Started

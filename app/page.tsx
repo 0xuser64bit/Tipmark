@@ -4,6 +4,7 @@ import { LandingFooter } from "@/components/LandingFooter";
 import { LandingHeader } from "@/components/LandingHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, ChevronRight, ChevronRightCircle, ChevronRightIcon } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 
@@ -26,7 +27,8 @@ export default function LandingPage() {
         </p>
         <Button
           size="lg"
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          className="text-black"
+          variant={"outline"}
           onClick={async () => {
             await signIn("google", {
               redirect: true,
@@ -35,6 +37,7 @@ export default function LandingPage() {
           }}
         >
           Get Started
+          <ArrowRight className="h-4 w-4" />
         </Button>
 
         <div className="mt-16 grid gap-8 md:grid-cols-3 max-w-4xl">
