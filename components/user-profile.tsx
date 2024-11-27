@@ -299,18 +299,20 @@ export default function UserProfile({
                 <div className="flex justify-end space-x-2 mb-2">
                   <Button
                     type="button"
+                    variant={"outline"}
                     onClick={() => setPreviewMode(false)}
-                    className={`text-sm ${
-                      !previewMode ? "bg-blue-600" : "bg-zinc-700"
+                    className={`text-sm border-0 ${
+                      !previewMode ? "text-gray-700" : "bg-zinc-700"
                     }`}
                   >
                     Edit
                   </Button>
                   <Button
                     type="button"
+                    variant={"outline"}
                     onClick={() => setPreviewMode(true)}
-                    className={`text-sm ${
-                      previewMode ? "bg-blue-600" : "bg-zinc-700"
+                    className={`text-sm border-0 ${
+                      previewMode ? "text-gray-700" : "bg-zinc-700"
                     }`}
                   >
                     Preview
@@ -396,10 +398,11 @@ export default function UserProfile({
                 <div className="flex justify-center space-x-4 mb-2">
                   <Button
                     type="button"
+                    variant={"outline"}
                     onClick={() => setCurrentBlockchain("solana")}
-                    className={`text-sm ${
+                    className={`text-sm text-gray-700 ${
                       currentBlockchain === "solana"
-                        ? "bg-blue-600"
+                        ? ""
                         : "bg-zinc-700"
                     }`}
                   >
@@ -444,7 +447,8 @@ export default function UserProfile({
               </div>
               <Button
                 type="submit"
-                className="w-full text-white"
+                variant={"outline"}
+                className="w-full text-gray-700"
                 disabled={isLoading}
               >
                 {isLoading ? <Spinner size={"sm"} /> : "Save Changes"}

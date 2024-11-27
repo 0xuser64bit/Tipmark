@@ -41,7 +41,7 @@ export default function LandingPage() {
         </Button>
 
         <div className="mt-16 grid gap-8 md:grid-cols-3 max-w-4xl">
-          <Card className="bg-zinc-800 border-none">
+          <Card className="bg-zinc-800 border-none cursor-default hover:scale-105 transition-all delay-75">
             <CardContent className="pt-6">
               <h2 className="text-xl font-bold mb-2 text-white">
                 Decentralized
@@ -51,7 +51,7 @@ export default function LandingPage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-zinc-800 border-none">
+          <Card className="bg-zinc-800 border-none cursor-default hover:scale-105 transition-all delay-75">
             <CardContent className="pt-6">
               <h2 className="text-xl font-bold mb-2 text-white">Transparent</h2>
               <p className="text-zinc-400">
@@ -59,7 +59,7 @@ export default function LandingPage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-zinc-800 border-none">
+          <Card className="bg-zinc-800 border-none cursor-default hover:scale-105 transition-all delay-75">
             <CardContent className="pt-6">
               <h2 className="text-xl font-bold mb-2 text-white">Low Fees</h2>
               <p className="text-zinc-400">

@@ -20,7 +20,7 @@ export const LandingHeader = () => {
           <li>
             <a
               href="/about-us"
-              className="hover:text-zinc-300 transition-colors"
+              className="hover:text-zinc-300 transition-colors hover:underline"
             >
               About
             </a>
@@ -34,7 +34,7 @@ export const LandingHeader = () => {
                   callbackUrl: "/edit-profile",
                 });
               }}
-              className="hover:text-zinc-300 transition-colors"
+              className="hover:text-zinc-300 transition-colors hover:underline"
             >
               Get Started
             </a>

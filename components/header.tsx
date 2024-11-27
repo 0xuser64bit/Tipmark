@@ -9,7 +9,7 @@ export const Header = () => {
   const session = useSession();
   return (
     <header className="flex justify-between items-center mb-6">
-      <div className="font-bold flex items-center justify-center">
+      <div className="font-bold flex items-center justify-center cursor-pointer">
         DAOnation
         <Badge variant="outline" className="text-white ms-2">
           Devnet
