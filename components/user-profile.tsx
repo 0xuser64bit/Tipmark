@@ -22,6 +22,7 @@ import { useEdgeStore } from "@/lib/edgestore";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Checkbox } from "./ui/checkbox";
+import { toast } from "sonner";
 
 interface UserProfileProps {
   coverImageValue: string;
@@ -82,6 +83,10 @@ export default function UserProfile({
     setImage: (value: string) => void
   ) => {
     const file = event.target.files?.[0];
+    if (file && file?.size > 1024 * 1024) {
+      toast.error("File size must be less than 1MB");
+      return;
+    }
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
