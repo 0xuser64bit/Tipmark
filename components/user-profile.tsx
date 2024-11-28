@@ -321,14 +321,18 @@ export default function UserProfile({
                 {previewMode ? (
                   <div className="bg-zinc-700 border border-zinc-600 rounded-md p-4 min-h-[150px] prose prose-invert max-w-none">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {descriptionValue}
+                      {descriptionValue ||
+                        "I'm crypto nerd and I love to get crypto from people"}
                     </ReactMarkdown>
                   </div>
                 ) : (
                   <Textarea
                     id="description"
                     name="description"
-                    defaultValue={descriptionValue}
+                    defaultValue={
+                      descriptionValue ||
+                      "I'm crypto nerd and I love to get crypto from people"
+                    }
                     placeholder="A Cool Description about you (Markdown supported)"
                     className="bg-zinc-700 border-zinc-600 text-zinc-100"
                     rows={6}
@@ -350,7 +354,7 @@ export default function UserProfile({
                     <Input
                       placeholder="url or # if not"
                       name="twitter"
-                      defaultValue={twitterValue}
+                      defaultValue={twitterValue || "#"}
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
                     />
                   </div>
@@ -359,7 +363,7 @@ export default function UserProfile({
                     <Input
                       placeholder="url or # if not"
                       name="instagram"
-                      defaultValue={instagramValue}
+                      defaultValue={instagramValue || "#"}
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
                     />
                   </div>
@@ -368,7 +372,7 @@ export default function UserProfile({
                     <Input
                       placeholder="url or # if not"
                       name="github"
-                      defaultValue={githubValue}
+                      defaultValue={githubValue || "#"}
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
                     />
                   </div>
@@ -377,7 +381,7 @@ export default function UserProfile({
                     <Input
                       placeholder="username or # if not"
                       name="linkedin"
-                      defaultValue={linkedinValue}
+                      defaultValue={linkedinValue || "#"}
                       className="bg-zinc-700 border-zinc-600 text-zinc-100"
                     />
                   </div>
@@ -401,9 +405,7 @@ export default function UserProfile({
                     variant={"outline"}
                     onClick={() => setCurrentBlockchain("solana")}
                     className={`text-sm text-gray-700 ${
-                      currentBlockchain === "solana"
-                        ? ""
-                        : "bg-zinc-700"
+                      currentBlockchain === "solana" ? "" : "bg-zinc-700"
                     }`}
                   >
                     Solana
@@ -411,7 +413,7 @@ export default function UserProfile({
                 </div>
                 <div className="flex items-center space-x-2">
                   <Input
-                    placeholder={`Enter ${currentBlockchain} public key`}
+                    placeholder={`your ${currentBlockchain} public key`}
                     value={
                       blockchainKeys[currentBlockchain] || solanaPublicKeyValue
                     }
