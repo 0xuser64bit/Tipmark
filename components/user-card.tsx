@@ -43,17 +43,12 @@ export default function UserCard({
             transition={{ duration: 0.5 }}
             className="relative mb-5"
           >
-            <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-sm animate-spin-slow opacity-70"></div>
             <Avatar className="h-28 w-28 border-zinc-800 bg-zinc-900 relative">
               <AvatarImage src={imageUrl} alt={name} crossOrigin="anonymous" />
               <AvatarFallback className="bg-gradient-to-br from-zinc-800 to-zinc-900 text-indigo-400 text-2xl font-bold">
                 {name.charAt(0)}
               </AvatarFallback>
             </Avatar>
-
-            <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-zinc-800">
-              <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
-            </div>
           </motion.div>
 
           <div className="relative">
