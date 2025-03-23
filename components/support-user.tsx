@@ -40,24 +40,23 @@ export const SupportUserCard = ({
     amount,
     fromPubkey,
     toPubkey,
+    status,
   }: {
     signature: string;
     amount: string;
     fromPubkey: string;
     toPubkey: string;
+    status: string;
   }) => {
-    const status = await connection.getSignatureStatus(signature, {
-      searchTransactionHistory: true,
-    });
     const transaction = await addTransactionToDB({
       userId: email,
       hash: signature,
       amount: amount,
       fromPublicKey: fromPubkey,
       toPublicKey: toPubkey,
-      status: status.value?.confirmationStatus!,
+      status: status,
     });
-    if (status && transaction) {
+    if (transaction) {
       router.push(`/check-explorer/${signature}`);
     }
   };
@@ -80,15 +79,54 @@ export const SupportUserCard = ({
         })
       );
       const signature = await sendTransaction(transaction, connection);
-      // Hack: wait for transaction to be confirmed
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await checkTransactionStatus({
-        signature,
-        amount: transferAmount.toString(),
-        fromPubkey: publicKey.toString(),
-        toPubkey: solana_address,
-      });
+
+      // Get transaction status before storing in DB
+      const status = await connection.getSignatureStatus(signature);
+
+      // Ensure we have a valid status before proceeding
+      if (!status || !status.value) {
+        // Wait for the transaction to be confirmed (with timeout)
+        let attempts = 0;
+        const maxAttempts = 10;
+        while (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const latestStatus = await connection.getSignatureStatus(signature);
+          if (latestStatus && latestStatus.value) {
+            await checkTransactionStatus({
+              signature,
+              amount: transferAmount.toString(),
+              fromPubkey: publicKey.toString(),
+              toPubkey: solana_address,
+              status: latestStatus.value.confirmationStatus || "confirmed", // Provide status
+            });
+            break;
+          }
+          attempts++;
+        }
+
+        if (attempts >= maxAttempts) {
+          // If we can't get the status after multiple attempts, still try to save with a default status
+          await checkTransactionStatus({
+            signature,
+            amount: transferAmount.toString(),
+            fromPubkey: publicKey.toString(),
+            toPubkey: solana_address,
+            status: "processing", // Default status
+          });
+        }
+      } else {
+        await checkTransactionStatus({
+          signature,
+          amount: transferAmount.toString(),
+          fromPubkey: publicKey.toString(),
+          toPubkey: solana_address,
+          status: status.value.confirmationStatus || "confirmed",
+        });
+      }
+
+      toast.success("Transaction successful!");
     } catch (error) {
+      console.error("Transaction error:", error);
       toast.error("Error sending transaction");
     } finally {
       setIsLoading(false);
@@ -106,15 +144,13 @@ export const SupportUserCard = ({
 
   return (
     <motion.div
-      whileHover={{ 
+      whileHover={{
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        translateY: -2
+        translateY: -2,
       }}
       transition={{ duration: 0.2 }}
     >
-      <Card 
-        className="w-full lg:w-[350px] transition-all duration-300 bg-zinc-800/90 border-zinc-700/50 p-4"
-      >
+      <Card className="w-full lg:w-[350px] transition-all duration-300 bg-zinc-800/90 border-zinc-700/50 p-4">
         <div className="space-y-4">
           <div className="flex flex-row items-center justify-between px-2">
             <div className="flex flex-col space-y-1.5">
