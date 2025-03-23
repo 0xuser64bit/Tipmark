@@ -285,7 +285,7 @@ export default function Dashboard({
                         className="rounded-lg"
                       >
                         <a
-                          href={`https://solscan.io/tx/${transaction.hash}?cluster=devnet`}
+                          href={`https://solscan.io/tx/${transaction.hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

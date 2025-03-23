@@ -16,7 +16,7 @@ export const WalletAdapterWrapper = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
   const endpoint = clusterApiUrl(network);
 
   return (

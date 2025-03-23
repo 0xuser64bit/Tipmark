@@ -23,7 +23,7 @@ export const CheckExplorerCard = ({
   const [explorerUrl, setExplorerUrl] = useState("");
 
   useEffect(() => {
-    setExplorerUrl(`https://solscan.io/tx/${signature}?cluster=devnet`);
+    setExplorerUrl(`https://solscan.io/tx/${signature}`);
   }, [signature]);
   
   return (
