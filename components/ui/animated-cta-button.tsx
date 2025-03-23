@@ -97,9 +97,9 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
       )}
       
       {/* Mouse trail effect */}
-      {trails.map(trail => (
+      {trails.map((trail, i) => (
         <motion.div
-          key={trail.id}
+          key={i}
           className="absolute w-4 h-4 rounded-full pointer-events-none -z-5"
           style={{
             left: trail.x - 8,

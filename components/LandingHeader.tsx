@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
-import { Badge } from "./ui/badge";
 import { signIn } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export const LandingHeader = () => {
   return (
