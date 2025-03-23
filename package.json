@@ -13,7 +13,7 @@
     "@edgestore/react": "^0.2.2",
     "@edgestore/server": "^0.2.2",
     "@next/font": "^14.2.15",
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.5.0",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -50,6 +50,7 @@
     "tailwind-gradient-mask-image": "^1.2.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.174.0",
     "tsparticles": "^3.8.1"
   },
   "devDependencies": {

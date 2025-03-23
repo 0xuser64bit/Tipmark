@@ -162,3 +162,11 @@ body {
     background-position: 0% 50%;
   }
 }
+
+.download-text {
+  /* Ensures name text is visible in downloaded version */
+  color: white !important;
+  background: none !important;
+  -webkit-text-fill-color: white !important;
+  text-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
