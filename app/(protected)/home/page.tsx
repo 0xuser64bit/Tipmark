@@ -47,8 +47,8 @@ export default async function HomePage() {
         <WalletAdapterWrapper>
           <div className="relative">
             <FloatingIcons 
-              iconCount={8} 
-              iconColor="rgba(99, 102, 241, 0.1)" 
+              iconCount={50} 
+              iconColor="rgba(99, 102, 241, 0.15)" 
               speed={30}
             />
             <Home

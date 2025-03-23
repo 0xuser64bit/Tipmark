@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Wallet } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -20,7 +20,13 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
 }) => {
   const { connected } = useWallet();
   const [isHovered, setIsHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
   return (
     <div 
       className="relative"

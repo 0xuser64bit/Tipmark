@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { DollarSign, CreditCard, TrendingUp, BarChart2, Wallet, Award } from "lucide-react";
+import { motion } from "framer-motion";
+import { Award, BarChart2, CreditCard, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface FloatingIconsProps {
   className?: string;
@@ -21,6 +21,13 @@ export const FloatingIcons: React.FC<FloatingIconsProps> = ({
   speed = 20,
 }) => {
   const icons = [DollarSign, CreditCard, TrendingUp, BarChart2, Wallet, Award];
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
   
   // Generate random positions and animations for each icon
   const iconElements = Array.from({ length: iconCount }).map((_, index) => {
