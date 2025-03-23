@@ -33,6 +33,14 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    
+    /* Animation variables */
+    --animation-primary: 4f46e5;
+    --animation-secondary: 8b5cf6;
+    --animation-accent: ec4899;
+    --animation-duration-slow: 0.8s;
+    --animation-duration-normal: 0.5s;
+    --animation-duration-fast: 0.3s;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -68,5 +76,89 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animation classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+.hover-rotate:hover {
+  transform: rotate(3deg) scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
+}
+
+/* Custom keyframes */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(79, 70, 229, 0.2);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }

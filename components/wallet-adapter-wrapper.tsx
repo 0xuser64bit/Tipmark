@@ -10,6 +10,7 @@ import { clusterApiUrl } from "@solana/web3.js";
 import React from "react";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
+import "./wallet-button-styles.css";
 export const WalletAdapterWrapper = ({
   children,
 }: Readonly<{

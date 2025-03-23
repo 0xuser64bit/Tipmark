@@ -8,7 +8,7 @@ import EnhancedParticles from "@/components/ui/enhanced-particles";
 import { FadeIn, StaggerChildren } from "@/components/ui/scroll-animations";
 import { GlitchText, TextReveal, TypewriterText } from "@/components/ui/text-reveal";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, ArrowUpRight, Shield, Sparkles, Wallet, Zap } from "lucide-react";
+import { ArrowRight, Shield, Sparkles, Wallet, Zap } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useRef } from "react";

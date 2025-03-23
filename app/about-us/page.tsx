@@ -2,23 +2,21 @@
 
 import { LandingFooter } from "@/components/LandingFooter";
 import { LandingHeader } from "@/components/LandingHeader";
-import { Button } from "@/components/ui/button";
-import { AnimatedCTAButton, MagneticButton } from "@/components/ui/animated-cta-button";
+import { MagneticButton } from "@/components/ui/animated-cta-button";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Enhanced3DCard, FloatingCard } from "@/components/ui/enhanced-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TextReveal, GlitchText, TypewriterText } from "@/components/ui/text-reveal";
+import EnhancedParticles from "@/components/ui/enhanced-particles";
 import { FadeIn, StaggerChildren } from "@/components/ui/scroll-animations";
+import { GlitchText, TextReveal, TypewriterText } from "@/components/ui/text-reveal";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ChevronRight,
   Globe,
   Wallet,
-  Zap,
-  ArrowRight
+  Zap
 } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import EnhancedParticles from "@/components/ui/enhanced-particles";
 
 export default function AboutPage() {
   // Scroll animations

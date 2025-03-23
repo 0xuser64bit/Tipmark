@@ -23,6 +23,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Checkbox } from "./ui/checkbox";
 import { toast } from "sonner";
+import { LoadingButton } from "./ui/loading-button";
 
 interface UserProfileProps {
   coverImageValue: string;
@@ -452,14 +453,17 @@ export default function UserProfile({
                   Recieve updates from DAOnation
                 </label>
               </div>
-              <Button
+              <LoadingButton
                 type="submit"
                 variant={"outline"}
-                className="w-full text-gray-700"
-                disabled={isLoading}
+                className="w-full text-zinc-800 hover:opacity-90"
+                isLoading={isLoading}
+                loadingText="Saving Changes..."
+                successText="Profile Updated!"
+                showSuccess={true}
               >
-                {isLoading ? <Spinner size={"sm"} /> : "Save Changes"}
-              </Button>
+                Save Changes
+              </LoadingButton>
             </form>
           </CardContent>
         </Card>

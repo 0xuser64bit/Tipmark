@@ -1,0 +1,113 @@
+/* Override wallet adapter modal styles for better aesthetics */
+.wallet-adapter-modal-wrapper {
+  background-color: rgba(24, 24, 27, 0.95) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(63, 63, 70, 0.5) !important;
+  border-radius: 16px !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #f4f4f5 !important;
+  font-weight: 600 !important;
+}
+
+.wallet-adapter-modal-content {
+  padding: 24px !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 16px 0 !important;
+}
+
+.wallet-adapter-modal-list-more {
+  color: #6366f1 !important;
+}
+
+.wallet-adapter-modal-list-more:hover {
+  color: #818cf8 !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background-color: rgba(63, 63, 70, 0.5) !important;
+}
+
+.wallet-adapter-modal-button-close:hover {
+  background-color: rgba(82, 82, 91, 0.7) !important;
+}
+
+/* Style wallet buttons in the modal */
+.wallet-adapter-button {
+  background-color: rgba(39, 39, 42, 0.5) !important;
+  border: 1px solid rgba(63, 63, 70, 0.5) !important;
+  transition: all 0.2s ease-in-out !important;
+  border-radius: 8px !important;
+  height: 48px !important;
+  font-weight: 500 !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: rgba(63, 63, 70, 0.7) !important;
+  border-color: rgba(82, 82, 91, 0.7) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+.wallet-adapter-button:active {
+  transform: translateY(0) !important;
+}
+
+/* Custom animation for the modal */
+.wallet-adapter-modal-wrapper {
+  animation: modalFadeIn 0.3s ease forwards !important;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Override the wallet dropdown menu */
+.wallet-adapter-dropdown-list {
+  background-color: rgba(24, 24, 27, 0.95) !important;
+  border: 1px solid rgba(63, 63, 70, 0.5) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  overflow: hidden !important;
+  animation: dropdownFadeIn 0.2s ease forwards !important;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wallet-adapter-dropdown-list-item {
+  padding: 12px 16px !important;
+  color: #f4f4f5 !important;
+  background-color: transparent !important;
+  transition: all 0.15s ease !important;
+  border-top: 1px solid rgba(63, 63, 70, 0.5) !important;
+}
+
+.wallet-adapter-dropdown-list-item:first-child {
+  border-top: none !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background-color: rgba(63, 63, 70, 0.5) !important;
+  color: white !important;
+} 
