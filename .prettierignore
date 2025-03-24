@@ -1,0 +1,9 @@
+.next
+node_modules
+*.env
+.gitignore
+.prettierignore
+.prettierrc
+README.md
+bun.lockb
+LICENSE

@@ -79,18 +79,20 @@ const EnhancedParticles: React.FC<EnhancedParticlesProps> = ({
           },
         },
         shape: {
-          type: variant === "crypto" 
-            ? ["circle", "triangle", "polygon"] 
-            : variant === "bubbles" 
-              ? "circle" 
-              : "circle",
+          type:
+            variant === "crypto"
+              ? ["circle", "triangle", "polygon"]
+              : variant === "bubbles"
+                ? "circle"
+                : "circle",
         },
         size: {
-          value: variant === "bubbles" 
-            ? { min: 2, max: 8 } 
-            : variant === "stars" 
-              ? { min: 1, max: 3 } 
-              : { min: 1, max: 3 },
+          value:
+            variant === "bubbles"
+              ? { min: 2, max: 8 }
+              : variant === "stars"
+                ? { min: 1, max: 3 }
+                : { min: 1, max: 3 },
           animation: {
             enable: variant === "bubbles",
             speed: 2,
@@ -123,7 +125,7 @@ const EnhancedParticles: React.FC<EnhancedParticlesProps> = ({
             resize: {
               enable: true,
               delay: 0.5,
-              factor: 1
+              factor: 1,
             },
           },
           modes: {
@@ -162,12 +164,12 @@ const EnhancedParticles: React.FC<EnhancedParticlesProps> = ({
         particlesLoaded={particlesLoaded}
         options={getVariantOptions()}
       />
-      
+
       {/* Gradient overlays for depth */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-zinc-900/50" />
-      
+
       {variant === "crypto" && (
-        <motion.div 
+        <motion.div
           className="absolute inset-0 bg-gradient-radial from-indigo-500/5 via-transparent to-transparent"
           animate={{
             scale: [1, 1.1, 1],

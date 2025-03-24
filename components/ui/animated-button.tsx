@@ -40,7 +40,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
       <Button
         className={cn(
           "relative overflow-hidden transition-all duration-300",
-          className
+          className,
         )}
         {...props}
       >
@@ -89,7 +89,7 @@ export const RainbowButton: React.FC<ButtonProps> = ({
       <Button
         className={cn(
           "relative z-10 bg-zinc-900 hover:bg-zinc-800 text-white rounded-full w-full transition-all duration-300",
-          className
+          className,
         )}
         variant="ghost"
         {...props}
@@ -98,4 +98,4 @@ export const RainbowButton: React.FC<ButtonProps> = ({
       </Button>
     </motion.div>
   );
-}; 
+};

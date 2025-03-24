@@ -85,10 +85,10 @@ export const GradientText: React.FC<{
     <span
       className={cn(
         `bg-clip-text text-transparent bg-gradient-to-r ${from} ${to}`,
-        className
+        className,
       )}
     >
       {text}
     </span>
   );
-}; 
+};

@@ -76,7 +76,7 @@ export const SupportUserCard = ({
           fromPubkey: publicKey,
           toPubkey: new PublicKey(solana_address),
           lamports: LAMPORTS_PER_SOL * transferAmount,
-        })
+        }),
       );
       const signature = await sendTransaction(transaction, connection);
 

@@ -5,7 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import html2canvas from "html2canvas";
@@ -34,7 +34,7 @@ export const GetCard = ({
       try {
         // Small delay to ensure flip animation completes
         await new Promise((resolve) => setTimeout(resolve, 800));
-        
+
         const canvas = await html2canvas(userCardRef.current, {
           backgroundColor: null,
           useCORS: true,
@@ -43,25 +43,24 @@ export const GetCard = ({
           allowTaint: true,
           onclone: (clonedDoc) => {
             const clonedElement = clonedDoc.querySelector(
-              "[data-card-container]"
+              "[data-card-container]",
             );
             if (clonedElement) {
               clonedElement.classList.add("download-mode");
-              
+
               // Remove the grid overlay
               const gridOverlay = clonedElement.querySelector(
-                "[data-grid-overlay]"
+                "[data-grid-overlay]",
               );
               if (gridOverlay) {
                 gridOverlay.remove();
               }
-              
+
               // Ensure name and text are visible by adding background
               const nameElement = clonedElement.querySelector("h2");
               if (nameElement) {
                 nameElement.classList.add("download-text");
               }
-          
             }
           },
         });
@@ -89,7 +88,9 @@ export const GetCard = ({
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-zinc-900/80 backdrop-blur-lg border border-zinc-800 rounded-xl [&>button]:text-white max-w-md sm:max-w-lg md:max-w-xl">
-        <DialogTitle className="text-white text-center">Your DAOnation Card</DialogTitle>
+        <DialogTitle className="text-white text-center">
+          Your DAOnation Card
+        </DialogTitle>
 
         <div className="flex justify-end items-center mb-4">
           <Download
@@ -102,26 +103,26 @@ export const GetCard = ({
             aria-disabled={isDownloading}
           />
         </div>
- 
-            <motion.div 
-              ref={userCardRef}
-              className="w-full max-w-[440px] mx-auto relative preserve-3d transition-all duration-700 premium-card-effect shadow-2xl card-border-gradient"
-              initial={{ rotateY: 0 }}
-              animate={{ rotateY: 360 }}
-              transition={{ duration: 0.7 }}
-            >              
-              <div className={`w-full backface-hidden rounded-xl overflow-hidden`}>
-                <div className="relative">
-                  <UserCard
-                    name={name}
-                    username={username}
-                    imageUrl={imageUrl}
-                    profileUrl={profileUrl}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 rounded-xl"></div>
-                </div>
-              </div>
-            </motion.div>
+
+        <motion.div
+          ref={userCardRef}
+          className="w-full max-w-[440px] mx-auto relative preserve-3d transition-all duration-700 premium-card-effect shadow-2xl card-border-gradient"
+          initial={{ rotateY: 0 }}
+          animate={{ rotateY: 360 }}
+          transition={{ duration: 0.7 }}
+        >
+          <div className={`w-full backface-hidden rounded-xl overflow-hidden`}>
+            <div className="relative">
+              <UserCard
+                name={name}
+                username={username}
+                imageUrl={imageUrl}
+                profileUrl={profileUrl}
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 rounded-xl"></div>
+            </div>
+          </div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

@@ -10,13 +10,13 @@ export default async function CheckExplorerPage({ params }: { params: any }) {
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated particles in the background */}
-      <EnhancedParticles 
+      <EnhancedParticles
         variant="stars"
         color={["#6366f1", "#8b5cf6", "#d946ef"]}
         density={30}
         speed={0.5}
       />
-      
+
       {/* Animated page transition for the card */}
       <PageTransition>
         <CheckExplorerCard signature={signature} />

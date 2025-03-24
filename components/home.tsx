@@ -55,7 +55,7 @@ export default function Home({
         <Header />
         <main className="flex flex-col gap-8 items-start">
           <div className="w-full">
-            <motion.div 
+            <motion.div
               className="relative"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ export default function Home({
                   transition={{ duration: 0.5 }}
                 />
               </div>
-              <motion.div 
+              <motion.div
                 className="absolute left-4 -bottom-16 sm:-bottom-20"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -87,19 +87,19 @@ export default function Home({
                 </div>
               </motion.div>
             </motion.div>
-            <motion.div 
+            <motion.div
               className="mt-20 sm:mt-24"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
               <div className="mb-4">
-                <AnimatedText 
+                <AnimatedText
                   text={displayName}
                   className="text-2xl font-semibold"
                   delay={1}
                 />
-                <motion.span 
+                <motion.span
                   className="text-muted-foreground text-sm block"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -132,16 +132,16 @@ export default function Home({
             </motion.div>
 
             <div className="flex flex-col lg:flex-row justify-between w-full gap-8">
-              <motion.div 
+              <motion.div
                 className="flex-1"
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
                 <motion.div
-                  whileHover={{ 
+                  whileHover={{
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    translateY: -2
+                    translateY: -2,
                   }}
                   transition={{ duration: 0.2 }}
                 >
@@ -156,11 +156,11 @@ export default function Home({
                     </CardContent>
                   </Card>
                 </motion.div>
-                
+
                 <motion.div
-                  whileHover={{ 
+                  whileHover={{
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    translateY: -2
+                    translateY: -2,
                   }}
                   transition={{ duration: 0.2 }}
                 >
@@ -172,14 +172,14 @@ export default function Home({
                   />
                 </motion.div>
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
-                whileHover={{ 
+                whileHover={{
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                  translateY: -2
+                  translateY: -2,
                 }}
               >
                 <SupportUserCard

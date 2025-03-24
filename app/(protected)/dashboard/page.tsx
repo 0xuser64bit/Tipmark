@@ -18,16 +18,16 @@ export default async function DashboardPage() {
   } = await getEarningData({
     userId: session?.user?.email!,
   });
-  
+
   return (
     <div className="min-h-screen bg-zinc-900 text-zinc-100 px-0 md:px-10 relative">
-      <FloatingIcons 
-        iconCount={50} 
-        iconColor="rgba(99, 102, 241, 0.1)" 
+      <FloatingIcons
+        iconCount={50}
+        iconColor="rgba(99, 102, 241, 0.1)"
         iconSize={32}
         speed={15}
       />
-      
+
       <PageTransition>
         <Suspense fallback={<DashboardSkeleton />}>
           <Dashboard

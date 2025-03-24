@@ -11,11 +11,11 @@ export default async function UserProfilePage() {
   const { data, error, statusCode } = await GetUserInfoAction({
     email: session?.user?.email!,
   });
-  
+
   if (statusCode === 400) {
     redirect("/");
   }
-  
+
   return (
     <PageTransition>
       <Suspense fallback={<ProfileSkeleton />}>

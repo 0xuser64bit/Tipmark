@@ -12,7 +12,7 @@ function RouteProgressInner() {
     // Configure NProgress
     NProgress.configure({
       minimum: 0.3,
-      easing: "ease", 
+      easing: "ease",
       speed: 800,
       showSpinner: false,
     });

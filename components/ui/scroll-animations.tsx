@@ -55,8 +55,20 @@ export const FadeIn: React.FC<FadeInProps> = ({
       }}
       animate={{
         opacity: inView ? 1 : 0,
-        y: inView ? 0 : direction === "up" ? 50 : direction === "down" ? -50 : 0,
-        x: inView ? 0 : direction === "left" ? 50 : direction === "right" ? -50 : 0,
+        y: inView
+          ? 0
+          : direction === "up"
+            ? 50
+            : direction === "down"
+              ? -50
+              : 0,
+        x: inView
+          ? 0
+          : direction === "left"
+            ? 50
+            : direction === "right"
+              ? -50
+              : 0,
       }}
       transition={{
         duration,
@@ -133,4 +145,4 @@ export const StaggerChildren: React.FC<StaggerChildrenProps> = ({
       ))}
     </motion.div>
   );
-}; 
+};

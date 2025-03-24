@@ -59,10 +59,10 @@ export default function UserProfile({
   const { edgestore } = useEdgeStore();
   const [previewMode, setPreviewMode] = useState(false);
   const [coverImage, setCoverImage] = useState(
-    coverImageValue || "/dummy-cover.png"
+    coverImageValue || "/dummy-cover.png",
   );
   const [profileImage, setProfileImage] = useState(
-    profileImageValue || "/sol.png"
+    profileImageValue || "/sol.png",
   );
   const [formErrors, setFormErrors] = useState<any>({
     username: "",
@@ -81,7 +81,7 @@ export default function UserProfile({
 
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    setImage: (value: string) => void
+    setImage: (value: string) => void,
   ) => {
     const file = event.target.files?.[0];
     if (file && file?.size > 1024 * 1024) {
@@ -426,7 +426,7 @@ export default function UserProfile({
                     onChange={(e) =>
                       handleBlockchainKeyChange(
                         currentBlockchain,
-                        e.target.value
+                        e.target.value,
                       )
                     }
                     className="bg-zinc-700 border-zinc-600 text-zinc-100"

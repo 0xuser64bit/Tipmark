@@ -32,7 +32,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
       className={cn(
         "relative overflow-hidden rounded-xl bg-zinc-800 border border-zinc-700/50",
         className,
-        hoverEffect && "transition-all duration-300"
+        hoverEffect && "transition-all duration-300",
       )}
       initial={{ opacity: 0, y: 50 }}
       animate={
@@ -83,7 +83,7 @@ export const AnimatedCardGrid: React.FC<{
     <div
       className={cn(
         "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
-        className
+        className,
       )}
     >
       {React.Children.map(children, (child, index) => {
@@ -96,4 +96,4 @@ export const AnimatedCardGrid: React.FC<{
       })}
     </div>
   );
-}; 
+};

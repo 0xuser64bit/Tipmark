@@ -2,7 +2,14 @@
 
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Award, BarChart2, CreditCard, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import {
+  Award,
+  BarChart2,
+  CreditCard,
+  DollarSign,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 interface FloatingIconsProps {
@@ -28,7 +35,7 @@ export const FloatingIcons: React.FC<FloatingIconsProps> = ({
   }, []);
 
   if (!mounted) return null;
-  
+
   // Generate random positions and animations for each icon
   const iconElements = Array.from({ length: iconCount }).map((_, index) => {
     const Icon = icons[index % icons.length];
@@ -36,7 +43,7 @@ export const FloatingIcons: React.FC<FloatingIconsProps> = ({
     const startY = Math.random() * 100;
     const delay = Math.random() * 5;
     const duration = speed + Math.random() * 20;
-    
+
     // Random float path
     const path = {
       x: [
@@ -53,7 +60,7 @@ export const FloatingIcons: React.FC<FloatingIconsProps> = ({
       ],
       rotate: [0, Math.random() * 30 - 15, 0, Math.random() * 30 - 15, 0],
     };
-    
+
     return (
       <motion.div
         key={index}
@@ -81,10 +88,10 @@ export const FloatingIcons: React.FC<FloatingIconsProps> = ({
     <div
       className={cn(
         "absolute inset-0 overflow-hidden pointer-events-none z-0",
-        className
+        className,
       )}
     >
       {iconElements}
     </div>
   );
-}; 
+};

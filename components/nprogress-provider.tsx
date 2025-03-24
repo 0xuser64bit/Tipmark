@@ -24,12 +24,14 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
           right: 0px;
           width: 100px;
           height: 100%;
-          box-shadow: 0 0 10px #4f46e5, 0 0 5px #4f46e5;
-          opacity: 1.0;
+          box-shadow:
+            0 0 10px #4f46e5,
+            0 0 5px #4f46e5;
+          opacity: 1;
           transform: rotate(3deg) translate(0px, -4px);
         }
       `}</style>
       {children}
     </>
   );
-} 
+}

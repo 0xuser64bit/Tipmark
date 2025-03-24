@@ -46,9 +46,9 @@ export default async function HomePage() {
       <Suspense fallback={<ProfileSkeleton />}>
         <WalletAdapterWrapper>
           <div className="relative">
-            <FloatingIcons 
-              iconCount={50} 
-              iconColor="rgba(99, 102, 241, 0.15)" 
+            <FloatingIcons
+              iconCount={50}
+              iconColor="rgba(99, 102, 241, 0.15)"
               speed={30}
             />
             <Home

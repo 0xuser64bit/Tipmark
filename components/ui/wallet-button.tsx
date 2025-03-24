@@ -28,7 +28,7 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
 
   if (!mounted) return null;
   return (
-    <div 
+    <div
       className="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -37,7 +37,8 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
       <motion.div
         className="absolute inset-0 rounded-md"
         initial={{
-          backgroundImage: "linear-gradient(45deg, rgba(79, 70, 229, 0.5), rgba(236, 72, 153, 0.5))",
+          backgroundImage:
+            "linear-gradient(45deg, rgba(79, 70, 229, 0.5), rgba(236, 72, 153, 0.5))",
           opacity: 0,
           borderRadius: "0.375rem",
         }}
@@ -54,11 +55,11 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
         className={cn(
           "wallet-adapter-button !bg-zinc-800 hover:!bg-zinc-700",
           "!border !border-zinc-700 hover:!border-zinc-600",
-          "shadow-md hover:shadow-lg !transition-all !duration-300", 
+          "shadow-md hover:shadow-lg !transition-all !duration-300",
           "relative z-10 flex items-center gap-2 overflow-hidden",
           "!rounded-md !text-zinc-100 !px-4 !py-2 !font-medium",
           connected && "!bg-indigo-900/40 hover:!bg-indigo-800/50",
-          className
+          className,
         )}
       >
         {showIcon && (
@@ -66,8 +67,8 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
             animate={{
               rotate: isHovered ? [0, -10, 10, -5, 5, 0] : 0,
             }}
-            transition={{ 
-              duration: 0.5, 
+            transition={{
+              duration: 0.5,
               ease: "easeInOut",
               repeat: isHovered ? 0 : 0,
             }}
@@ -76,13 +77,14 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
             <Wallet size={iconSize} />
           </motion.span>
         )}
-        
+
         {/* Shine effect */}
         {isHovered && (
           <motion.div
             className="absolute inset-0 z-0"
-            initial={{ 
-              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+            initial={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
               left: "-100%",
             }}
             animate={{ left: "100%" }}
@@ -92,4 +94,4 @@ export const StylishWalletButton: React.FC<StylishWalletButtonProps> = ({
       </WalletMultiButton>
     </div>
   );
-}; 
+};

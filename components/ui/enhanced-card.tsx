@@ -25,29 +25,35 @@ export const Enhanced3DCard: React.FC<Enhanced3DCardProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  
+
   // Motion values for rotation
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  
+
   // Smoother rotation with springs
-  const rotateX = useSpring(useTransform(y, [-300, 300], [rotationIntensity, -rotationIntensity]), {
-    stiffness: 200,
-    damping: 25
-  });
-  const rotateY = useSpring(useTransform(x, [-300, 300], [-rotationIntensity, rotationIntensity]), {
-    stiffness: 200,
-    damping: 25
-  });
+  const rotateX = useSpring(
+    useTransform(y, [-300, 300], [rotationIntensity, -rotationIntensity]),
+    {
+      stiffness: 200,
+      damping: 25,
+    },
+  );
+  const rotateY = useSpring(
+    useTransform(x, [-300, 300], [-rotationIntensity, rotationIntensity]),
+    {
+      stiffness: 200,
+      damping: 25,
+    },
+  );
 
   // Handle mouse move for 3D effect
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (!cardRef.current) return;
-    
+
     const rect = cardRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     x.set(e.clientX - centerX);
     y.set(e.clientY - centerY);
   }
@@ -64,15 +70,15 @@ export const Enhanced3DCard: React.FC<Enhanced3DCardProps> = ({
       ref={cardRef}
       className={cn(
         "relative rounded-xl overflow-hidden backdrop-blur-sm",
-        className
+        className,
       )}
       style={{
         rotateX,
         rotateY,
         transformStyle: "preserve-3d",
         background: backgroundGradient,
-        boxShadow: isHovered 
-          ? `0 10px 30px -10px ${glowColor}, 0 0 0 1px ${borderColor}` 
+        boxShadow: isHovered
+          ? `0 10px 30px -10px ${glowColor}, 0 0 0 1px ${borderColor}`
           : `0 2px 10px -2px rgba(0, 0, 0, 0.2), 0 0 0 1px ${borderColor}`,
       }}
       whileHover={{ scale: hoverScale }}
@@ -82,20 +88,22 @@ export const Enhanced3DCard: React.FC<Enhanced3DCardProps> = ({
       onMouseLeave={handleMouseLeave}
     >
       {/* Subtle gradient overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-60 mix-blend-overlay"
         style={{
-          background: "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%)",
+          background:
+            "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%)",
           transform: "translateZ(2px)",
         }}
       />
-      
+
       {/* Shine effect on hover */}
       {isHovered && (
         <motion.div
           className="absolute inset-0 opacity-20"
           style={{
-            background: "linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%)",
+            background:
+              "linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%)",
             backgroundSize: "200% 200%",
             transform: "translateZ(1px)",
           }}
@@ -104,9 +112,9 @@ export const Enhanced3DCard: React.FC<Enhanced3DCardProps> = ({
           transition={{ duration: 1, repeat: Infinity, repeatType: "mirror" }}
         />
       )}
-      
+
       {/* Content container with perspective */}
-      <div 
+      <div
         className="relative z-10 h-full"
         style={{ transform: "translateZ(20px)" }}
       >
@@ -122,13 +130,7 @@ export const FloatingCard: React.FC<{
   delay?: number;
   amplitude?: number;
   duration?: number;
-}> = ({
-  children,
-  className,
-  delay = 0,
-  amplitude = 10,
-  duration = 4,
-}) => {
+}> = ({ children, className, delay = 0, amplitude = 10, duration = 4 }) => {
   return (
     <motion.div
       className={cn("relative", className)}

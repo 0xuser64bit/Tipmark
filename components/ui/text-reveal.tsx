@@ -176,11 +176,7 @@ export const TypewriterText: React.FC<{
         animate={inView ? "visible" : "hidden"}
       >
         {characters.map((character, index) => (
-          <motion.span
-            key={index}
-            variants={child}
-            className="inline-block"
-          >
+          <motion.span key={index} variants={child} className="inline-block">
             {character === " " ? "\u00A0" : character}
           </motion.span>
         ))}

@@ -1,10 +1,10 @@
 "use client";
 
-import React from 'react';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import React from "react";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { cn } from "@/lib/utils";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 interface SkeletonLoaderProps {
   count?: number;
@@ -21,7 +21,7 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   height,
   width,
   className,
-  borderRadius = '0.5rem',
+  borderRadius = "0.5rem",
   animated = true,
   inline = false,
 }) => {
@@ -93,4 +93,4 @@ export const DashboardSkeleton: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

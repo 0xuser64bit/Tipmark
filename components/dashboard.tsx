@@ -58,34 +58,34 @@ const containerVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
+      delayChildren: 0.2,
+    },
+  },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     y: 0,
     transition: {
       type: "spring",
       stiffness: 100,
-      damping: 15
-    }
-  }
+      damping: 15,
+    },
+  },
 };
 
 const chartVariants = {
   hidden: { opacity: 0, scale: 0.95 },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     scale: 1,
     transition: {
       duration: 0.5,
-      delay: 0.4
-    }
-  }
+      delay: 0.4,
+    },
+  },
 };
 
 export default function Dashboard({
@@ -99,7 +99,7 @@ export default function Dashboard({
   // Use intersection observer for the chart section
   const [chartRef, chartInView] = useInView({
     triggerOnce: true,
-    threshold: 0.1
+    threshold: 0.1,
   });
 
   return (
@@ -127,7 +127,7 @@ export default function Dashboard({
         </div>
       </div>
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <motion.div 
+        <motion.div
           className="flex items-center justify-center"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -135,9 +135,9 @@ export default function Dashboard({
         >
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </motion.div>
-        
+
         {/* Stats Cards - Using staggered animation */}
-        <motion.div 
+        <motion.div
           className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
           variants={containerVariants}
           initial="hidden"
@@ -170,7 +170,9 @@ export default function Dashboard({
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+{last30daysEarning} SOL</div>
+                  <div className="text-2xl font-bold">
+                    +{last30daysEarning} SOL
+                  </div>
                   <p className="text-xs text-zinc-400">around $$$+ USD</p>
                 </CardContent>
               </Card>
@@ -187,7 +189,9 @@ export default function Dashboard({
                   <DollarSign className="h-4 w-4 text-zinc-400" />{" "}
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+{last7daysEarning} SOL</div>
+                  <div className="text-2xl font-bold">
+                    +{last7daysEarning} SOL
+                  </div>
                   <p className="text-xs text-zinc-400">around $$$+ USD</p>
                 </CardContent>
               </Card>
@@ -213,7 +217,7 @@ export default function Dashboard({
         </motion.div>
 
         <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
-          <motion.div 
+          <motion.div
             className="lg:w-1/2"
             ref={chartRef}
             variants={chartVariants}
@@ -247,10 +251,10 @@ export default function Dashboard({
                         content={<ShowMonthlyDataTooltip />}
                         cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
                       />
-                      <Bar 
-                        dataKey="total" 
-                        fill="#6366f1" 
-                        radius={[4, 4, 0, 0]} 
+                      <Bar
+                        dataKey="total"
+                        fill="#6366f1"
+                        radius={[4, 4, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -258,8 +262,8 @@ export default function Dashboard({
               </Card>
             </AnimatedCard>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="lg:w-1/2"
             variants={chartVariants}
             initial="hidden"
@@ -277,10 +281,10 @@ export default function Dashboard({
                         key={i}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 + (i * 0.1) }}
-                        whileHover={{ 
+                        transition={{ delay: 0.5 + i * 0.1 }}
+                        whileHover={{
                           scale: 1.02,
-                          backgroundColor: "rgba(99, 102, 241, 0.1)"
+                          backgroundColor: "rgba(99, 102, 241, 0.1)",
                         }}
                         className="rounded-lg"
                       >
@@ -302,7 +306,7 @@ export default function Dashboard({
                                 {transaction.fromPublicKey.substring(0, 4) +
                                   "..." +
                                   transaction.fromPublicKey.substring(
-                                    transaction.fromPublicKey.length - 4
+                                    transaction.fromPublicKey.length - 4,
                                   )}
                               </p>
                               <p className="text-sm text-zinc-400 mt-1">
@@ -317,7 +321,7 @@ export default function Dashboard({
                       </motion.div>
                     ))}
                     {recentTransactions.length === 0 && (
-                      <motion.p 
+                      <motion.p
                         className="text-center text-sm text-muted-foreground text-red-500 font-semibold"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

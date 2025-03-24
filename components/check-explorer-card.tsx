@@ -25,10 +25,10 @@ export const CheckExplorerCard = ({
   useEffect(() => {
     setExplorerUrl(`https://solscan.io/tx/${signature}`);
   }, [signature]);
-  
+
   return (
-    <Enhanced3DCard 
-      className="w-full max-w-md p-0 border-0" 
+    <Enhanced3DCard
+      className="w-full max-w-md p-0 border-0"
       glowColor="rgba(99, 102, 241, 0.4)"
       hoverScale={1.03}
     >
@@ -52,7 +52,7 @@ export const CheckExplorerCard = ({
           </motion.div>
         </CardHeader>
         <CardContent className="text-center">
-          <motion.div 
+          <motion.div
             className="mb-4"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -66,7 +66,7 @@ export const CheckExplorerCard = ({
               className="rounded-lg mx-auto object-cover"
             />
           </motion.div>
-          <motion.p 
+          <motion.p
             className="text-zinc-300 mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -74,28 +74,28 @@ export const CheckExplorerCard = ({
           >
             Your awesome support has been zapped to the creator! 🚀✨
           </motion.p>
-          <motion.div 
+          <motion.div
             className="bg-zinc-900 p-4 rounded-md overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
-            whileHover={{ 
+            whileHover={{
               boxShadow: "0 0 15px rgba(99, 102, 241, 0.3)",
-              scale: 1.01
+              scale: 1.01,
             }}
           >
             <p className="text-sm font-mono text-indigo-300 break-all">
               {signature}
             </p>
           </motion.div>
-          <motion.p 
+          <motion.p
             className="mt-4 text-sm text-zinc-400"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
           >
-            This magical string is your transaction signature. It's like a digital
-            high-five! 🖐️
+            This magical string is your transaction signature. It's like a
+            digital high-five! 🖐️
           </motion.p>
         </CardContent>
         <CardFooter className="flex justify-center">

@@ -24,33 +24,35 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [trails, setTrails] = useState<{ id: number; x: number; y: number; opacity: number }[]>([]);
+  const [trails, setTrails] = useState<
+    { id: number; x: number; y: number; opacity: number }[]
+  >([]);
   const [trailId, setTrailId] = useState(0);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!trailEffect) return;
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     setMousePosition({ x, y });
-    
+
     // Add trail particle
     if (isHovered) {
       const newTrail = {
         id: trailId,
         x,
         y,
-        opacity: 1
+        opacity: 1,
       };
-      
-      setTrails(prev => [...prev, newTrail]);
-      setTrailId(prev => prev + 1);
-      
+
+      setTrails((prev) => [...prev, newTrail]);
+      setTrailId((prev) => prev + 1);
+
       // Remove old trails
       setTimeout(() => {
-        setTrails(prev => prev.filter(trail => trail.id !== newTrail.id));
+        setTrails((prev) => prev.filter((trail) => trail.id !== newTrail.id));
       }, 500);
     }
   };
@@ -77,14 +79,14 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
           style={{ backgroundColor: glowColor }}
         />
       )}
-      
+
       {/* Pulse animation */}
       {pulseEffect && (
         <motion.div
           className="absolute inset-0 rounded-full -z-10"
           initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ 
-            scale: [0.8, 1.2, 0.8], 
+          animate={{
+            scale: [0.8, 1.2, 0.8],
             opacity: [0, 0.5, 0],
           }}
           transition={{
@@ -95,7 +97,7 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
           style={{ backgroundColor: glowColor }}
         />
       )}
-      
+
       {/* Mouse trail effect */}
       {trails.map((trail, i) => (
         <motion.div
@@ -111,11 +113,11 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
       ))}
-      
+
       <Button
         className={cn(
           "relative overflow-hidden transition-all duration-300",
-          className
+          className,
         )}
         {...props}
       >
@@ -127,11 +129,12 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
             animate={{ x: "100%" }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
             style={{
-              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
             }}
           />
         )}
-        
+
         <motion.span
           className="relative z-10 flex items-center gap-2"
           animate={{
@@ -146,30 +149,27 @@ export const AnimatedCTAButton: React.FC<AnimatedCTAButtonProps> = ({
   );
 };
 
-export const MagneticButton: React.FC<ButtonProps & { magnetStrength?: number }> = ({
-  children,
-  className,
-  magnetStrength = 0.3,
-  ...props
-}) => {
+export const MagneticButton: React.FC<
+  ButtonProps & { magnetStrength?: number }
+> = ({ children, className, magnetStrength = 0.3, ...props }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const buttonRef = React.useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!buttonRef.current) return;
-    
+
     const rect = buttonRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     // Calculate distance from center
     const distanceX = e.clientX - centerX;
     const distanceY = e.clientY - centerY;
-    
+
     // Apply magnetic effect
-    setPosition({ 
-      x: distanceX * magnetStrength, 
-      y: distanceY * magnetStrength 
+    setPosition({
+      x: distanceX * magnetStrength,
+      y: distanceY * magnetStrength,
     });
   };
 
@@ -189,7 +189,7 @@ export const MagneticButton: React.FC<ButtonProps & { magnetStrength?: number }>
       <Button
         className={cn(
           "relative overflow-hidden transition-all duration-300",
-          className
+          className,
         )}
         {...props}
       >
