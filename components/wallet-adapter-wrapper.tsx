@@ -7,17 +7,24 @@ import {
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
-import React from "react";
+import React, { useMemo } from "react";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 import "./wallet-button-styles.css";
+
 export const WalletAdapterWrapper = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = clusterApiUrl(network);
+  // Prefer a dedicated RPC (the public cluster endpoint is rate-limited and
+  // unreliable for a payments flow). Falls back to the public mainnet cluster.
+  const endpoint = useMemo(
+    () =>
+      process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
+      clusterApiUrl(WalletAdapterNetwork.Mainnet),
+    [],
+  );
 
   return (
     <ConnectionProvider endpoint={endpoint}>

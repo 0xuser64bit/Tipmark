@@ -2,104 +2,67 @@
 
 import db from "@/db";
 
-const monthlyEarningData = [
-  {
-    month: "Jan",
-    total: 0,
-  },
-  {
-    month: "Feb",
-    total: 0,
-  },
-  {
-    month: "Mar",
-    total: 0,
-  },
-  {
-    month: "Apr",
-    total: 0,
-  },
-  {
-    month: "May",
-    total: 0,
-  },
-  {
-    month: "Jun",
-    total: 0,
-  },
-  {
-    month: "Jul",
-    total: 0,
-  },
-  {
-    month: "Aug",
-    total: 0,
-  },
-  {
-    month: "Sep",
-    total: 0,
-  },
-  {
-    month: "Oct",
-    total: 0,
-  },
-  {
-    month: "Nov",
-    total: 0,
-  },
-  {
-    month: "Dec",
-    total: 0,
-  },
-];
+const DAY_MS = 1000 * 60 * 60 * 24;
 
 export const getEarningData = async ({ userId }: { userId: string }) => {
   const transactions = await db.transaction.findMany({
-    where: {
-      user_id: userId,
-    },
+    where: { user_id: userId },
     select: {
       amount: true,
       createdAt: true,
       hash: true,
       fromPublicKey: true,
+      status: true,
     },
   });
-  const totalEarning = transactions.reduce((acc, transaction) => {
-    return acc + parseFloat(transaction.amount);
-  }, 0);
 
-  const last30daysEarning = transactions.reduce((acc, transaction) => {
-    const date = new Date(transaction.createdAt);
-    const currentDate = new Date();
-    const diff = currentDate.getTime() - date.getTime(); // in milliseconds
-    if (diff < 1000 * 60 * 60 * 24 * 30) {
-      return acc + parseFloat(transaction.amount);
-    }
-    return acc;
-  }, 0);
+  const now = new Date();
+  const amountOf = (a: string) => parseFloat(a) || 0;
 
-  const last7daysEarning = transactions.reduce((acc, transaction) => {
-    const date = new Date(transaction.createdAt);
-    const currentDate = new Date();
-    const diff = currentDate.getTime() - date.getTime();
-    if (diff < 1000 * 60 * 60 * 24 * 7) {
-      return acc + parseFloat(transaction.amount);
-    }
-    return acc;
-  }, 0);
+  const totalEarning = transactions.reduce((acc, t) => acc + amountOf(t.amount), 0);
 
-  transactions.map((transaction) => {
-    const month = transaction.createdAt.getMonth();
-    monthlyEarningData[month].total += parseFloat(transaction.amount);
+  const sumWithin = (days: number) =>
+    transactions.reduce((acc, t) => {
+      const diff = now.getTime() - new Date(t.createdAt).getTime();
+      return diff < days * DAY_MS ? acc + amountOf(t.amount) : acc;
+    }, 0);
+
+  // Rolling last-12-months buckets — built per request (no shared mutable state).
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+    return {
+      key: `${d.getFullYear()}-${d.getMonth()}`,
+      month: d.toLocaleString("en-US", { month: "short" }),
+      total: 0,
+    };
   });
+  const indexByKey = new Map(months.map((m, i) => [m.key, i]));
+
+  for (const t of transactions) {
+    const d = new Date(t.createdAt);
+    const i = indexByKey.get(`${d.getFullYear()}-${d.getMonth()}`);
+    if (i !== undefined) months[i].total += amountOf(t.amount);
+  }
+
+  const monthlyEarningData = months.map(({ month, total }) => ({
+    month,
+    total: Number(total.toFixed(4)),
+  }));
+
+  const recentTransactions = [...transactions]
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    .slice(0, 6);
+
+  const uniqueSupporters = new Set(transactions.map((t) => t.fromPublicKey))
+    .size;
 
   return {
     totalEarning,
-    last30daysEarning,
-    last7daysEarning,
+    last30daysEarning: sumWithin(30),
+    last7daysEarning: sumWithin(7),
     totalTrasactions: transactions.length,
-    recentTransactions: transactions.slice(0, 5),
+    uniqueSupporters,
+    recentTransactions,
     monthlyEarningData,
   };
 };

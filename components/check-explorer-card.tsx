@@ -1,120 +1,119 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ExternalLink, PartyPopperIcon as Party } from "lucide-react";
-import Image from "next/image";
+import { Card } from "@/components/ui/card";
+import { AddressChip } from "@/components/ui/address-chip";
+import { SolAmount } from "@/components/ui/sol-amount";
+import { Confetti } from "@/components/ui/confetti";
+import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Enhanced3DCard } from "./ui/enhanced-card";
+import { motion } from "motion/react";
+import { useSolPrice } from "@/lib/use-sol-price";
+
+interface CheckExplorerCardProps {
+  signature: string;
+  amount?: string;
+  toPublicKey?: string;
+  creatorUsername?: string;
+  creatorName?: string;
+}
 
 export const CheckExplorerCard = ({
   signature,
-}: {
-  signature: string | string[] | undefined;
-}) => {
-  const [explorerUrl, setExplorerUrl] = useState("");
-
-  useEffect(() => {
-    setExplorerUrl(`https://solscan.io/tx/${signature}`);
-  }, [signature]);
+  amount,
+  toPublicKey,
+  creatorUsername,
+  creatorName,
+}: CheckExplorerCardProps) => {
+  const { usd } = useSolPrice();
+  const explorerUrl = `https://solscan.io/tx/${signature}`;
 
   return (
-    <Enhanced3DCard
-      className="w-full max-w-md p-0 border-0"
-      glowColor="rgba(99, 102, 241, 0.4)"
-      hoverScale={1.03}
-    >
-      <Card className="w-full max-w-md bg-transparent border-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 animate-gradient"></div>
-        <CardHeader>
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
+    <Card className="relative w-full max-w-md overflow-hidden p-0">
+      <Confetti />
+
+      <div className="flex flex-col items-center px-6 pt-8 text-center">
+        <motion.div
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-money/15 text-money ring-1 ring-money/30"
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 14 }}
+        >
+          <Check className="h-8 w-8" strokeWidth={3} />
+        </motion.div>
+
+        <h1 className="mt-5 text-xl font-semibold tracking-tight">
+          Support sent
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {creatorName
+            ? `Your support is on its way to ${creatorName}.`
+            : "Your support is on its way."}{" "}
+          🚀
+        </p>
+
+        {amount && (
+          <div className="mt-5 w-full rounded-xl border border-border bg-surface-2/40 p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Amount</span>
+              <SolAmount
+                sol={amount}
+                priceUsd={usd}
+                layout="inline"
+                amountClassName="text-base"
+              />
+            </div>
+            {toPublicKey && (
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">To</span>
+                <AddressChip address={toPublicKey} />
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-4 w-full rounded-lg border border-border bg-surface p-3 text-left">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            Transaction signature
+          </p>
+          <p className="mt-1 break-all font-mono text-xs text-brand-muted">
+            {signature}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 p-6 pt-5">
+        <Button asChild variant="outline" className="w-full">
+          <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
+            View on Solscan
+            <ExternalLink className="h-4 w-4" />
+          </Link>
+        </Button>
+        {creatorUsername && (
+          <Button
+            asChild
+            variant="ghost"
+            className="w-full text-muted-foreground"
           >
-            <CardTitle className="text-2xl font-bold text-center text-indigo-400 flex items-center justify-center">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 10, 0] }}
-                transition={{ repeat: Infinity, repeatDelay: 3, duration: 1 }}
-              >
-                <Party className="mr-2 h-6 w-6" />
-              </motion.div>
-              Woohoo! Transaction Confirmed
-            </CardTitle>
-          </motion.div>
-        </CardHeader>
-        <CardContent className="text-center">
-          <motion.div
-            className="mb-4"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, type: "spring", bounce: 0.5 }}
-          >
-            <Image
-              src="/kitten-cute.gif"
-              alt="Celebration GIF"
-              width={200}
-              height={200}
-              className="rounded-lg mx-auto object-cover"
-            />
-          </motion.div>
-          <motion.p
-            className="text-zinc-300 mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            Your awesome support has been zapped to the creator! 🚀✨
-          </motion.p>
-          <motion.div
-            className="bg-zinc-900 p-4 rounded-md overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            whileHover={{
-              boxShadow: "0 0 15px rgba(99, 102, 241, 0.3)",
-              scale: 1.01,
-            }}
-          >
-            <p className="text-sm font-mono text-indigo-300 break-all">
-              {signature}
-            </p>
-          </motion.div>
-          <motion.p
-            className="mt-4 text-sm text-zinc-400"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-          >
-            This magical string is your transaction signature. It's like a
-            digital high-five! 🖐️
-          </motion.p>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link href={explorerUrl} target="_blank" rel="noopener noreferrer">
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full text-sm font-semibold transition duration-300 ease-in-out flex items-center gap-2">
-                Peek at the Blockchain Magic
-                <ExternalLink className="h-4 w-4" />
-              </Button>
+            <Link href={`/${creatorUsername}`}>Back to @{creatorUsername}</Link>
+          </Button>
+        )}
+
+        <div className="mt-2 rounded-xl border border-brand/20 bg-brand/5 p-4 text-center">
+          <p className="text-sm font-medium text-foreground">
+            Want to get supported too?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Claim your own DAOnation page in seconds.
+          </p>
+          <Button asChild variant="brand" size="sm" className="mt-3">
+            <Link href="/">
+              Create your page
+              <ArrowRight className="h-4 w-4" />
             </Link>
-          </motion.div>
-        </CardFooter>
-      </Card>
-    </Enhanced3DCard>
+          </Button>
+        </div>
+      </div>
+    </Card>
   );
 };

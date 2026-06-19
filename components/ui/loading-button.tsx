@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button, ButtonProps } from "./button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ export const LoadingButton = React.forwardRef<
       children,
       className,
       isLoading,
-      loadingText = "Loading...",
+      loadingText,
       successText = "Success!",
       showSuccess = false,
       successDuration = 1000,
@@ -73,13 +73,14 @@ export const LoadingButton = React.forwardRef<
         {/* Loading spinner with fade effect */}
         {isLoading && (
           <motion.span
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center gap-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <Loader2 size={loaderSize} className="animate-spin mr-2" />
+            <Loader2 size={loaderSize} className="animate-spin" />
+            {loadingText && <span>{loadingText}</span>}
           </motion.span>
         )}
 

@@ -14,5 +14,10 @@ export async function validateSignature(signature: string) {
     notFound();
   }
 
-  return true;
+  const creator = await db.user.findUnique({
+    where: { email: transaction.user_id },
+    select: { username: true, display_name: true, profile_image: true },
+  });
+
+  return { transaction, creator };
 }

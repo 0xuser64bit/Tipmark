@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { Check, ShareIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { BadgeCheck, Check, Share2, Users } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,8 +11,15 @@ import { GetCard } from "./get-card";
 import { Header } from "./header";
 import { SocialsCard } from "./socials-card";
 import { SupportUserCard } from "./support-user";
-import { AnimatedGradientButton } from "./ui/animated-gradient-button";
-import { AnimatedText } from "./ui/animated-text";
+import { Button } from "./ui/button";
+import { fadeUp } from "@/lib/motion";
+import { formatSol } from "@/lib/format";
+
+interface HomeStats {
+  supporters: number;
+  contributions: number;
+  totalSol: number;
+}
 
 interface HomeProps {
   profileImage: string;
@@ -26,6 +33,8 @@ interface HomeProps {
   linkedin_username: string;
   solana_address: string;
   email: string;
+  stats?: HomeStats;
+  isOwner?: boolean;
 }
 
 export default function Home({
@@ -40,158 +49,140 @@ export default function Home({
   linkedin_username,
   solana_address,
   email,
+  stats,
+  isOwner = false,
 }: HomeProps) {
   const [copied, setCopied] = useState(false);
+  const profileUrl = `https://daonation.xyz/${username}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`https://daonation.xyz/` + username);
+    navigator.clipboard.writeText(profileUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col">
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-grow">
-        <Header />
-        <main className="flex flex-col gap-8 items-start">
-          <div className="w-full">
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="w-full h-48 sm:h-64 overflow-hidden rounded-xl">
-                <motion.img
-                  src={coverImage ?? "/dummy-cover.png"}
-                  alt="Cover"
-                  className="w-full h-full object-cover cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.5 }}
-                />
-              </div>
-              <motion.div
-                className="absolute left-4 -bottom-16 sm:-bottom-20"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-zinc-900">
-                  <motion.img
-                    src={profileImage ?? "/sol.png"}
-                    alt="Profile"
-                    className="w-full h-full object-cover cursor-pointer"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </div>
-              </motion.div>
-            </motion.div>
-            <motion.div
-              className="mt-20 sm:mt-24"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <div className="mb-4">
-                <AnimatedText
-                  text={displayName}
-                  className="text-2xl font-semibold"
-                  delay={1}
-                />
-                <motion.span
-                  className="text-muted-foreground text-sm block"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  @{username}
-                </motion.span>
-              </div>
-              <div className="flex gap-4 mb-6">
-                <GetCard
-                  name={displayName}
-                  username={username}
-                  profileUrl={"https://daonation.xyz/" + username}
-                  imageUrl={profileImage}
-                />
-                <AnimatedGradientButton
-                  variant="outline"
-                  className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-                  onClick={handleCopy}
-                  gradientFrom="rgba(99, 102, 241, 0.8)"
-                  gradientTo="rgba(236, 72, 153, 0.8)"
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <ShareIcon className="h-4 w-4" />
-                  )}
-                </AnimatedGradientButton>
-              </div>
-            </motion.div>
+    <div className="flex min-h-screen flex-col">
+      <Header />
 
-            <div className="flex flex-col lg:flex-row justify-between w-full gap-8">
-              <motion.div
-                className="flex-1"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-              >
-                <motion.div
-                  whileHover={{
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    translateY: -2,
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Card className="w-full bg-zinc-800/50 border-zinc-700/50 border mb-6">
-                    <CardContent className="p-4">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        className="text-zinc-300"
-                      >
-                        {description}
-                      </ReactMarkdown>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+      <main className="mx-auto w-full max-w-6xl flex-grow px-4 pb-20 sm:px-6">
+        {isOwner && (
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand/5 px-4 py-2.5 text-sm">
+            <span className="text-muted-foreground">
+              This is your public page — here&apos;s how supporters see you.
+            </span>
+            <code className="hidden shrink-0 font-mono text-xs text-brand-muted sm:block">
+              daonation.xyz/{username}
+            </code>
+          </div>
+        )}
 
-                <motion.div
-                  whileHover={{
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    translateY: -2,
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SocialsCard
-                    x_username={x_username}
-                    instagram_username={instagram_username}
-                    github_username={github_username}
-                    linkedin_username={linkedin_username}
-                  />
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                whileHover={{
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                  translateY: -2,
-                }}
-              >
-                <SupportUserCard
-                  displayName={displayName}
-                  solana_address={solana_address}
-                  email={email}
-                />
-              </motion.div>
+        {/* Cover + avatar */}
+        <motion.div
+          className="relative mt-4"
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+        >
+          <div className="relative h-44 w-full overflow-hidden rounded-2xl border border-border sm:h-60">
+            <img
+              src={coverImage || "/dummy-cover.png"}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent" />
+          </div>
+          <div className="absolute -bottom-12 left-5 sm:-bottom-14">
+            <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-background bg-surface sm:h-28 sm:w-28">
+              <img
+                src={profileImage || "/sol.png"}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
-        </main>
-      </div>
+        </motion.div>
+
+        {/* Identity */}
+        <div className="mt-16 flex flex-col gap-4 sm:mt-20 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                {displayName}
+              </h1>
+              <span className="inline-flex items-center gap-1 rounded-full border border-money/30 bg-money/10 px-2 py-0.5 text-[11px] font-medium text-money">
+                <BadgeCheck className="h-3 w-3" /> On-chain
+              </span>
+            </div>
+            <p className="mt-1 font-mono text-sm text-muted-foreground">
+              @{username}
+            </p>
+            {stats && stats.supporters > 0 && (
+              <p className="mt-2 inline-flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                <Users className="h-3.5 w-3.5 text-brand" />
+                <span className="font-medium text-foreground">
+                  {stats.supporters}
+                </span>
+                supporter{stats.supporters === 1 ? "" : "s"}
+                <span className="text-border">·</span>
+                <span className="font-mono tabular-nums text-foreground">
+                  {formatSol(stats.totalSol)} SOL
+                </span>
+                raised
+              </p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <GetCard
+              name={displayName}
+              username={username}
+              profileUrl={profileUrl}
+              imageUrl={profileImage}
+            />
+            <Button variant="outline" onClick={handleCopy}>
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" /> Copied
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4" /> Share
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-5">
+                <div className="markdown">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {description}
+                  </ReactMarkdown>
+                </div>
+              </CardContent>
+            </Card>
+            <SocialsCard
+              x_username={x_username}
+              instagram_username={instagram_username}
+              github_username={github_username}
+              linkedin_username={linkedin_username}
+            />
+          </div>
+
+          <div className="h-fit lg:sticky lg:top-20">
+            <SupportUserCard
+              displayName={displayName}
+              solana_address={solana_address}
+              email={email}
+            />
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

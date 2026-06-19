@@ -1,6 +1,8 @@
-import { DollarSign, LogOut, Menu, User } from "lucide-react";
+"use client";
+
+import { LayoutDashboard, LogOut, Menu, UserRound } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -11,51 +13,53 @@ import {
 } from "./ui/dropdown-menu";
 
 export const DropdownSettings = () => {
+  const router = useRouter();
+
   return (
-    <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 hover:text-white"
-          >
-            <Menu />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-56 bg-zinc-800 border-zinc-700 mt-3"
-          align="end"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className="text-foreground"
+          aria-label="Open menu"
         >
-          <DropdownMenuItem
-            className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-            onClick={() => redirect("/edit-profile")}
-          >
-            <User className="mr-2 h-4 w-4" />
-            <span>Account</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-zinc-700" />
-          <DropdownMenuItem
-            className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-            onClick={() => redirect("/dashboard")}
-          >
-            <DollarSign className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-zinc-700" />
-          <DropdownMenuItem
-            className="text-zinc-100 focus:bg-zinc-700 focus:text-zinc-100 cursor-pointer"
-            onClick={async () =>
-              await signOut({
-                redirect: true,
-                callbackUrl: "/",
-              })
-            }
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+          <Menu className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-52 border-border bg-popover"
+        align="end"
+        sideOffset={8}
+      >
+        <DropdownMenuItem
+          className="cursor-pointer focus:bg-accent"
+          onClick={() => router.push("/dashboard")}
+        >
+          <LayoutDashboard className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>Dashboard</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer focus:bg-accent"
+          onClick={() => router.push("/edit-profile")}
+        >
+          <UserRound className="mr-2 h-4 w-4 text-muted-foreground" />
+          <span>Edit profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-border" />
+        <DropdownMenuItem
+          className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+          onClick={() =>
+            signOut({
+              redirect: true,
+              callbackUrl: "/",
+            })
+          }
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

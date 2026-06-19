@@ -1,29 +1,35 @@
 "use client";
 
 import UpdateUserProfileAction from "@/actions/updateUserProfile";
+import { checkUsernameAvailable } from "@/actions/checkUsername";
+import { useEdgeStore } from "@/lib/edgestore";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { motion } from "framer-motion";
+import { Checkbox } from "./ui/checkbox";
+import { LoadingButton } from "./ui/loading-button";
+import { AppNav } from "./app-nav";
+import { AnimatePresence, motion } from "motion/react";
 import {
+  AlertCircle,
   ArrowLeft,
+  ArrowRight,
+  BadgeCheck,
+  Check,
   Github,
   Instagram,
   Linkedin,
+  Loader2,
   Twitter,
   Upload,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Spinner } from "./spinner";
-import { useEdgeStore } from "@/lib/edgestore";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Checkbox } from "./ui/checkbox";
-import { toast } from "sonner";
-import { LoadingButton } from "./ui/loading-button";
+import { cn } from "@/lib/utils";
 
 interface UserProfileProps {
   coverImageValue: string;
@@ -40,6 +46,16 @@ interface UserProfileProps {
   updates: boolean;
 }
 
+const clean = (v: string) => (v && v.trim() !== "#" ? v.trim() : "");
+
+const STEPS = [
+  { id: 1, title: "Claim your handle" },
+  { id: 2, title: "Make it yours" },
+  { id: 3, title: "Get paid" },
+];
+
+type UsernameState = "idle" | "checking" | "available" | "taken" | "invalid";
+
 export default function UserProfile({
   coverImageValue,
   profileImageValue,
@@ -52,421 +68,582 @@ export default function UserProfile({
   githubValue,
   solanaPublicKeyValue,
   email,
-  updates,
+  updates: updatesValue,
 }: UserProfileProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const { edgestore } = useEdgeStore();
-  const [previewMode, setPreviewMode] = useState(false);
+
+  const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [username, setUsername] = useState(usernameValue || "");
+  const [displayName, setDisplayName] = useState(displayNameValue || "");
+  const [description, setDescription] = useState(descriptionValue || "");
   const [coverImage, setCoverImage] = useState(
     coverImageValue || "/dummy-cover.png",
   );
   const [profileImage, setProfileImage] = useState(
     profileImageValue || "/sol.png",
   );
-  const [formErrors, setFormErrors] = useState<any>({
-    username: "",
-    displayName: "",
-    description: "",
-    twitter: "",
-    instagram: "",
-    github: "",
-    linkedin: "",
-    blockchainKeys: {},
-  });
-  const [blockchainKeys, setBlockchainKeys] = useState<any>({
-    solana: solanaPublicKeyValue || "",
-  });
-  const [currentBlockchain, setCurrentBlockchain] = useState("solana");
+  const [solana, setSolana] = useState(solanaPublicKeyValue || "");
+  const [x, setX] = useState(clean(twitterValue));
+  const [instagram, setInstagram] = useState(clean(instagramValue));
+  const [github, setGithub] = useState(clean(githubValue));
+  const [linkedin, setLinkedin] = useState(clean(linkedinValue));
+  const [updates, setUpdates] = useState(updatesValue);
+  const [previewMode, setPreviewMode] = useState(false);
 
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    setImage: (value: string) => void,
-  ) => {
-    const file = event.target.files?.[0];
-    if (file && file?.size > 1024 * 1024) {
-      toast.error("File size must be less than 1MB");
+  const [usernameState, setUsernameState] = useState<UsernameState>("idle");
+  const [uploading, setUploading] = useState<null | "cover" | "profile">(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const slug = username.trim().split(" ").join("-").toLowerCase();
+
+  // Debounced real-time handle availability
+  useEffect(() => {
+    if (!slug) {
+      setUsernameState("idle");
       return;
     }
-    if (file) {
+    if (!/^[a-z0-9-]{2,30}$/.test(slug)) {
+      setUsernameState("invalid");
+      return;
+    }
+    setUsernameState("checking");
+    const t = setTimeout(async () => {
+      const res = await checkUsernameAvailable(slug);
+      setUsernameState(
+        res.available
+          ? "available"
+          : res.reason === "invalid"
+            ? "invalid"
+            : "taken",
+      );
+    }, 450);
+    return () => clearTimeout(t);
+  }, [slug]);
+
+  const handleImageUpload = async (
+    file: File | undefined,
+    setImage: (v: string) => void,
+    kind: "cover" | "profile",
+  ) => {
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+      toast.error("Image must be under 1MB");
+      return;
+    }
+    setUploading(kind);
+    try {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setImage(e.target?.result as string);
-      };
+      reader.onload = (e) => setImage(e.target?.result as string);
       reader.readAsDataURL(file);
-      const response = await edgestore.publicFiles.upload({
-        file,
+      const res = await edgestore.publicFiles.upload({ file });
+      setImage(res.url);
+    } catch {
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const validateStep = (s: number) => {
+    const e: Record<string, string> = {};
+    if (s === 1) {
+      if (!slug) e.username = "Pick a handle";
+      else if (usernameState === "invalid")
+        e.username = "2–30 lowercase letters, numbers, or dashes";
+      else if (usernameState === "taken") e.username = "That handle is taken";
+      if (!displayName.trim()) e.displayName = "Add a display name";
+    }
+    if (s === 2 && !description.trim()) e.description = "Add a short bio";
+    if (s === 3) {
+      if (!solana.trim()) e.solana = "Add your Solana address";
+      else if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(solana.trim()))
+        e.solana = "That doesn't look like a Solana address";
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const next = () => {
+    if (validateStep(step)) setStep((s) => Math.min(3, s + 1));
+  };
+  const back = () => setStep((s) => Math.max(1, s - 1));
+
+  const handlePublish = async () => {
+    if (!validateStep(1)) {
+      setStep(1);
+      return;
+    }
+    if (!validateStep(3)) return;
+    setIsLoading(true);
+    try {
+      const { statusCode } = await UpdateUserProfileAction({
+        username: slug,
+        profile_image: profileImage,
+        cover_image: coverImage,
+        email,
+        display_name: displayName.trim(),
+        description: description.trim(),
+        x_username: x.trim(),
+        instagram_username: instagram.trim(),
+        github_username: github.trim(),
+        linkedin_username: linkedin.trim(),
+        blockchainKeys: { solana: solana.trim() },
+        updates,
       });
-      setImage(response.url);
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const newErrors = { ...formErrors };
-    let hasError = false;
-
-    Object.keys(formErrors).forEach((key) => {
-      if (key === "blockchainKeys") {
-        const keyErrors: any = {};
-        Object.entries(blockchainKeys).forEach(([blockchain, key]) => {
-          keyErrors[blockchain] = key ? "" : "This field is required*";
-          if (keyErrors[blockchain]) {
-            hasError = true;
-          }
-        });
-        newErrors.blockchainKeys = keyErrors;
-      } else if (!formData.get(key)) {
-        newErrors[key] = "This field is required*";
-        hasError = true;
+      if (statusCode === 200) {
+        toast.success("Your page is live! 🎉");
+        router.push("/home");
+      } else if (statusCode === 409) {
+        setUsernameState("taken");
+        setErrors({ username: "That handle is taken" });
+        setStep(1);
       } else {
-        newErrors[key] = "";
+        toast.error("Couldn't save. Please try again.");
       }
-    });
-
-    setFormErrors(newErrors);
-
-    if (!hasError) {
-      setIsLoading(true);
-      try {
-        const username = formData.get("username") as string;
-        const display_name = formData.get("displayName") as string;
-        const description = formData.get("description") as string;
-        const x_username = formData.get("twitter") as string;
-        const instagram_username = formData.get("instagram") as string;
-        const github_username = formData.get("github") as string;
-        const linkedin_username = formData.get("linkedin") as string;
-        const updates = formData.get("updates") as string;
-
-        const { data, error, statusCode } = await UpdateUserProfileAction({
-          username: username.trim().split(" ").join("-").toLocaleLowerCase(),
-          profile_image: profileImage,
-          cover_image: coverImage,
-          email,
-          display_name,
-          description,
-          x_username,
-          instagram_username,
-          github_username,
-          linkedin_username,
-          blockchainKeys,
-          updates: updates === "on",
-        });
-        if (statusCode === 200) {
-          router.push("/home");
-        } else if (statusCode === 409) {
-          setFormErrors((prev: any) => ({
-            ...prev,
-            username: "Username is already taken",
-          }));
-        } else {
-          console.log(data);
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
+    } catch {
+      toast.error("Couldn't save. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleBlockchainKeyChange = (blockchain: string, value: string) => {
-    setBlockchainKeys((prev: any) => ({
-      ...prev,
-      [blockchain]: value,
-    }));
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between">
-          <h1
-            className="text-3xl font-bold mb-8 text-center cursor-pointer hover:bg-zinc-700 rounded-full p-2"
-            onClick={() => router.push("/home")}
-          >
-            <ArrowLeft />
-          </h1>{" "}
-          <h1 className="text-3xl font-bold mb-8 text-center">
-            Edit Your Profile
-          </h1>{" "}
-          <h1 className="invisible text-3xl font-bold mb-8 text-center">
-            Hidden
+    <div className="flex min-h-screen flex-col bg-grid">
+      <AppNav />
+
+      <main className="mx-auto w-full max-w-5xl flex-grow px-4 py-8 sm:px-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Set up your page
           </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Three quick steps and you&apos;re ready to get supported.
+          </p>
         </div>
 
-        <Card className="bg-zinc-800 border-none mb-8 pb-12 pt-3">
-          <CardContent className="space-y-4 pt-4 pb-6">
-            <div className="relative">
-              <motion.div
-                className="relative h-48 rounded-lg overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
+        {/* Stepper */}
+        <div className="mb-8 flex items-center gap-2">
+          {STEPS.map((s, i) => (
+            <div key={s.id} className="flex flex-1 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => s.id < step && setStep(s.id)}
+                className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
+                  step > s.id &&
+                    "border-money/40 bg-money/15 text-money",
+                  step === s.id && "border-brand bg-brand text-white",
+                  step < s.id && "border-border bg-surface text-muted-foreground",
+                )}
               >
-                <img
-                  src={coverImage as string}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
-                />
-                <Label
-                  htmlFor="cover-upload"
-                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                >
-                  <Upload className="w-8 h-8 text-white" />
-                </Label>
-                <Input
-                  id="cover-upload"
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => handleImageUpload(e, setCoverImage)}
-                  accept="image/*"
-                />
-              </motion.div>
-              <motion.div
-                className="absolute left-3 bottom-0 transform translate-y-1/2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
+                {step > s.id ? <Check className="h-3.5 w-3.5" /> : s.id}
+              </button>
+              <span
+                className={cn(
+                  "hidden text-sm sm:block",
+                  step >= s.id ? "text-foreground" : "text-muted-foreground",
+                )}
               >
-                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-zinc-900">
-                  <img
-                    src={profileImage as string}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                  <Label
-                    htmlFor="profile-upload"
-                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity cursor-pointer rounded-full"
-                  >
-                    <Upload className="w-6 h-6 text-white" />
-                  </Label>
-                  <Input
-                    id="profile-upload"
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => handleImageUpload(e, setProfileImage)}
-                    accept="image/*"
-                  />
-                </div>
-              </motion.div>
+                {s.title}
+              </span>
+              {i < STEPS.length - 1 && (
+                <div className="h-px flex-1 bg-border" />
+              )}
             </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
 
-        <Card className="bg-zinc-800 border-none text-white">
-          <CardContent className="pt-3">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">
-                  Username <span className="text-red-500">*</span>
-                </Label>
-                <div className="flex items-center">
-                  <div className="text-zinc-400 px-3 py-1.5 rounded-l-md border border-zinc-400/30">
-                    daonation.xyz/
-                  </div>
-                  <Input
-                    id="username"
-                    name="username"
-                    defaultValue={usernameValue}
-                    placeholder="Your unique identity"
-                    className="bg-zinc-700 border-zinc-600 text-zinc-100 rounded-l-none"
-                  />
-                </div>
-                {formErrors?.username && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {formErrors.username}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="displayName">
-                  Display Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="displayName"
-                  name="displayName"
-                  defaultValue={displayNameValue}
-                  placeholder="A cool Display Name"
-                  className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                />
-                {formErrors.displayName && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {formErrors.displayName}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Description <span className="text-red-500">*</span>
-                </Label>
-                <div className="flex justify-end space-x-2 mb-2">
-                  <Button
-                    type="button"
-                    variant={"outline"}
-                    onClick={() => setPreviewMode(false)}
-                    className={`text-sm border-0 ${
-                      !previewMode ? "text-gray-700" : "bg-zinc-700"
-                    }`}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={"outline"}
-                    onClick={() => setPreviewMode(true)}
-                    className={`text-sm border-0 ${
-                      previewMode ? "text-gray-700" : "bg-zinc-700"
-                    }`}
-                  >
-                    Preview
-                  </Button>
-                </div>
-                {previewMode ? (
-                  <div className="bg-zinc-700 border border-zinc-600 rounded-md p-4 min-h-[150px] prose prose-invert max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {descriptionValue ||
-                        "I'm crypto nerd and I love to get crypto from people"}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <Textarea
-                    id="description"
-                    name="description"
-                    defaultValue={
-                      descriptionValue ||
-                      "I'm crypto nerd and I love to get crypto from people"
-                    }
-                    placeholder="A Cool Description about you (Markdown supported)"
-                    className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                    rows={6}
-                  />
-                )}
-                {formErrors.description && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {formErrors.description}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>
-                  Social Media Links <span className="text-red-500">*</span>
-                </Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <Twitter className="w-5 h-5 text-zinc-400" />
-                    <Input
-                      placeholder="url or # if not"
-                      name="twitter"
-                      defaultValue={twitterValue || "#"}
-                      className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Instagram className="w-5 h-5 text-zinc-400" />
-                    <Input
-                      placeholder="url or # if not"
-                      name="instagram"
-                      defaultValue={instagramValue || "#"}
-                      className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Github className="w-5 h-5 text-zinc-400" />
-                    <Input
-                      placeholder="url or # if not"
-                      name="github"
-                      defaultValue={githubValue || "#"}
-                      className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Linkedin className="w-5 h-5 text-zinc-400" />
-                    <Input
-                      placeholder="username or # if not"
-                      name="linkedin"
-                      defaultValue={linkedinValue || "#"}
-                      className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                    />
-                  </div>
-                </div>
-                {(formErrors.twitter ||
-                  formErrors.instagram ||
-                  formErrors.github ||
-                  formErrors.linkedin) && (
-                  <p className="text-red-500 text-sm mt-1">
-                    All social media links are required
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>
-                  Public Keys <span className="text-red-500">*</span>
-                </Label>
-                <div className="flex justify-center space-x-4 mb-2">
-                  <Button
-                    type="button"
-                    variant={"outline"}
-                    onClick={() => setCurrentBlockchain("solana")}
-                    className={`text-sm text-gray-700 ${
-                      currentBlockchain === "solana" ? "" : "bg-zinc-700"
-                    }`}
-                  >
-                    Solana
-                  </Button>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    placeholder={`your ${currentBlockchain} public key`}
-                    value={
-                      blockchainKeys[currentBlockchain] || solanaPublicKeyValue
-                    }
-                    onChange={(e) =>
-                      handleBlockchainKeyChange(
-                        currentBlockchain,
-                        e.target.value,
-                      )
-                    }
-                    className="bg-zinc-700 border-zinc-600 text-zinc-100"
-                  />
-                </div>
-                {formErrors.blockchainKeys &&
-                  formErrors.blockchainKeys[currentBlockchain] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {formErrors.blockchainKeys[currentBlockchain]}
-                    </p>
-                  )}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="terms"
-                  name="updates"
-                  defaultChecked={updates}
-                  className="border-white"
-                />
-                <label
-                  htmlFor="terms"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Recieve updates from DAOnation
-                </label>
-              </div>
-              <LoadingButton
-                type="submit"
-                variant={"outline"}
-                className="w-full text-zinc-800 hover:opacity-90"
-                isLoading={isLoading}
-                loadingText="Saving Changes..."
-                successText="Profile Updated!"
-                showSuccess={true}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
+          {/* Form */}
+          <div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-5"
               >
-                Save Changes
-              </LoadingButton>
-            </form>
-          </CardContent>
-        </Card>
+                {step === 1 && (
+                  <>
+                    <Field
+                      label="Handle"
+                      error={errors.username}
+                      hint="This becomes your shareable link."
+                    >
+                      <div className="flex items-stretch">
+                        <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-surface px-3 font-mono text-sm text-muted-foreground">
+                          daonation.xyz/
+                        </span>
+                        <div className="relative flex-grow">
+                          <Input
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="your-name"
+                            className="rounded-l-none pr-9 font-mono"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <UsernameIndicator state={usernameState} />
+                          </span>
+                        </div>
+                      </div>
+                    </Field>
+                    <Field label="Display name" error={errors.displayName}>
+                      <Input
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Satoshi Nakamoto"
+                      />
+                    </Field>
+                  </>
+                )}
+
+                {step === 2 && (
+                  <>
+                    <div>
+                      <Label className="mb-2 block">Cover &amp; photo</Label>
+                      <div className="relative">
+                        <label className="group relative block h-36 w-full cursor-pointer overflow-hidden rounded-xl border border-border">
+                          <img
+                            src={coverImage}
+                            alt="Cover"
+                            className="h-full w-full object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity group-hover:opacity-100">
+                            {uploading === "cover" ? (
+                              <Loader2 className="h-6 w-6 animate-spin text-white" />
+                            ) : (
+                              <Upload className="h-6 w-6 text-white" />
+                            )}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) =>
+                              handleImageUpload(
+                                e.target.files?.[0],
+                                setCoverImage,
+                                "cover",
+                              )
+                            }
+                          />
+                        </label>
+                        <label className="group absolute -bottom-6 left-4 block h-20 w-20 cursor-pointer overflow-hidden rounded-xl border-4 border-background bg-surface">
+                          <img
+                            src={profileImage}
+                            alt="Avatar"
+                            className="h-full w-full object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 transition-opacity group-hover:opacity-100">
+                            {uploading === "profile" ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-white" />
+                            ) : (
+                              <Upload className="h-4 w-4 text-white" />
+                            )}
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) =>
+                              handleImageUpload(
+                                e.target.files?.[0],
+                                setProfileImage,
+                                "profile",
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
+                      <p className="mt-8 text-xs text-muted-foreground">
+                        PNG or JPG, up to 1MB each.
+                      </p>
+                    </div>
+
+                    <Field label="Bio" error={errors.description}>
+                      <div className="mb-2 flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewMode(false)}
+                          className={cn(
+                            "rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                            !previewMode
+                              ? "bg-surface-2 text-foreground"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          Write
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewMode(true)}
+                          className={cn(
+                            "rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                            previewMode
+                              ? "bg-surface-2 text-foreground"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          Preview
+                        </button>
+                      </div>
+                      {previewMode ? (
+                        <div className="markdown min-h-[150px] rounded-md border border-border bg-surface p-4">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {description || "_Nothing here yet._"}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <Textarea
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Tell supporters what you're building. Markdown is supported."
+                          rows={6}
+                        />
+                      )}
+                    </Field>
+                  </>
+                )}
+
+                {step === 3 && (
+                  <>
+                    <Field
+                      label="Solana wallet address"
+                      error={errors.solana}
+                      hint="Support is sent directly here — non-custodial."
+                    >
+                      <Input
+                        value={solana}
+                        onChange={(e) => setSolana(e.target.value)}
+                        placeholder="Your Solana public key"
+                        className="font-mono text-sm"
+                      />
+                    </Field>
+
+                    <div>
+                      <Label className="mb-2 block">
+                        Socials{" "}
+                        <span className="font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </Label>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <SocialInput
+                          icon={<Twitter className="h-4 w-4" />}
+                          value={x}
+                          onChange={setX}
+                          placeholder="X username"
+                        />
+                        <SocialInput
+                          icon={<Instagram className="h-4 w-4" />}
+                          value={instagram}
+                          onChange={setInstagram}
+                          placeholder="Instagram username"
+                        />
+                        <SocialInput
+                          icon={<Github className="h-4 w-4" />}
+                          value={github}
+                          onChange={setGithub}
+                          placeholder="GitHub username"
+                        />
+                        <SocialInput
+                          icon={<Linkedin className="h-4 w-4" />}
+                          value={linkedin}
+                          onChange={setLinkedin}
+                          placeholder="LinkedIn username"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="flex cursor-pointer items-center gap-2.5">
+                      <Checkbox
+                        checked={updates}
+                        onCheckedChange={(v) => setUpdates(Boolean(v))}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        Email me product updates from DAOnation
+                      </span>
+                    </label>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Nav */}
+            <div className="mt-8 flex items-center justify-between">
+              <Button
+                variant="ghost"
+                onClick={back}
+                disabled={step === 1}
+                className={cn(step === 1 && "invisible")}
+              >
+                <ArrowLeft className="h-4 w-4" /> Back
+              </Button>
+              {step < 3 ? (
+                <Button variant="brand" onClick={next}>
+                  Continue <ArrowRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <LoadingButton
+                  variant="brand"
+                  onClick={handlePublish}
+                  isLoading={isLoading}
+                  loadingText="Publishing…"
+                >
+                  <BadgeCheck className="h-4 w-4" /> Publish my page
+                </LoadingButton>
+              )}
+            </div>
+          </div>
+
+          {/* Live preview */}
+          <div className="h-fit lg:sticky lg:top-20">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Live preview
+            </p>
+            <LivePreview
+              coverImage={coverImage}
+              profileImage={profileImage}
+              displayName={displayName || "Your name"}
+              slug={slug || "your-name"}
+              description={description}
+              socials={{ x, instagram, github, linkedin }}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  hint,
+  error,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {children}
+      {error ? (
+        <p className="flex items-center gap-1 text-xs text-destructive">
+          <AlertCircle className="h-3 w-3" /> {error}
+        </p>
+      ) : hint ? (
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function UsernameIndicator({ state }: { state: UsernameState }) {
+  if (state === "checking")
+    return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+  if (state === "available") return <Check className="h-4 w-4 text-money" />;
+  if (state === "taken" || state === "invalid")
+    return <AlertCircle className="h-4 w-4 text-destructive" />;
+  return null;
+}
+
+function SocialInput({
+  icon,
+  value,
+  onChange,
+  placeholder,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground">
+        {icon}
+      </span>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+function LivePreview({
+  coverImage,
+  profileImage,
+  displayName,
+  slug,
+  description,
+  socials,
+}: {
+  coverImage: string;
+  profileImage: string;
+  displayName: string;
+  slug: string;
+  description: string;
+  socials: { x: string; instagram: string; github: string; linkedin: string };
+}) {
+  const socialIcons = [
+    { v: socials.x, Icon: Twitter },
+    { v: socials.instagram, Icon: Instagram },
+    { v: socials.github, Icon: Github },
+    { v: socials.linkedin, Icon: Linkedin },
+  ].filter((s) => s.v);
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="relative h-20 w-full">
+        <img src={coverImage} alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
+      </div>
+      <div className="px-4 pb-4">
+        <div className="-mt-7 mb-2 h-14 w-14 overflow-hidden rounded-xl border-4 border-card bg-surface">
+          <img
+            src={profileImage}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate font-semibold tracking-tight">{displayName}</p>
+          <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-money" />
+        </div>
+        <p className="font-mono text-xs text-muted-foreground">@{slug}</p>
+        {description && (
+          <div className="markdown mt-3 line-clamp-4 text-xs text-muted-foreground">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {description}
+            </ReactMarkdown>
+          </div>
+        )}
+        {socialIcons.length > 0 && (
+          <div className="mt-3 flex gap-1.5">
+            {socialIcons.map(({ Icon }, i) => (
+              <span
+                key={i}
+                className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground"
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="mt-4 rounded-lg border border-border bg-surface-2/40 p-2.5 text-center text-xs text-money">
+          Support in SOL
+        </div>
       </div>
     </div>
   );

@@ -1,341 +1,264 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, DollarSign } from "lucide-react";
-import { redirect } from "next/navigation";
+import { StatCard } from "@/components/ui/stat-card";
+import { CountUp } from "@/components/ui/count-up";
+import { AddressChip } from "@/components/ui/address-chip";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { formatUsd } from "@/lib/format";
+import { motion } from "motion/react";
+import { useInView } from "react-intersection-observer";
+import {
+  ArrowUpRight,
+  Calendar,
+  Coins,
+  Inbox,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
-import { DropdownSettings } from "./dropdown";
-import { motion } from "framer-motion";
-import { AnimatedCard } from "./ui/animated-card";
-import { useInView } from "react-intersection-observer";
+import { fadeUp, staggerContainer } from "@/lib/motion";
 
 interface DashboardProps {
-  totalEarning: string;
-  last30daysEarning: string;
-  last7daysEarning: string;
-  totalTrasactions: string;
+  totalEarning: number;
+  last30daysEarning: number;
+  last7daysEarning: number;
+  totalTransactions: number;
+  uniqueSupporters: number;
   recentTransactions: {
     hash: string;
     amount: string;
     fromPublicKey: string;
     createdAt: Date;
+    status: string;
   }[];
-  chartData: {
-    month: string;
-    total: number;
-  }[];
+  chartData: { month: string; total: number }[];
+  priceUsd: number | null;
 }
 
-const ShowMonthlyDataTooltip = ({
+const ChartTooltip = ({
   active,
   payload,
   label,
 }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-zinc-900 border border-zinc-700 p-2 rounded-md shadow-md">
-        <p className="text-zinc-100">{`${label} : ${payload[0].value} SOL`}</p>
+      <div className="rounded-lg border border-border bg-popover px-3 py-2 shadow-lg">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="font-mono text-sm font-semibold tabular-nums">
+          {payload[0].value} SOL
+        </p>
       </div>
     );
   }
-
   return null;
-};
-
-// Animation variants for staggered animations
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15,
-    },
-  },
-};
-
-const chartVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      delay: 0.4,
-    },
-  },
 };
 
 export default function Dashboard({
   totalEarning,
   last30daysEarning,
   last7daysEarning,
-  totalTrasactions,
+  totalTransactions,
+  uniqueSupporters,
   recentTransactions,
   chartData,
+  priceUsd,
 }: DashboardProps) {
-  // Use intersection observer for the chart section
   const [chartRef, chartInView] = useInView({
     triggerOnce: true,
-    threshold: 0.1,
+    threshold: 0.15,
   });
 
+  const usdSub = (sol: number) =>
+    priceUsd != null ? `≈ ${formatUsd(sol * priceUsd)}` : "—";
+
   return (
-    <div className="flex-col md:flex">
-      <div>
-        <div className="flex h-16 justify-between items-center border-b border-zinc-700 ml-8">
-          <motion.div
-            className="flex items-center space-x-4"
-            role="button"
-            onClick={() => redirect("/home")}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <span className="font-bold">DAOnation</span>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <DropdownSettings />
-          </motion.div>
-        </div>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your support, on-chain and in real time.
+        </p>
       </div>
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <motion.div
-          className="flex items-center justify-center"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+
+      {/* Stats */}
+      <motion.div
+        variants={staggerContainer(0.08)}
+        initial="hidden"
+        animate="show"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <motion.div variants={fadeUp}>
+          <StatCard
+            label="Total earned"
+            accent="money"
+            icon={<Coins className="h-5 w-5" />}
+            value={
+              <span className="font-mono text-money">
+                <CountUp value={totalEarning} decimals={2} suffix=" SOL" />
+              </span>
+            }
+            sub={usdSub(totalEarning)}
+          />
         </motion.div>
-
-        {/* Stats Cards - Using staggered animation */}
-        <motion.div
-          className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-        >
-          <motion.div variants={itemVariants}>
-            <AnimatedCard hoverEffect={true}>
-              <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Earning
-                  </CardTitle>
-                  <DollarSign className="h-4 w-4 text-zinc-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+{totalEarning} SOL</div>
-                  <p className="text-xs text-zinc-400">around $$$+ USD</p>
-                </CardContent>
-              </Card>
-            </AnimatedCard>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <AnimatedCard hoverEffect={true} delay={0.1}>
-              <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Last 30 days Earning
-                  </CardTitle>
-                  <DollarSign className="h-4 w-4 text-zinc-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    +{last30daysEarning} SOL
-                  </div>
-                  <p className="text-xs text-zinc-400">around $$$+ USD</p>
-                </CardContent>
-              </Card>
-            </AnimatedCard>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <AnimatedCard hoverEffect={true} delay={0.2}>
-              <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Last 7 days Earning
-                  </CardTitle>
-                  <DollarSign className="h-4 w-4 text-zinc-400" />{" "}
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    +{last7daysEarning} SOL
-                  </div>
-                  <p className="text-xs text-zinc-400">around $$$+ USD</p>
-                </CardContent>
-              </Card>
-            </AnimatedCard>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
-            <AnimatedCard hoverEffect={true} delay={0.3}>
-              <Card className="bg-zinc-800 text-zinc-100 border-zinc-700">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Trasactions
-                  </CardTitle>
-                  <Activity className="h-4 w-4 text-zinc-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+{totalTrasactions}</div>
-                  <p className="text-xs text-zinc-400">+XXX since last hour</p>
-                </CardContent>
-              </Card>
-            </AnimatedCard>
-          </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard
+            label="Supporters"
+            icon={<Users className="h-5 w-5" />}
+            value={<CountUp value={uniqueSupporters} decimals={0} />}
+            sub={`${totalTransactions} contribution${totalTransactions === 1 ? "" : "s"}`}
+          />
         </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard
+            label="Last 30 days"
+            icon={<Calendar className="h-5 w-5" />}
+            value={
+              <span className="font-mono">
+                <CountUp value={last30daysEarning} decimals={2} suffix=" SOL" />
+              </span>
+            }
+            sub={usdSub(last30daysEarning)}
+          />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard
+            label="Last 7 days"
+            icon={<TrendingUp className="h-5 w-5" />}
+            value={
+              <span className="font-mono">
+                <CountUp value={last7daysEarning} decimals={2} suffix=" SOL" />
+              </span>
+            }
+            sub={usdSub(last7daysEarning)}
+          />
+        </motion.div>
+      </motion.div>
 
-        <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
-          <motion.div
-            className="lg:w-1/2"
-            ref={chartRef}
-            variants={chartVariants}
-            initial="hidden"
-            animate={chartInView ? "show" : "hidden"}
-          >
-            <AnimatedCard>
-              <Card className="bg-zinc-800 text-zinc-100 col-span-4 border-zinc-700 h-full">
-                <CardHeader>
-                  <CardTitle>Overview</CardTitle>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={chartData}>
-                      <XAxis
-                        dataKey="month"
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        padding={{ top: 20, bottom: 20 }}
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(value) => `${value} SOL`}
-                      />
-                      <Tooltip
-                        content={<ShowMonthlyDataTooltip />}
-                        cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                      />
-                      <Bar
-                        dataKey="total"
-                        fill="#6366f1"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </AnimatedCard>
-          </motion.div>
+      {/* Chart + transactions */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card ref={chartRef}>
+          <CardHeader>
+            <CardTitle className="text-base">Earnings overview</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-1">
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={chartData}>
+                <defs>
+                  <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#9945ff" stopOpacity={0.95} />
+                    <stop offset="100%" stopColor="#9945ff" stopOpacity={0.35} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  vertical={false}
+                  stroke="rgba(255,255,255,0.06)"
+                />
+                <XAxis
+                  dataKey="month"
+                  stroke="#6b6b78"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#6b6b78"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  width={44}
+                  tickFormatter={(v) => `${v}`}
+                />
+                <Tooltip
+                  content={<ChartTooltip />}
+                  cursor={{ fill: "rgba(153,69,255,0.08)" }}
+                />
+                <Bar
+                  dataKey="total"
+                  fill="url(#barFill)"
+                  radius={[5, 5, 0, 0]}
+                  maxBarSize={44}
+                  isAnimationActive={chartInView}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-          <motion.div
-            className="lg:w-1/2"
-            variants={chartVariants}
-            initial="hidden"
-            animate={chartInView ? "show" : "hidden"}
-          >
-            <AnimatedCard delay={0.2}>
-              <Card className="bg-zinc-800 text-zinc-100 col-span-4 border-zinc-700 h-full">
-                <CardHeader>
-                  <CardTitle>Recent Transactions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-1">
-                    {recentTransactions.map((transaction, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 + i * 0.1 }}
-                        whileHover={{
-                          scale: 1.02,
-                          backgroundColor: "rgba(99, 102, 241, 0.1)",
-                        }}
-                        className="rounded-lg"
-                      >
-                        <a
-                          href={`https://solscan.io/tx/${transaction.hash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <div className="flex sm:flex-row items-start sm:items-center gap-2 sm:gap-4 hover:bg-zinc-500/10 cursor-pointer px-4 py-3 rounded-lg">
-                            <Avatar className="h-10 w-10 shrink-0">
-                              <AvatarImage src="/sol.png" alt={"SOL"} />
-                              <AvatarFallback>{"D"}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-grow min-w-0">
-                              <p className="text-sm font-medium leading-none hidden md:block">
-                                {transaction.fromPublicKey}
-                              </p>
-                              <p className="text-sm font-medium leading-none md:hidden block">
-                                {transaction.fromPublicKey.substring(0, 4) +
-                                  "..." +
-                                  transaction.fromPublicKey.substring(
-                                    transaction.fromPublicKey.length - 4,
-                                  )}
-                              </p>
-                              <p className="text-sm text-zinc-400 mt-1">
-                                {transaction.createdAt.toDateString()}
-                              </p>
-                            </div>
-                            <div className="font-medium text-sm sm:text-base sm:ml-auto">
-                              +{transaction.amount} SOL
-                            </div>
-                          </div>
-                        </a>
-                      </motion.div>
-                    ))}
-                    {recentTransactions.length === 0 && (
-                      <motion.p
-                        className="text-center text-sm text-muted-foreground text-red-500 font-semibold"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                      >
-                        No recent transactions
-                      </motion.p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimatedCard>
-          </motion.div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Recent support</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recentTransactions.length === 0 ? (
+              <EmptyState
+                icon={<Inbox className="h-5 w-5" />}
+                title="No support yet"
+                description="Share your link and your first contributions will show up here."
+                action={
+                  <Button asChild variant="brand" size="sm">
+                    <Link href="/home">
+                      View your page
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                }
+              />
+            ) : (
+              <ul className="divide-y divide-border">
+                {recentTransactions.map((t, i) => (
+                  <motion.li
+                    key={t.hash}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 * i }}
+                  >
+                    <a
+                      href={`https://solscan.io/tx/${t.hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-2/40"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-money/10 text-money">
+                        <Coins className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <AddressChip address={t.fromPublicKey} />
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {new Date(t.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="font-mono text-sm font-semibold text-money tabular-nums">
+                          +{t.amount} SOL
+                        </span>
+                        <StatusBadge status={t.status} />
+                      </div>
+                    </a>
+                  </motion.li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

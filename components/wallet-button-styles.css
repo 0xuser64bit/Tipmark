@@ -21,11 +21,11 @@
 }
 
 .wallet-adapter-modal-list-more {
-  color: #6366f1 !important;
+  color: #9945ff !important;
 }
 
 .wallet-adapter-modal-list-more:hover {
-  color: #818cf8 !important;
+  color: #b07cff !important;
 }
 
 .wallet-adapter-modal-button-close {
@@ -34,6 +34,34 @@
 
 .wallet-adapter-modal-button-close:hover {
   background-color: rgba(82, 82, 91, 0.7) !important;
+}
+
+/* The trigger button shown in app navs */
+.wallet-adapter-button-trigger {
+  background-color: #16161d !important;
+  border: 1px solid #23232b !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  color: #fafafa !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 0 16px !important;
+  line-height: 1 !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background-color: #1a1a22 !important;
+  border-color: #2a2a34 !important;
+}
+
+.wallet-adapter-button-trigger.wallet-connected {
+  background-color: rgba(153, 69, 255, 0.14) !important;
+  border-color: rgba(153, 69, 255, 0.35) !important;
+  color: #c9a8ff !important;
+}
+
+.wallet-adapter-button-trigger.wallet-connected:hover {
+  background-color: rgba(153, 69, 255, 0.2) !important;
 }
 
 /* Style wallet buttons in the modal */

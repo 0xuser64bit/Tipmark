@@ -2,22 +2,26 @@
 
 import { addTransactionToDB } from "@/actions/addTransactionToDB";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import { motion } from "framer-motion";
-import { CreditCard, DollarSign, Send } from "lucide-react";
+import { ShieldCheck, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Spinner } from "./spinner";
-import { AnimatedGradientButton } from "./ui/animated-gradient-button";
-import { Card, CardTitle } from "./ui/card";
+import { AddressChip } from "./ui/address-chip";
+import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { LoadingButton } from "./ui/loading-button";
+import { Spinner } from "./spinner";
+import { formatUsd } from "@/lib/format";
+import { useSolPrice } from "@/lib/use-sol-price";
+
+const PRESET_AMOUNTS = [0.1, 0.5, 1, 5];
 
 export const SupportUserCard = ({
   displayName,
@@ -30,12 +34,14 @@ export const SupportUserCard = ({
 }) => {
   const router = useRouter();
   const [customAmount, setCustomAmount] = useState("");
-  const [walletConnected, setWalletConnected] = useState(true);
+  const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const { setVisible } = useWalletModal();
+  const { usd: solPrice } = useSolPrice();
 
-  const checkTransactionStatus = async ({
+  const persistAndRedirect = async ({
     signature,
     amount,
     fromPubkey,
@@ -51,53 +57,61 @@ export const SupportUserCard = ({
     const transaction = await addTransactionToDB({
       userId: email,
       hash: signature,
-      amount: amount,
+      amount,
       fromPublicKey: fromPubkey,
       toPublicKey: toPubkey,
-      status: status,
+      status,
     });
     if (transaction) {
       router.push(`/check-explorer/${signature}`);
     }
   };
 
-  const handleSupportUser = async (e: any, amount?: string) => {
+  const handleSupportUser = async (
+    e: React.SyntheticEvent,
+    amount?: number,
+  ) => {
     e.preventDefault();
+
+    // Graceful connect: open the wallet modal instead of failing silently.
     if (!connection || !publicKey) {
-      setWalletConnected(false);
+      setVisible(true);
       return;
     }
+
+    const transferAmount = amount ?? parseFloat(customAmount);
+    if (!transferAmount || transferAmount <= 0 || Number.isNaN(transferAmount)) {
+      toast.error("Enter an amount greater than 0");
+      return;
+    }
+
     setIsLoading(true);
-    let transferAmount = amount ? parseFloat(amount) : parseFloat(customAmount);
+    setPendingAmount(amount ?? -1);
     try {
       const transaction = new Transaction();
       transaction.add(
         SystemProgram.transfer({
           fromPubkey: publicKey,
           toPubkey: new PublicKey(solana_address),
-          lamports: LAMPORTS_PER_SOL * transferAmount,
+          lamports: Math.round(LAMPORTS_PER_SOL * transferAmount),
         }),
       );
       const signature = await sendTransaction(transaction, connection);
-
-      // Get transaction status before storing in DB
       const status = await connection.getSignatureStatus(signature);
 
-      // Ensure we have a valid status before proceeding
       if (!status || !status.value) {
-        // Wait for the transaction to be confirmed (with timeout)
         let attempts = 0;
         const maxAttempts = 10;
         while (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           const latestStatus = await connection.getSignatureStatus(signature);
           if (latestStatus && latestStatus.value) {
-            await checkTransactionStatus({
+            await persistAndRedirect({
               signature,
               amount: transferAmount.toString(),
               fromPubkey: publicKey.toString(),
               toPubkey: solana_address,
-              status: latestStatus.value.confirmationStatus || "confirmed", // Provide status
+              status: latestStatus.value.confirmationStatus || "confirmed",
             });
             break;
           }
@@ -105,17 +119,16 @@ export const SupportUserCard = ({
         }
 
         if (attempts >= maxAttempts) {
-          // If we can't get the status after multiple attempts, still try to save with a default status
-          await checkTransactionStatus({
+          await persistAndRedirect({
             signature,
             amount: transferAmount.toString(),
             fromPubkey: publicKey.toString(),
             toPubkey: solana_address,
-            status: "processing", // Default status
+            status: "processing",
           });
         }
       } else {
-        await checkTransactionStatus({
+        await persistAndRedirect({
           signature,
           amount: transferAmount.toString(),
           fromPubkey: publicKey.toString(),
@@ -124,124 +137,118 @@ export const SupportUserCard = ({
         });
       }
 
-      toast.success("Transaction successful!");
+      toast.success("Transaction sent!");
     } catch (error) {
       console.error("Transaction error:", error);
-      toast.error("Error sending transaction");
+      toast.error("Couldn't send the transaction. Please try again.");
     } finally {
       setIsLoading(false);
+      setPendingAmount(null);
     }
   };
 
-  useEffect(() => {
-    if (!walletConnected) {
-      setTimeout(() => {
-        setWalletConnected(true);
-      }, 2000);
-    }
-  }, [walletConnected]);
-  const predefinedAmounts = [0.1, 0.5, 1, 5];
+  const customUsd =
+    solPrice != null && parseFloat(customAmount) > 0
+      ? formatUsd(parseFloat(customAmount) * solPrice)
+      : null;
 
   return (
-    <motion.div
-      whileHover={{
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        translateY: -2,
-      }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card className="w-full lg:w-[350px] transition-all duration-300 bg-zinc-800/90 border-zinc-700/50 p-4">
-        <div className="space-y-4">
-          <div className="flex flex-row items-center justify-between px-2">
-            <div className="flex flex-col space-y-1.5">
-              <CardTitle className="text-lg font-semibold text-white">
-                Support {displayName}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Directly support with Solana
-              </p>
-            </div>
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.1 }}
-              transition={{ duration: 0.8 }}
-              className="p-2 rounded-full bg-pink-500/10"
-            >
-              <DollarSign size={20} className="text-pink-400" />
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-2">
-            {predefinedAmounts.map((amount, i) => (
-              <motion.div
-                key={amount}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 + 0.2 }}
-              >
-                <AnimatedGradientButton
-                  key={amount}
-                  variant="outline"
-                  className={`w-full bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 text-zinc-100 border-zinc-700 ${
-                    parseInt(customAmount) === amount
-                      ? "bg-pink-500/20 border-pink-500/50 text-zinc-100"
-                      : ""
-                  }`}
-                  onClick={(e) => handleSupportUser(e, amount.toString())}
-                  gradientFrom="#ec4899"
-                  gradientTo="#8b5cf6"
-                  disabled={isLoading}
-                >
-                  {isLoading && parseInt(customAmount) === amount ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <>{amount} SOL</>
-                  )}
-                </AnimatedGradientButton>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="relative">
-            <form onSubmit={(e) => handleSupportUser(e)} className="space-y-2">
-              <div className="flex gap-2">
-                <div className="relative flex-grow">
-                  <motion.div
-                    className="absolute left-3 top-1/3 transform -translate-y-1/2 text-zinc-400"
-                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      duration: 2,
-                      repeatDelay: 5,
-                    }}
-                  >
-                    <CreditCard size={16} />
-                  </motion.div>
-                  <Input
-                    type="text"
-                    placeholder="Custom amount"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
-                    className="pl-10 bg-zinc-800 border-zinc-700 text-zinc-100"
-                    disabled={isLoading}
-                  />
-                </div>
-                <LoadingButton
-                  type="submit"
-                  className="bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white"
-                  isLoading={isLoading}
-                >
-                  <Send size={16} className="mr-1" />
-                </LoadingButton>
-              </div>
-            </form>
-          </div>
-
-          <div className="text-center text-xs text-zinc-400 mt-4">
-            <p>Transactions are secure and powered by Solana</p>
-          </div>
+    <Card className="overflow-hidden p-0">
+      <div className="border-b border-border bg-surface-2/40 p-5">
+        <div className="flex items-center gap-2 text-money">
+          <Wallet className="h-4 w-4" />
+          <span className="text-xs font-medium uppercase tracking-wide">
+            Support in SOL
+          </span>
         </div>
-      </Card>
-    </motion.div>
+        <h2 className="mt-2 text-lg font-semibold tracking-tight">
+          Send {displayName} some crypto
+        </h2>
+        <div className="mt-3 flex items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>Goes directly to</span>
+          <AddressChip address={solana_address} />
+        </div>
+      </div>
+
+      <div className="space-y-4 p-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          {PRESET_AMOUNTS.map((amount) => {
+            const usd = solPrice != null ? formatUsd(amount * solPrice) : null;
+            const loadingThis = isLoading && pendingAmount === amount;
+            return (
+              <button
+                key={amount}
+                type="button"
+                disabled={isLoading}
+                onClick={(e) => handleSupportUser(e, amount)}
+                className="group flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border bg-surface py-3 transition-all hover:border-brand/50 hover:bg-brand/5 disabled:opacity-50"
+              >
+                {loadingThis ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <>
+                    <span className="font-mono text-sm font-semibold tabular-nums">
+                      {amount} SOL
+                    </span>
+                    {usd && (
+                      <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+                        {usd}
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative flex items-center">
+          <div className="h-px flex-1 bg-border" />
+          <span className="px-3 text-[11px] uppercase tracking-wide text-muted-foreground">
+            or custom
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <form onSubmit={(e) => handleSupportUser(e)} className="space-y-2">
+          <div className="flex gap-2">
+            <div className="relative flex-grow">
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={customAmount}
+                onChange={(e) => setCustomAmount(e.target.value)}
+                className="h-11 pr-14 font-mono tabular-nums"
+                disabled={isLoading}
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-muted-foreground">
+                SOL
+              </span>
+            </div>
+            <LoadingButton
+              type="submit"
+              variant="brand"
+              className="h-11 px-5"
+              isLoading={isLoading && pendingAmount === -1}
+            >
+              {publicKey ? "Send" : "Connect"}
+            </LoadingButton>
+          </div>
+          {customUsd && (
+            <p className="pl-1 font-mono text-xs text-muted-foreground tabular-nums">
+              ≈ {customUsd}
+            </p>
+          )}
+        </form>
+
+        <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-xs text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-money" />
+          <span>Non-custodial · settled on Solana</span>
+        </div>
+      </div>
+    </Card>
   );
 };

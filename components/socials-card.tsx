@@ -1,5 +1,7 @@
 import { Github, Instagram, Linkedin, Twitter } from "lucide-react";
 
+const clean = (v: string) => (v && v.trim() !== "#" ? v.trim() : "");
+
 export const SocialsCard = ({
   x_username,
   instagram_username,
@@ -11,42 +13,44 @@ export const SocialsCard = ({
   github_username: string;
   linkedin_username: string;
 }) => {
+  const socials = [
+    { value: clean(x_username), base: "https://x.com/", icon: Twitter, label: "X" },
+    {
+      value: clean(instagram_username),
+      base: "https://instagram.com/",
+      icon: Instagram,
+      label: "Instagram",
+    },
+    {
+      value: clean(github_username),
+      base: "https://github.com/",
+      icon: Github,
+      label: "GitHub",
+    },
+    {
+      value: clean(linkedin_username),
+      base: "https://linkedin.com/in/",
+      icon: Linkedin,
+      label: "LinkedIn",
+    },
+  ].filter((s) => s.value);
+
+  if (socials.length === 0) return null;
+
   return (
-    <div className="w-full bg-zinc-800/50 rounded-lg p-4">
-      <div className="flex justify-center gap-6 text-zinc-400">
+    <div className="flex flex-wrap items-center gap-2">
+      {socials.map(({ value, base, icon: Icon, label }) => (
         <a
-          href={"https://x.com/" + x_username}
-          className="hover:text-zinc-100 transition-colors"
-          aria-label="Twitter"
+          key={label}
+          href={value.startsWith("http") ? value : base + value}
           target="_blank"
+          rel="noopener noreferrer"
+          aria-label={label}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground transition-all hover:border-brand/40 hover:text-foreground"
         >
-          <Twitter className="h-5 w-5" />
+          <Icon className="h-4 w-4" />
         </a>
-        <a
-          href={"https://instagram.com/" + instagram_username}
-          className="hover:text-zinc-100 transition-colors"
-          aria-label="Instagram"
-          target="_blank"
-        >
-          <Instagram className="h-5 w-5" />
-        </a>
-        <a
-          href={"https://github.com/" + github_username}
-          className="hover:text-zinc-100 transition-colors"
-          aria-label="GitHub"
-          target="_blank"
-        >
-          <Github className="h-5 w-5" />
-        </a>
-        <a
-          href={"https://linkedin.com/" + linkedin_username}
-          className="hover:text-zinc-100 transition-colors"
-          aria-label="LinkedIn"
-          target="_blank"
-        >
-          <Linkedin className="h-5 w-5" />
-        </a>
-      </div>
+      ))}
     </div>
   );
 };

@@ -9,7 +9,7 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
         }
 
         #nprogress .bar {
-          background: linear-gradient(90deg, #4f46e5, #8b5cf6, #ec4899);
+          background: linear-gradient(90deg, #9945ff, #14f195);
           position: fixed;
           z-index: 1031;
           top: 0;
@@ -25,8 +25,8 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
           width: 100px;
           height: 100%;
           box-shadow:
-            0 0 10px #4f46e5,
-            0 0 5px #4f46e5;
+            0 0 10px #9945ff,
+            0 0 5px #14f195;
           opacity: 1;
           transform: rotate(3deg) translate(0px, -4px);
         }

@@ -11,7 +11,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   secret: process.env.NEXTAUTH_SECRET || "secret",
   callbacks: {
-    async signIn({ user }: any) {
+    async signIn({ user }: { user: { email?: string | null } }) {
+      if (!user.email) return false;
       const existingUser = await db.user.findUnique({
         where: { email: user.email },
       });

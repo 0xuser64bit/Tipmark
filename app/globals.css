@@ -1,174 +1,275 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+/*
+  DAOnation design system — Solana-native neon, dark-only.
+  Purple (#9945FF) = brand / action. Green (#14F195) = money / confirmed.
+  Mono numerals for on-chain credibility. Calm, premium, intentional.
+*/
+
+@theme {
+  /* Brand */
+  --color-brand: #9945ff;
+  --color-brand-foreground: #ffffff;
+  --color-brand-muted: #b07cff;
+  --color-money: #14f195;
+  --color-money-foreground: #04130c;
+
+  /* Core surfaces (dark-only) */
+  --color-canvas: #0a0a0f;
+  --color-background: #0a0a0f;
+  --color-foreground: #fafafa;
+  --color-surface: #121218;
+  --color-surface-2: #1a1a22;
+
+  --color-card: #121218;
+  --color-card-foreground: #fafafa;
+  --color-popover: #16161d;
+  --color-popover-foreground: #fafafa;
+
+  --color-primary: #9945ff;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1a1a22;
+  --color-secondary-foreground: #fafafa;
+  --color-muted: #1a1a22;
+  --color-muted-foreground: #9b9ba6;
+  --color-accent: #23232d;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #f43f5e;
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #23232b;
+  --color-input: #2a2a34;
+  --color-ring: #9945ff;
+
+  /* Chart palette */
+  --color-chart-1: #9945ff;
+  --color-chart-2: #14f195;
+  --color-chart-3: #22d3ee;
+  --color-chart-4: #f59e0b;
+  --color-chart-5: #f43f5e;
+
+  /* Radius scale */
+  --radius: 0.75rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Typography */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", SFMono-Regular,
+    Menlo, monospace;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-
-    /* Animation variables */
-    --animation-primary: 4f46e5;
-    --animation-secondary: 8b5cf6;
-    --animation-accent: ec4899;
-    --animation-duration-slow: 0.8s;
-    --animation-duration-normal: 0.5s;
-    --animation-duration-fast: 0.3s;
+    color-scheme: dark;
   }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
 
-@layer base {
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    /* Subtle ambient brand glow at the top — calm, not busy */
+    background-image:
+      radial-gradient(
+        60rem 40rem at 50% -20%,
+        rgba(153, 69, 255, 0.08),
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 30rem at 100% 0%,
+        rgba(20, 241, 149, 0.05),
+        transparent 55%
+      );
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(153, 69, 255, 0.32);
+    color: #fff;
+  }
+
+  /* Numbers read as money: tabular mono everywhere they matter */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
 
-/* Custom animation classes */
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+/* ---- Utilities ------------------------------------------------------ */
+
+@utility text-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-brand) 0%,
+    var(--color-money) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 3s ease-in-out infinite;
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-.animate-bounce-subtle {
-  animation: bounce-subtle 2s ease-in-out infinite;
+@utility surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
-.animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
+/* Reserved brand gradient for the few accent moments that earn it */
+@utility brand-gradient {
+  background-image: linear-gradient(135deg, #9945ff 0%, #7c3aed 50%, #14f195 160%);
 }
 
-.animate-gradient-shift {
-  background-size: 200% 200%;
-  animation: gradient-shift 5s ease infinite;
+@utility glow-brand {
+  box-shadow:
+    0 0 0 1px rgba(153, 69, 255, 0.25),
+    0 12px 40px -12px rgba(153, 69, 255, 0.55);
 }
 
-.hover-rotate:hover {
-  transform: rotate(3deg) scale(1.02);
-  transition: transform 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-5px);
-  transition: transform 0.3s ease;
-}
-
-/* Custom keyframes */
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-@keyframes pulse-subtle {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-@keyframes bounce-subtle {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes glow {
-  from {
-    box-shadow: 0 0 5px rgba(79, 70, 229, 0.2);
-  }
-  to {
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
-  }
-}
+/* ---- Keyframes (used sparingly) ------------------------------------ */
 
 @keyframes gradient-shift {
-  0% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
     background-position: 100% 50%;
   }
+}
+
+@keyframes float {
+  0%,
   100% {
-    background-position: 0% 50%;
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient-shift,
+  .animate-float {
+    animation: none;
+  }
+}
+
+/* ---- Markdown (bio / descriptions) -------------------------------- */
+.markdown {
+  color: var(--color-foreground);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.markdown > * + * {
+  margin-top: 0.75rem;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.markdown h1 {
+  font-size: 1.35rem;
+}
+.markdown h2 {
+  font-size: 1.15rem;
+}
+.markdown h3 {
+  font-size: 1.02rem;
+}
+.markdown a {
+  color: var(--color-brand-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.markdown a:hover {
+  color: var(--color-brand);
+}
+.markdown ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.markdown ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.markdown li {
+  margin-top: 0.25rem;
+}
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-surface-2);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.markdown pre {
+  background: var(--color-surface-2);
+  padding: 0.9rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+.markdown pre code {
+  background: transparent;
+  padding: 0;
+}
+.markdown blockquote {
+  border-left: 2px solid var(--color-brand);
+  padding-left: 0.9rem;
+  color: var(--color-muted-foreground);
+}
+.markdown strong {
+  color: var(--color-foreground);
+  font-weight: 600;
+}
+.markdown hr {
+  border-color: var(--color-border);
+  margin: 1.25rem 0;
+}
+
+/* Keep downloaded share-card text legible on export */
 .download-text {
-  /* Ensures name text is visible in downloaded version */
-  color: white !important;
+  color: #fff !important;
   background: none !important;
-  -webkit-text-fill-color: white !important;
+  -webkit-text-fill-color: #fff !important;
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }

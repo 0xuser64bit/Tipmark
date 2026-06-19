@@ -36,12 +36,13 @@ DAOnation bridges the gap between content creators and their supporters in the W
 - **Frontend Framework**: Next.js 15 (App Router)
 - **UI Library**: React 18
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS, shadcn/ui, Radix UI
+- **Styling**: Tailwind CSS v4 (CSS-first `@theme`), shadcn/ui, Radix UI
+- **Fonts**: Geist Sans + Geist Mono (`next/font/local`)
 - **Authentication**: NextAuth.js
 - **Database**: Prisma ORM
 - **Blockchain Integration**: Solana Web3.js
 - **Wallet Adapters**: Solana Wallet Adapter
-- **Animation**: Framer Motion, React Spring, tsParticles
+- **Animation**: Motion (`motion/react`)
 - **Charts**: Recharts
 - **Deployment**: Vercel
 
@@ -112,6 +113,10 @@ EDGE_STORE_ACCESS_KEY=
 EDGE_STORE_SECRET_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+
+# Solana RPC (recommended: a dedicated mainnet RPC such as Helius/QuickNode).
+# Falls back to the public mainnet cluster when empty.
+NEXT_PUBLIC_SOLANA_RPC_URL=
 ```
 
 ## 💻 Usage
