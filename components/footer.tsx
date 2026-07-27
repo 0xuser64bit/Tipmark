@@ -25,7 +25,7 @@ export function Footer() {
             <Twitter className="h-4 w-4" />
           </a>
           <a
-            href="https://github.com/user-64bit"
+            href="https://github.com/0xuser64bit"
             className="text-muted-foreground transition-colors hover:text-foreground"
             aria-label="GitHub"
             target="_blank"
