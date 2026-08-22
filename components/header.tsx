@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { AppNav } from "./app-nav";
 import { DropdownSettings } from "./dropdown";
-import { WalletButton } from "./ui/wallet-button";
+import { StylishWalletButton as WalletButton } from "./ui/wallet-button";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { LayoutDashboard } from "lucide-react";
