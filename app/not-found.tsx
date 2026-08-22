@@ -5,29 +5,25 @@ import { Compass, Home } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-grid px-4 text-center">
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-1/3 -z-10 mx-auto h-48 w-72 rounded-full bg-brand/10 blur-3xl"
-      />
-      <Logo className="mb-8" />
-      <p className="text-gradient font-mono text-7xl font-semibold">404</p>
-      <h1 className="mt-4 text-xl font-semibold tracking-tight">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 text-center">
+      <Logo className="mb-10" />
+      <p className="font-mono text-8xl font-bold tracking-tighter text-foreground/10">404</p>
+      <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
         This page went off-chain
       </h1>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+      <p className="mt-3 max-w-sm text-[15px] text-muted-foreground leading-relaxed">
         The link may be broken, or the page may have moved. Let&apos;s get you
         back on track.
       </p>
-      <div className="mt-7 flex gap-3">
-        <Button asChild variant="brand">
+      <div className="mt-8 flex gap-3">
+        <Button asChild variant="brand" className="h-11 px-6">
           <Link href="/">
-            <Home className="h-4 w-4" /> Home
+            <Home className="h-4 w-4 mr-1.5" /> Home
           </Link>
         </Button>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="h-11 px-6">
           <Link href="/about-us">
-            <Compass className="h-4 w-4" /> Learn more
+            <Compass className="h-4 w-4 mr-1.5 opacity-70" /> Learn more
           </Link>
         </Button>
       </div>
