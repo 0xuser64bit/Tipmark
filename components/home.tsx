@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "motion/react";
 import { BadgeCheck, Check, Share2, Users } from "lucide-react";
 import { useState } from "react";
@@ -65,35 +64,38 @@ export default function Home({
     <div className="flex min-h-screen flex-col">
       <Header />
 
-      <main className="mx-auto w-full max-w-6xl flex-grow px-4 pb-20 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl flex-grow px-4 pb-24 sm:px-6">
         {isOwner && (
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand/5 px-4 py-2.5 text-sm">
+          <div className="mt-6 flex items-center justify-between gap-3 rounded-lg border border-brand-surface bg-brand-surface/50 px-4 py-2.5 text-sm">
             <span className="text-muted-foreground">
               This is your public page — here&apos;s how supporters see you.
             </span>
-            <code className="hidden shrink-0 font-mono text-xs text-brand-muted sm:block">
+            <code className="hidden shrink-0 font-mono text-[13px] text-brand-muted sm:block">
               daonation.xyz/{username}
             </code>
           </div>
         )}
 
-        {/* Cover + avatar */}
+        {/* ── Cover & Avatar ──────────────────────────────────────── */}
         <motion.div
-          className="relative mt-4"
+          className="relative mt-6 sm:mt-8"
           variants={fadeUp}
           initial="hidden"
           animate="show"
         >
-          <div className="relative h-44 w-full overflow-hidden rounded-2xl border border-border sm:h-60">
+          {/* Taller cover image for premium feel */}
+          <div className="relative h-52 w-full overflow-hidden rounded-2xl border border-border sm:h-72">
             <img
               src={coverImage || "/dummy-cover.png"}
               alt=""
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent" />
           </div>
-          <div className="absolute -bottom-12 left-5 sm:-bottom-14">
-            <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-background bg-surface sm:h-28 sm:w-28">
+          
+          {/* Avatar pulled up to overlap cover more intentionally */}
+          <div className="absolute -bottom-14 left-6 sm:-bottom-16">
+            <div className="h-28 w-28 overflow-hidden rounded-[1.25rem] border-[4px] border-background bg-surface shadow-lg sm:h-32 sm:w-32">
               <img
                 src={profileImage || "/sol.png"}
                 alt={displayName}
@@ -103,23 +105,18 @@ export default function Home({
           </div>
         </motion.div>
 
-        {/* Identity */}
-        <div className="mt-16 flex flex-col gap-4 sm:mt-20 sm:flex-row sm:items-end sm:justify-between">
+        {/* ── Identity & Stats ────────────────────────────────────── */}
+        <div className="mt-20 flex flex-col gap-5 sm:mt-24 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                {displayName}
-              </h1>
-              <span className="inline-flex items-center gap-1 rounded-full border border-money/30 bg-money/10 px-2 py-0.5 text-[11px] font-medium text-money">
-                <BadgeCheck className="h-3 w-3" /> On-chain
-              </span>
-            </div>
+            <h1 className="text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
+              {displayName}
+            </h1>
             <p className="mt-1 font-mono text-sm text-muted-foreground">
               @{username}
             </p>
             {stats && stats.supporters > 0 && (
-              <p className="mt-2 inline-flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-                <Users className="h-3.5 w-3.5 text-brand" />
+              <p className="mt-3.5 inline-flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                <Users className="h-4 w-4 text-brand-muted" />
                 <span className="font-medium text-foreground">
                   {stats.supporters}
                 </span>
@@ -142,7 +139,7 @@ export default function Home({
             <Button variant="outline" onClick={handleCopy}>
               {copied ? (
                 <>
-                  <Check className="h-4 w-4" /> Copied
+                  <Check className="h-4 w-4 text-money" /> Copied
                 </>
               ) : (
                 <>
@@ -153,18 +150,18 @@ export default function Home({
           </div>
         </div>
 
-        {/* Content */}
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-5">
-                <div className="markdown">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {description}
-                  </ReactMarkdown>
-                </div>
-              </CardContent>
-            </Card>
+        {/* ── Content Grid ────────────────────────────────────────── */}
+        <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-8">
+            {/* Unboxed Bio */}
+            {description && (
+              <div className="markdown text-base">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {description}
+                </ReactMarkdown>
+              </div>
+            )}
+            
             <SocialsCard
               x_username={x_username}
               instagram_username={instagram_username}

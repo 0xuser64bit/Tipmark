@@ -14,12 +14,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AddressChip } from "./ui/address-chip";
-import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { LoadingButton } from "./ui/loading-button";
 import { Spinner } from "./spinner";
 import { formatUsd } from "@/lib/format";
 import { useSolPrice } from "@/lib/use-sol-price";
+import { cn } from "@/lib/utils";
 
 const PRESET_AMOUNTS = [0.1, 0.5, 1, 5];
 
@@ -73,7 +73,6 @@ export const SupportUserCard = ({
   ) => {
     e.preventDefault();
 
-    // Graceful connect: open the wallet modal instead of failing silently.
     if (!connection || !publicKey) {
       setVisible(true);
       return;
@@ -153,25 +152,36 @@ export const SupportUserCard = ({
       : null;
 
   return (
-    <Card className="overflow-hidden p-0">
-      <div className="border-b border-border bg-surface-2/40 p-5">
-        <div className="flex items-center gap-2 text-money">
-          <Wallet className="h-4 w-4" />
-          <span className="text-xs font-medium uppercase tracking-wide">
-            Support in SOL
-          </span>
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      {/* Card header — unified surface, no inner border-bottom section */}
+      <div className="px-5 pt-5 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+              Support in SOL
+            </p>
+            <h2 className="mt-1.5 text-[15px] font-semibold leading-tight tracking-tight">
+              Send {displayName} some crypto
+            </h2>
+          </div>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-money-surface text-money">
+            <Wallet className="h-3.5 w-3.5" />
+          </div>
         </div>
-        <h2 className="mt-2 text-lg font-semibold tracking-tight">
-          Send {displayName} some crypto
-        </h2>
-        <div className="mt-3 flex items-center justify-between gap-2 text-sm text-muted-foreground">
+
+        <div className="mt-3 flex items-center gap-2 text-[13px] text-muted-foreground">
           <span>Goes directly to</span>
           <AddressChip address={solana_address} />
         </div>
       </div>
 
+      {/* Divider */}
+      <div className="mx-5 h-px bg-border" />
+
+      {/* Amount section */}
       <div className="space-y-4 p-5">
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {/* Preset amounts */}
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {PRESET_AMOUNTS.map((amount) => {
             const usd = solPrice != null ? formatUsd(amount * solPrice) : null;
             const loadingThis = isLoading && pendingAmount === amount;
@@ -181,17 +191,26 @@ export const SupportUserCard = ({
                 type="button"
                 disabled={isLoading}
                 onClick={(e) => handleSupportUser(e, amount)}
-                className="group flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border bg-surface py-3 transition-all hover:border-brand/50 hover:bg-brand/5 disabled:opacity-50"
+                className={cn(
+                  "group flex flex-col items-center justify-center gap-0.5",
+                  "rounded-lg border border-border bg-surface",
+                  "py-3 px-2",
+                  "transition-all duration-150",
+                  "hover:border-border-emphasis hover:bg-surface-2",
+                  "active:scale-[0.98]",
+                  "disabled:opacity-50 disabled:pointer-events-none",
+                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                )}
               >
                 {loadingThis ? (
                   <Spinner size="sm" />
                 ) : (
                   <>
-                    <span className="font-mono text-sm font-semibold tabular-nums">
+                    <span className="font-mono text-[13px] font-semibold tabular-nums">
                       {amount} SOL
                     </span>
                     {usd && (
-                      <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+                      <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
                         {usd}
                       </span>
                     )}
@@ -202,14 +221,16 @@ export const SupportUserCard = ({
           })}
         </div>
 
-        <div className="relative flex items-center">
+        {/* Divider with label */}
+        <div className="relative flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="px-3 text-[11px] uppercase tracking-wide text-muted-foreground">
+          <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
             or custom
           </span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
+        {/* Custom amount form */}
         <form onSubmit={(e) => handleSupportUser(e)} className="space-y-2">
           <div className="flex gap-2">
             <div className="relative flex-grow">
@@ -221,34 +242,35 @@ export const SupportUserCard = ({
                 placeholder="0.00"
                 value={customAmount}
                 onChange={(e) => setCustomAmount(e.target.value)}
-                className="h-11 pr-14 font-mono tabular-nums"
+                className="h-10 pr-14 font-mono tabular-nums"
                 disabled={isLoading}
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-muted-foreground">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[11px] font-medium text-muted-foreground">
                 SOL
               </span>
             </div>
             <LoadingButton
               type="submit"
               variant="brand"
-              className="h-11 px-5"
+              className="h-10 px-5 shrink-0"
               isLoading={isLoading && pendingAmount === -1}
             >
               {publicKey ? "Send" : "Connect"}
             </LoadingButton>
           </div>
           {customUsd && (
-            <p className="pl-1 font-mono text-xs text-muted-foreground tabular-nums">
+            <p className="pl-1 font-mono text-[11px] text-muted-foreground tabular-nums">
               ≈ {customUsd}
             </p>
           )}
         </form>
 
-        <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-xs text-muted-foreground">
-          <ShieldCheck className="h-3.5 w-3.5 text-money" />
+        {/* Trust line */}
+        <div className="flex items-center justify-center gap-1.5 pt-0.5 text-center text-[11px] text-muted-foreground">
+          <ShieldCheck className="h-3 w-3 text-money" />
           <span>Non-custodial · settled on Solana</span>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
