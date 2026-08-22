@@ -12,7 +12,7 @@ export const LandingHeader = () => {
         <>
           <Link
             href="/about-us"
-            className="hidden px-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
+            className="hidden px-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:block"
           >
             About
           </Link>
