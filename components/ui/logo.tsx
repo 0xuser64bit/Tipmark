@@ -5,32 +5,33 @@ export function LogoMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-[0.6rem] brand-gradient shadow-[0_4px_16px_-4px_rgba(153,69,255,0.6)]",
-        "h-8 w-8",
+        "relative inline-flex shrink-0 items-center justify-center rounded-[0.55rem]",
+        "brand-gradient",
+        "h-7 w-7",
         className,
       )}
       aria-hidden="true"
     >
       <svg
-        width="18"
-        height="18"
+        width="16"
+        height="16"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Rising value — two stacked chevrons */}
+        {/* Rising value — double chevron mark */}
         <path
           d="M4.5 13.5L12 7l7.5 6.5"
           stroke="white"
-          strokeWidth="2.4"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
           d="M4.5 18L12 11.5l7.5 6.5"
           stroke="white"
-          strokeOpacity="0.45"
-          strokeWidth="2.4"
+          strokeOpacity="0.4"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -54,14 +55,14 @@ export function Logo({
     <Link
       href={href}
       className={cn(
-        "group inline-flex items-center gap-2.5 transition-opacity hover:opacity-90",
+        "group inline-flex items-center gap-2 transition-opacity hover:opacity-85",
         className,
       )}
     >
       <LogoMark className={markClassName} />
       {showWordmark && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">
-          DAO<span className="text-muted-foreground">nation</span>
+        <span className="text-[15px] font-semibold tracking-[-0.025em] text-foreground">
+          DAO<span className="text-muted-foreground font-normal">nation</span>
         </span>
       )}
     </Link>

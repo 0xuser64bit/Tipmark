@@ -14,7 +14,8 @@ interface AppNavProps {
 
 /**
  * The single navigation shell for every DAOnation surface.
- * Logo on the left, composable actions on the right. Glassy, sticky, calm.
+ * Logo on the left, composable actions on the right.
+ * Glassy background on scroll; clean border separation.
  */
 export function AppNav({
   right,
@@ -27,21 +28,22 @@ export function AppNav({
   return (
     <header
       className={cn(
-        "z-40 w-full bg-background/70 backdrop-blur-xl",
+        "z-40 w-full",
+        "bg-background/80 backdrop-blur-xl",
         sticky && "sticky top-0",
-        border && "border-b border-border/70",
+        border && "border-b border-border/60",
         className,
       )}
     >
       <div
         className={cn(
-          "mx-auto flex h-16 items-center justify-between px-4 sm:px-6",
+          "mx-auto flex h-14 items-center justify-between px-4 sm:px-6",
           maxWidth,
         )}
       >
         <Logo href={logoHref} />
         {right && (
-          <div className="flex items-center gap-2 sm:gap-3">{right}</div>
+          <div className="flex items-center gap-2 sm:gap-2.5">{right}</div>
         )}
       </div>
     </header>
