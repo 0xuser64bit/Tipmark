@@ -1,15 +1,19 @@
-/* Override wallet adapter modal styles for better aesthetics */
+/* Wallet adapter overrides — aligned with DAOnation design system */
+
 .wallet-adapter-modal-wrapper {
-  background-color: rgba(24, 24, 27, 0.95) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(63, 63, 70, 0.5) !important;
-  border-radius: 16px !important;
+  background-color: #16161f !important;
+  box-shadow:
+    0 0 0 1px rgba(30, 30, 44, 1),
+    0 24px 48px -12px rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid #1e1e2c !important;
+  border-radius: 14px !important;
 }
 
 .wallet-adapter-modal-title {
-  color: #f4f4f5 !important;
+  color: #f0f0f5 !important;
   font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
 }
 
 .wallet-adapter-modal-content {
@@ -21,114 +25,106 @@
 }
 
 .wallet-adapter-modal-list-more {
-  color: #9945ff !important;
+  color: #a47af8 !important;
 }
 
 .wallet-adapter-modal-list-more:hover {
-  color: #b07cff !important;
+  color: #7c4ef3 !important;
 }
 
 .wallet-adapter-modal-button-close {
-  background-color: rgba(63, 63, 70, 0.5) !important;
+  background-color: rgba(30, 30, 44, 0.8) !important;
+  border: 1px solid #1e1e2c !important;
 }
 
 .wallet-adapter-modal-button-close:hover {
-  background-color: rgba(82, 82, 91, 0.7) !important;
+  background-color: rgba(48, 48, 74, 0.8) !important;
 }
 
-/* The trigger button shown in app navs */
+/* Trigger button in nav */
 .wallet-adapter-button-trigger {
-  background-color: #16161d !important;
-  border: 1px solid #23232b !important;
+  background-color: #0f0f18 !important;
+  border: 1px solid #1e1e2c !important;
   height: 36px !important;
   border-radius: 8px !important;
-  color: #fafafa !important;
+  color: #f0f0f5 !important;
   font-weight: 500 !important;
-  font-size: 14px !important;
-  padding: 0 16px !important;
+  font-size: 13px !important;
+  padding: 0 14px !important;
   line-height: 1 !important;
+  transition: border-color 0.15s ease, background-color 0.15s ease !important;
 }
 
 .wallet-adapter-button-trigger:hover {
-  background-color: #1a1a22 !important;
-  border-color: #2a2a34 !important;
+  background-color: #16161f !important;
+  border-color: #30304a !important;
 }
 
 .wallet-adapter-button-trigger.wallet-connected {
-  background-color: rgba(153, 69, 255, 0.14) !important;
-  border-color: rgba(153, 69, 255, 0.35) !important;
-  color: #c9a8ff !important;
+  background-color: rgba(124, 78, 243, 0.1) !important;
+  border-color: rgba(124, 78, 243, 0.3) !important;
+  color: #a47af8 !important;
 }
 
 .wallet-adapter-button-trigger.wallet-connected:hover {
-  background-color: rgba(153, 69, 255, 0.2) !important;
+  background-color: rgba(124, 78, 243, 0.16) !important;
 }
 
-/* Style wallet buttons in the modal */
+/* Wallet option buttons in modal */
 .wallet-adapter-button {
-  background-color: rgba(39, 39, 42, 0.5) !important;
-  border: 1px solid rgba(63, 63, 70, 0.5) !important;
-  transition: all 0.2s ease-in-out !important;
+  background-color: rgba(15, 15, 24, 0.6) !important;
+  border: 1px solid #1e1e2c !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
   border-radius: 8px !important;
   height: 48px !important;
   font-weight: 500 !important;
+  color: #f0f0f5 !important;
 }
 
 .wallet-adapter-button:hover {
-  background-color: rgba(63, 63, 70, 0.7) !important;
-  border-color: rgba(82, 82, 91, 0.7) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.5) !important;
+  background-color: #16161f !important;
+  border-color: #30304a !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .wallet-adapter-button:active {
-  transform: translateY(0) !important;
+  transform: none !important;
 }
 
-/* Custom animation for the modal */
+/* Modal animation */
 .wallet-adapter-modal-wrapper {
-  animation: modalFadeIn 0.3s ease forwards !important;
+  animation: walletModalIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+@keyframes walletModalIn {
+  from { opacity: 0; transform: scale(0.97) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Override the wallet dropdown menu */
+/* Dropdown list */
 .wallet-adapter-dropdown-list {
-  background-color: rgba(24, 24, 27, 0.95) !important;
-  border: 1px solid rgba(63, 63, 70, 0.5) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
-  backdrop-filter: blur(10px) !important;
+  background-color: #16161f !important;
+  border: 1px solid #1e1e2c !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(16px) !important;
   overflow: hidden !important;
-  animation: dropdownFadeIn 0.2s ease forwards !important;
+  animation: walletDropIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
 }
 
-@keyframes dropdownFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes walletDropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .wallet-adapter-dropdown-list-item {
-  padding: 12px 16px !important;
-  color: #f4f4f5 !important;
+  padding: 11px 16px !important;
+  color: #f0f0f5 !important;
   background-color: transparent !important;
-  transition: all 0.15s ease !important;
-  border-top: 1px solid rgba(63, 63, 70, 0.5) !important;
+  transition: background-color 0.12s ease !important;
+  border-top: 1px solid #1e1e2c !important;
+  font-size: 13px !important;
 }
 
 .wallet-adapter-dropdown-list-item:first-child {
@@ -136,6 +132,6 @@
 }
 
 .wallet-adapter-dropdown-list-item:hover {
-  background-color: rgba(63, 63, 70, 0.5) !important;
-  color: white !important;
+  background-color: #1e1e2c !important;
+  color: #f0f0f5 !important;
 }

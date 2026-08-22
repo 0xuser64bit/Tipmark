@@ -2,69 +2,87 @@
 @import "tw-animate-css";
 
 /*
-  DAOnation design system — Solana-native neon, dark-only.
-  Purple (#9945FF) = brand / action. Green (#14F195) = money / confirmed.
-  Mono numerals for on-chain credibility. Calm, premium, intentional.
+  DAOnation design system — Protocol Finance aesthetic.
+  Solana-native palette used with restraint:
+    Brand (#7c4ef3) = primary actions & logo only.
+    Money (#10d97e) = SOL amounts, confirmed states only.
+  Flat canvas. No ambient glow. Color earns its place.
 */
 
 @theme {
-  /* Brand */
-  --color-brand: #9945ff;
+  /* ── Brand ───────────────────────────────────────────────────────── */
+  --color-brand:            #7c4ef3;
+  --color-brand-hover:      #6f44e0;
   --color-brand-foreground: #ffffff;
-  --color-brand-muted: #b07cff;
-  --color-money: #14f195;
-  --color-money-foreground: #04130c;
+  --color-brand-muted:      #a47af8;
+  --color-brand-surface:    rgba(124, 78, 243, 0.09);
 
-  /* Core surfaces (dark-only) */
-  --color-canvas: #0a0a0f;
-  --color-background: #0a0a0f;
-  --color-foreground: #fafafa;
-  --color-surface: #121218;
-  --color-surface-2: #1a1a22;
+  /* ── Money / SOL / Success ───────────────────────────────────────── */
+  --color-money:            #10d97e;
+  --color-money-foreground: #031a0f;
+  --color-money-surface:    rgba(16, 217, 126, 0.08);
 
-  --color-card: #121218;
-  --color-card-foreground: #fafafa;
-  --color-popover: #16161d;
-  --color-popover-foreground: #fafafa;
+  /* ── Canvas & surfaces (dark-only, flat) ────────────────────────── */
+  --color-canvas:           #080810;
+  --color-background:       #080810;
+  --color-foreground:       #f0f0f5;
 
-  --color-primary: #9945ff;
+  --color-surface:          #0f0f18;
+  --color-surface-2:        #16161f;
+
+  --color-card:             #0f0f18;
+  --color-card-foreground:  #f0f0f5;
+  --color-popover:          #16161f;
+  --color-popover-foreground: #f0f0f5;
+
+  /* ── Semantic roles ──────────────────────────────────────────────── */
+  --color-primary:          #7c4ef3;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #1a1a22;
-  --color-secondary-foreground: #fafafa;
-  --color-muted: #1a1a22;
-  --color-muted-foreground: #9b9ba6;
-  --color-accent: #23232d;
-  --color-accent-foreground: #ffffff;
-  --color-destructive: #f43f5e;
+
+  --color-secondary:        #16161f;
+  --color-secondary-foreground: #f0f0f5;
+
+  --color-muted:            #16161f;
+  --color-muted-foreground: #7a7a94;
+
+  --color-accent:           #1e1e2a;
+  --color-accent-foreground: #f0f0f5;
+
+  --color-destructive:      #e54060;
   --color-destructive-foreground: #ffffff;
 
-  --color-border: #23232b;
-  --color-input: #2a2a34;
-  --color-ring: #9945ff;
+  /* ── Borders ────────────────────────────────────────────────────── */
+  --color-border:           #1e1e2c;
+  --color-border-emphasis:  #30304a;
+  --color-input:            #1e1e2c;
+  --color-ring:             #7c4ef3;
 
-  /* Chart palette */
-  --color-chart-1: #9945ff;
-  --color-chart-2: #14f195;
-  --color-chart-3: #22d3ee;
-  --color-chart-4: #f59e0b;
-  --color-chart-5: #f43f5e;
+  /* ── Chart palette ───────────────────────────────────────────────── */
+  --color-chart-1:  #7c4ef3;
+  --color-chart-2:  #10d97e;
+  --color-chart-3:  #22d3ee;
+  --color-chart-4:  #f59e0b;
+  --color-chart-5:  #e54060;
 
-  /* Radius scale */
-  --radius: 0.75rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* ── Radius scale ────────────────────────────────────────────────── */
+  --radius:    0.625rem;
+  --radius-sm: calc(var(--radius) - 3px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 3px);
+  --radius-xl: calc(var(--radius) + 6px);
 
-  /* Typography */
+  /* ── Typography ──────────────────────────────────────────────────── */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", SFMono-Regular,
     Menlo, monospace;
 
-  /* Motion */
+  /* ── Motion ──────────────────────────────────────────────────────── */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ── Base ──────────────────────────────────────────────────────────── */
 
 @layer base {
   :root {
@@ -73,10 +91,12 @@
 
   * {
     border-color: var(--color-border);
+    box-sizing: border-box;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
@@ -84,39 +104,48 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    /* Subtle ambient brand glow at the top — calm, not busy */
-    background-image:
-      radial-gradient(
-        60rem 40rem at 50% -20%,
-        rgba(153, 69, 255, 0.08),
-        transparent 60%
-      ),
-      radial-gradient(
-        50rem 30rem at 100% 0%,
-        rgba(20, 241, 149, 0.05),
-        transparent 55%
-      );
-    background-attachment: fixed;
+    font-size: 15px;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+    /* Flat canvas — no ambient gradients */
   }
 
+  /* Scrollbar */
+  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--color-border-emphasis); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #44445e; }
+
   ::selection {
-    background: rgba(153, 69, 255, 0.32);
+    background: rgba(124, 78, 243, 0.28);
     color: #fff;
   }
 
-  /* Numbers read as money: tabular mono everywhere they matter */
+  /* Heading defaults — tight tracking */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  /* Tabular numerals on all mono-rendered numbers */
   .tnum {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
 }
 
-/* ---- Utilities ------------------------------------------------------ */
+/* ── Utilities ─────────────────────────────────────────────────────── */
 
+/* Brand gradient — reserved for logo mark & primary CTA button only */
+@utility brand-gradient {
+  background-image: linear-gradient(135deg, #7c4ef3 0%, #5e35d4 60%, #10d97e 200%);
+}
+
+/* Text gradient — for exceptional hero moments only */
 @utility text-gradient {
   background-image: linear-gradient(
     135deg,
-    var(--color-brand) 0%,
+    var(--color-brand-muted) 0%,
     var(--color-money) 100%
   );
   -webkit-background-clip: text;
@@ -124,55 +153,42 @@
   color: transparent;
 }
 
+/* Subtle grid overlay for cards/hero areas */
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
+    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
+/* Surface shorthand */
 @utility surface {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
 }
 
-/* Reserved brand gradient for the few accent moments that earn it */
-@utility brand-gradient {
-  background-image: linear-gradient(135deg, #9945ff 0%, #7c3aed 50%, #14f195 160%);
-}
-
+/* Brand glow — used only on primary CTA button */
 @utility glow-brand {
   box-shadow:
-    0 0 0 1px rgba(153, 69, 255, 0.25),
-    0 12px 40px -12px rgba(153, 69, 255, 0.55);
+    0 0 0 1px rgba(124, 78, 243, 0.2),
+    0 8px 32px -8px rgba(124, 78, 243, 0.45);
 }
 
-/* ---- Keyframes (used sparingly) ------------------------------------ */
-
-@keyframes gradient-shift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
+/* ── Keyframes ─────────────────────────────────────────────────────── */
 
 @keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* Gradient shift kept only for the UserCard share card stripe */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
 }
 
 .animate-gradient-shift {
@@ -180,21 +196,22 @@
   animation: gradient-shift 6s ease infinite;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-gradient-shift,
-  .animate-float {
+  .animate-pulse-dot {
     animation: none;
   }
 }
 
-/* ---- Markdown (bio / descriptions) -------------------------------- */
+/* ── Markdown (bio / descriptions) ───────────────────────────────── */
+
 .markdown {
   color: var(--color-foreground);
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   line-height: 1.7;
 }
 .markdown > * + * {
@@ -204,25 +221,21 @@
 .markdown h2,
 .markdown h3 {
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
-.markdown h1 {
-  font-size: 1.35rem;
-}
-.markdown h2 {
-  font-size: 1.15rem;
-}
-.markdown h3 {
-  font-size: 1.02rem;
-}
+.markdown h1 { font-size: 1.3rem; }
+.markdown h2 { font-size: 1.1rem; }
+.markdown h3 { font-size: 1rem; }
 .markdown a {
   color: var(--color-brand-muted);
   text-decoration: underline;
   text-underline-offset: 2px;
+  text-decoration-color: rgba(164, 122, 248, 0.4);
 }
 .markdown a:hover {
   color: var(--color-brand);
+  text-decoration-color: var(--color-brand);
 }
 .markdown ul {
   list-style: disc;
@@ -232,21 +245,21 @@
   list-style: decimal;
   padding-left: 1.25rem;
 }
-.markdown li {
-  margin-top: 0.25rem;
-}
+.markdown li { margin-top: 0.25rem; }
 .markdown code {
   font-family: var(--font-mono);
-  font-size: 0.85em;
+  font-size: 0.82em;
   background: var(--color-surface-2);
-  padding: 0.1em 0.35em;
+  padding: 0.1em 0.38em;
   border-radius: 4px;
+  letter-spacing: -0.01em;
 }
 .markdown pre {
   background: var(--color-surface-2);
   padding: 0.9rem;
   border-radius: 0.5rem;
   overflow-x: auto;
+  border: 1px solid var(--color-border);
 }
 .markdown pre code {
   background: transparent;
@@ -266,10 +279,10 @@
   margin: 1.25rem 0;
 }
 
-/* Keep downloaded share-card text legible on export */
+/* ── Share card export ───────────────────────────────────────────── */
 .download-text {
   color: #fff !important;
   background: none !important;
   -webkit-text-fill-color: #fff !important;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
