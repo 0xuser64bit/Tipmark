@@ -57,7 +57,7 @@ const ChartTooltip = ({
     return (
       <div className="rounded-lg border border-border bg-popover px-3 py-2 shadow-lg">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-mono text-sm font-semibold tabular-nums">
+        <p className="font-mono text-sm font-semibold tabular-nums text-money">
           {payload[0].value} SOL
         </p>
       </div>
@@ -85,17 +85,26 @@ export default function Dashboard({
     priceUsd != null ? `≈ ${formatUsd(sol * priceUsd)}` : "—";
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your support, on-chain and in real time.
-        </p>
+    <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      {/* ── Header ────────────────────────────────────────────── */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">
+            {new Date().toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
+          <h1 className="text-3xl font-bold tracking-[-0.03em]">
+            Overview
+          </h1>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/home">
+            View public page
+            <ArrowUpRight className="h-4 w-4 ml-1.5" />
+          </Link>
+        </Button>
       </div>
 
-      {/* Stats */}
+      {/* ── Stats ─────────────────────────────────────────────── */}
       <motion.div
         variants={staggerContainer(0.08)}
         initial="hidden"
@@ -106,7 +115,7 @@ export default function Dashboard({
           <StatCard
             label="Total earned"
             accent="money"
-            icon={<Coins className="h-5 w-5" />}
+            icon={<Coins className="h-4 w-4" />}
             value={
               <span className="font-mono text-money">
                 <CountUp value={totalEarning} decimals={2} suffix=" SOL" />
@@ -118,7 +127,7 @@ export default function Dashboard({
         <motion.div variants={fadeUp}>
           <StatCard
             label="Supporters"
-            icon={<Users className="h-5 w-5" />}
+            icon={<Users className="h-4 w-4" />}
             value={<CountUp value={uniqueSupporters} decimals={0} />}
             sub={`${totalTransactions} contribution${totalTransactions === 1 ? "" : "s"}`}
           />
@@ -126,7 +135,7 @@ export default function Dashboard({
         <motion.div variants={fadeUp}>
           <StatCard
             label="Last 30 days"
-            icon={<Calendar className="h-5 w-5" />}
+            icon={<Calendar className="h-4 w-4" />}
             value={
               <span className="font-mono">
                 <CountUp value={last30daysEarning} decimals={2} suffix=" SOL" />
@@ -138,7 +147,7 @@ export default function Dashboard({
         <motion.div variants={fadeUp}>
           <StatCard
             label="Last 7 days"
-            icon={<TrendingUp className="h-5 w-5" />}
+            icon={<TrendingUp className="h-4 w-4" />}
             value={
               <span className="font-mono">
                 <CountUp value={last7daysEarning} decimals={2} suffix=" SOL" />
@@ -149,77 +158,75 @@ export default function Dashboard({
         </motion.div>
       </motion.div>
 
-      {/* Chart + transactions */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      {/* ── Chart & Activity ──────────────────────────────────── */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <Card ref={chartRef}>
-          <CardHeader>
-            <CardTitle className="text-base">Earnings overview</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle>Earnings history</CardTitle>
           </CardHeader>
-          <CardContent className="pl-1">
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={chartData}>
-                <defs>
-                  <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#9945ff" stopOpacity={0.95} />
-                    <stop offset="100%" stopColor="#9945ff" stopOpacity={0.35} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  vertical={false}
-                  stroke="rgba(255,255,255,0.06)"
-                />
-                <XAxis
-                  dataKey="month"
-                  stroke="#6b6b78"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#6b6b78"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  width={44}
-                  tickFormatter={(v) => `${v}`}
-                />
-                <Tooltip
-                  content={<ChartTooltip />}
-                  cursor={{ fill: "rgba(153,69,255,0.08)" }}
-                />
-                <Bar
-                  dataKey="total"
-                  fill="url(#barFill)"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={44}
-                  isAnimationActive={chartInView}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="pl-1 pt-4">
+            <div className="h-[280px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
+                      {/* Switched to money color for financial data */}
+                      <stop offset="0%" stopColor="#10d97e" stopOpacity={0.9} />
+                      <stop offset="100%" stopColor="#10d97e" stopOpacity={0.2} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--color-border)"
+                    strokeDasharray="4 4"
+                  />
+                  <XAxis
+                    dataKey="month"
+                    stroke="#545468"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    dy={10}
+                  />
+                  <YAxis
+                    stroke="#545468"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `${v}`}
+                    width={48}
+                  />
+                  <Tooltip
+                    content={<ChartTooltip />}
+                    cursor={{ fill: "var(--color-surface-2)" }}
+                  />
+                  <Bar
+                    dataKey="total"
+                    fill="url(#barFill)"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={40}
+                    isAnimationActive={chartInView}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recent support</CardTitle>
+        <Card className="flex flex-col">
+          <CardHeader className="pb-2">
+            <CardTitle>Recent support</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 pt-4">
             {recentTransactions.length === 0 ? (
               <EmptyState
                 icon={<Inbox className="h-5 w-5" />}
                 title="No support yet"
                 description="Share your link and your first contributions will show up here."
-                action={
-                  <Button asChild variant="brand" size="sm">
-                    <Link href="/home">
-                      View your page
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                }
+                className="h-full border-none bg-transparent"
               />
             ) : (
-              <ul className="divide-y divide-border">
+              <ul className="-mx-2 space-y-1">
                 {recentTransactions.map((t, i) => (
                   <motion.li
                     key={t.hash}
@@ -231,23 +238,21 @@ export default function Dashboard({
                       href={`https://solscan.io/tx/${t.hash}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-surface-2/40"
+                      className="group flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-2"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-money/10 text-money">
-                        <Coins className="h-4 w-4" />
-                      </div>
                       <div className="min-w-0 flex-1">
-                        <AddressChip address={t.fromPublicKey} />
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(t.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <AddressChip address={t.fromPublicKey} />
+                          <span className="text-[11px] text-muted-foreground">
+                            {new Date(t.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <span className="font-mono text-sm font-semibold text-money tabular-nums">
+                        <span className="font-mono text-[13px] font-semibold text-money tabular-nums">
                           +{t.amount} SOL
                         </span>
                         <StatusBadge status={t.status} />

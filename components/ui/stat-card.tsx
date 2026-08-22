@@ -22,36 +22,31 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden p-5 transition-colors hover:border-border/80",
+        "p-5 transition-colors duration-200 hover:border-border-emphasis",
         className,
       )}
     >
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full blur-2xl",
-          accent === "money" ? "bg-money/10" : "bg-brand/10",
-        )}
-      />
-      <div className="relative flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
             {label}
           </p>
-          <div className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">
+          <div className="mt-2 text-[1.65rem] font-semibold tracking-tight tabular-nums leading-none">
             {value}
           </div>
           {sub && (
-            <p className="mt-1 truncate text-xs text-muted-foreground">{sub}</p>
+            <p className="mt-2 truncate text-xs text-muted-foreground">
+              {sub}
+            </p>
           )}
         </div>
         {icon && (
           <div
             className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
               accent === "money"
-                ? "bg-money/10 text-money"
-                : "bg-brand/10 text-brand",
+                ? "bg-money-surface text-money"
+                : "bg-brand-surface text-brand",
             )}
           >
             {icon}
