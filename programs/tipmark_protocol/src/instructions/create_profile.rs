@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::{
+    account_init::initialize_pda_account,
     constants::*,
     error::TipmarkError,
     events::ProfileCreated,
@@ -26,21 +27,19 @@ pub struct CreateProfile<'info> {
     )]
     pub config: Account<'info, ProtocolConfig>,
     #[account(
-        init,
-        payer = owner,
-        space = 8 + CreatorProfile::INIT_SPACE,
+        mut,
         seeds = [PROFILE_SEED, owner.key().as_ref()],
         bump
     )]
-    pub profile: Account<'info, CreatorProfile>,
+    /// CHECK: The handler creates and serializes the canonical profile PDA.
+    pub profile: UncheckedAccount<'info>,
     #[account(
-        init,
-        payer = owner,
-        space = 8 + UsernameRecord::INIT_SPACE,
+        mut,
         seeds = [USERNAME_SEED, username.as_bytes()],
         bump
     )]
-    pub username_record: Account<'info, UsernameRecord>,
+    /// CHECK: The handler creates and serializes the username PDA.
+    pub username_record: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -55,25 +54,45 @@ pub(crate) fn handler(
     let profile_key = ctx.accounts.profile.key();
     let payout_wallet = ctx.accounts.payout_wallet.key();
 
-    let profile = &mut ctx.accounts.profile;
-    profile.owner = owner;
-    profile.payout_wallet = payout_wallet;
-    profile.username = username.clone();
-    profile.metadata_uri = metadata_uri;
-    profile.metadata_hash = metadata_hash;
-    profile.active = true;
-    profile.created_at = now;
-    profile.updated_at = now;
-    profile.version = PROTOCOL_VERSION;
-    profile.bump = ctx.bumps.profile;
-    profile.reserved = [0; 62];
+    let profile_bump = ctx.bumps.profile;
+    let profile = CreatorProfile {
+        owner,
+        payout_wallet,
+        username: username.clone(),
+        metadata_uri,
+        metadata_hash,
+        active: true,
+        created_at: now,
+        updated_at: now,
+        version: PROTOCOL_VERSION,
+        bump: profile_bump,
+        reserved: [0; 62],
+    };
+    initialize_pda_account(
+        &ctx.accounts.owner,
+        &ctx.accounts.profile,
+        &ctx.accounts.system_program,
+        8 + CreatorProfile::INIT_SPACE,
+        &[PROFILE_SEED, owner.as_ref(), &[profile_bump]],
+        &profile,
+    )?;
 
-    let username_record = &mut ctx.accounts.username_record;
-    username_record.owner = owner;
-    username_record.profile = profile_key;
-    username_record.version = PROTOCOL_VERSION;
-    username_record.bump = ctx.bumps.username_record;
-    username_record.reserved = [0; 30];
+    let username_bump = ctx.bumps.username_record;
+    let username_record = UsernameRecord {
+        owner,
+        profile: profile_key,
+        version: PROTOCOL_VERSION,
+        bump: username_bump,
+        reserved: [0; 30],
+    };
+    initialize_pda_account(
+        &ctx.accounts.owner,
+        &ctx.accounts.username_record,
+        &ctx.accounts.system_program,
+        8 + UsernameRecord::INIT_SPACE,
+        &[USERNAME_SEED, username.as_bytes(), &[username_bump]],
+        &username_record,
+    )?;
 
     emit!(ProfileCreated {
         profile: profile_key,

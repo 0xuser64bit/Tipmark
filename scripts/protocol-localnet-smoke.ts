@@ -14,7 +14,11 @@ import {
   buildUpdateProfileInstruction,
   simulateAndSendProtocolTransaction,
 } from "@/lib/protocol/transactions";
-import { deriveConfigPda, deriveProfilePda } from "@/lib/protocol/pdas";
+import {
+  deriveConfigPda,
+  deriveProfilePda,
+  deriveUsernamePda,
+} from "@/lib/protocol/pdas";
 import { createTipReference } from "@/lib/protocol/reference";
 import { readTipReceipt } from "@/lib/protocol/tip-receipt";
 
@@ -196,6 +200,23 @@ async function send(
   });
 }
 
+async function preFundPda(
+  connection: Connection,
+  signer: Keypair,
+  destination: string,
+) {
+  const lamports = await connection.getMinimumBalanceForRentExemption(0);
+  await send(
+    connection,
+    signer,
+    SystemProgram.transfer({
+      fromPubkey: signer.publicKey,
+      toPubkey: new PublicKey(destination),
+      lamports,
+    }),
+  );
+}
+
 const runSmoke = async (
   connection: Connection,
   authority: Keypair,
@@ -224,6 +245,7 @@ const runSmoke = async (
   const [configPda] = await deriveConfigPda();
   const configInfo = await connection.getAccountInfo(new PublicKey(configPda));
   if (!configInfo) {
+    await preFundPda(connection, authority, String(configPda));
     if (
       programInfo.data.length < 36 ||
       programInfo.data.readUInt32LE(0) !== 2
@@ -243,13 +265,17 @@ const runSmoke = async (
 
   const ownerAddress = owner.publicKey.toBase58();
   const [profilePda] = await deriveProfilePda(ownerAddress);
+  const username = `local-${ownerAddress.slice(0, 8).toLowerCase()}`;
+  const [usernamePda] = await deriveUsernamePda(username);
+  await preFundPda(connection, owner, String(profilePda));
+  await preFundPda(connection, owner, String(usernamePda));
   const create = await send(
     connection,
     owner,
     await buildCreateProfileInstruction({
       owner: ownerAddress,
       payoutWallet: ownerAddress,
-      username: `local-${ownerAddress.slice(0, 8).toLowerCase()}`,
+      username,
       metadataUri: "ar://localnet-profile",
       metadataHash: Uint8Array.from({ length: 32 }, (_, index) => index + 1),
     }),

@@ -24,4 +24,8 @@ pub enum TipmarkError {
     NoPendingAuthority,
     #[msg("Only the pending protocol authority may accept authority")]
     InvalidPendingAuthority,
+    #[msg("The PDA is already initialized")]
+    PdaAlreadyInitialized,
+    #[msg("The PDA must be an empty system-owned account")]
+    InvalidPdaAccountOwner,
 }

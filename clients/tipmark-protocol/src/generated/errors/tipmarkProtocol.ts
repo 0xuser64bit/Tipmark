@@ -36,32 +36,41 @@ export const TIPMARK_PROTOCOL_ERROR__INVALID_PROTOCOL_AUTHORITY = 0x1778; // 600
 export const TIPMARK_PROTOCOL_ERROR__NO_PENDING_AUTHORITY = 0x1779; // 6009
 /** InvalidPendingAuthority: Only the pending protocol authority may accept authority */
 export const TIPMARK_PROTOCOL_ERROR__INVALID_PENDING_AUTHORITY = 0x177a; // 6010
+/** PdaAlreadyInitialized: The PDA is already initialized */
+export const TIPMARK_PROTOCOL_ERROR__PDA_ALREADY_INITIALIZED = 0x177b; // 6011
+/** InvalidPdaAccountOwner: The PDA must be an empty system-owned account */
+export const TIPMARK_PROTOCOL_ERROR__INVALID_PDA_ACCOUNT_OWNER = 0x177c; // 6012
 
 export type TipmarkProtocolError =
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_METADATA_HASH
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_METADATA_URI
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_PAYOUT_WALLET
+  | typeof TIPMARK_PROTOCOL_ERROR__INVALID_PDA_ACCOUNT_OWNER
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_PENDING_AUTHORITY
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_PROTOCOL_AUTHORITY
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_TIP_AMOUNT
   | typeof TIPMARK_PROTOCOL_ERROR__INVALID_USERNAME
   | typeof TIPMARK_PROTOCOL_ERROR__NO_PENDING_AUTHORITY
+  | typeof TIPMARK_PROTOCOL_ERROR__PDA_ALREADY_INITIALIZED
   | typeof TIPMARK_PROTOCOL_ERROR__PROFILE_CREATION_PAUSED
   | typeof TIPMARK_PROTOCOL_ERROR__PROFILE_INACTIVE
   | typeof TIPMARK_PROTOCOL_ERROR__SELF_TIP_NOT_ALLOWED;
 
 let tipmarkProtocolErrorMessages:
-  Record<TipmarkProtocolError, string> | undefined;
+  | Record<TipmarkProtocolError, string>
+  | undefined;
 if (process.env["NODE_ENV"] !== "production") {
   tipmarkProtocolErrorMessages = {
     [TIPMARK_PROTOCOL_ERROR__INVALID_METADATA_HASH]: `Metadata hash cannot be empty`,
     [TIPMARK_PROTOCOL_ERROR__INVALID_METADATA_URI]: `Metadata URI must be a valid ar:// or ipfs:// content URI`,
     [TIPMARK_PROTOCOL_ERROR__INVALID_PAYOUT_WALLET]: `The supplied payout wallet does not match the profile`,
+    [TIPMARK_PROTOCOL_ERROR__INVALID_PDA_ACCOUNT_OWNER]: `The PDA must be an empty system-owned account`,
     [TIPMARK_PROTOCOL_ERROR__INVALID_PENDING_AUTHORITY]: `Only the pending protocol authority may accept authority`,
     [TIPMARK_PROTOCOL_ERROR__INVALID_PROTOCOL_AUTHORITY]: `Only the current protocol authority may perform this action`,
     [TIPMARK_PROTOCOL_ERROR__INVALID_TIP_AMOUNT]: `Tip amount must be greater than zero`,
     [TIPMARK_PROTOCOL_ERROR__INVALID_USERNAME]: `Username must be 2-30 lowercase letters, numbers, or dashes`,
     [TIPMARK_PROTOCOL_ERROR__NO_PENDING_AUTHORITY]: `A pending protocol authority has not been configured`,
+    [TIPMARK_PROTOCOL_ERROR__PDA_ALREADY_INITIALIZED]: `The PDA is already initialized`,
     [TIPMARK_PROTOCOL_ERROR__PROFILE_CREATION_PAUSED]: `Profile creation is currently paused`,
     [TIPMARK_PROTOCOL_ERROR__PROFILE_INACTIVE]: `Profile is not accepting support`,
     [TIPMARK_PROTOCOL_ERROR__SELF_TIP_NOT_ALLOWED]: `Payout wallet must be different from the supporter`,

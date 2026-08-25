@@ -610,6 +610,16 @@
       "code": 6010,
       "name": "InvalidPendingAuthority",
       "msg": "Only the pending protocol authority may accept authority"
+    },
+    {
+      "code": 6011,
+      "name": "PdaAlreadyInitialized",
+      "msg": "The PDA is already initialized"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidPdaAccountOwner",
+      "msg": "The PDA must be an empty system-owned account"
     }
   ],
   "types": [

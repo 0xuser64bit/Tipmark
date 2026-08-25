@@ -1,17 +1,16 @@
 use anchor_lang::prelude::*;
 
-use crate::{constants::*, state::ProtocolConfig};
+use crate::{account_init::initialize_pda_account, constants::*, state::ProtocolConfig};
 
 #[derive(Accounts)]
 pub struct InitializeConfig<'info> {
     #[account(
-        init,
-        payer = authority,
-        space = 8 + ProtocolConfig::INIT_SPACE,
+        mut,
         seeds = [CONFIG_SEED],
         bump
     )]
-    pub config: Account<'info, ProtocolConfig>,
+    /// CHECK: The handler creates and serializes the canonical config PDA.
+    pub config: UncheckedAccount<'info>,
     pub program: Program<'info, crate::program::TipmarkProtocol>,
     #[account(
         constraint = program.programdata_address()? == Some(program_data.key())
@@ -26,13 +25,21 @@ pub struct InitializeConfig<'info> {
 }
 
 pub(crate) fn handler(ctx: Context<InitializeConfig>) -> Result<()> {
-    let config = &mut ctx.accounts.config;
-    config.authority = ctx.accounts.authority.key();
-    config.pending_authority = None;
-    config.profile_creation_paused = false;
-    config.version = PROTOCOL_VERSION;
-    config.bump = ctx.bumps.config;
-    config.reserved = [0; 61];
-
-    Ok(())
+    let bump = ctx.bumps.config;
+    let config = ProtocolConfig {
+        authority: ctx.accounts.authority.key(),
+        pending_authority: None,
+        profile_creation_paused: false,
+        version: PROTOCOL_VERSION,
+        bump,
+        reserved: [0; 61],
+    };
+    initialize_pda_account(
+        &ctx.accounts.authority,
+        &ctx.accounts.config,
+        &ctx.accounts.system_program,
+        8 + ProtocolConfig::INIT_SPACE,
+        &[CONFIG_SEED, &[bump]],
+        &config,
+    )
 }
