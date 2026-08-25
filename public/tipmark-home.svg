@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Tipmark — direct creator support</title>
+  <desc id="desc">A Tipmark receipt on a warm paper background.</desc>
+  <rect width="1200" height="630" fill="#f5f1e8"/>
+  <path d="M0 118H1200M0 512H1200" stroke="#d8d0c0"/>
+  <g transform="translate(116 112)">
+    <path d="M0 0h74v310l-9 8-9-8-9 8-9-8-9 8-9-8-9 8-9-8V0Z" fill="#14573c"/>
+    <path d="M19 74h36M19 100h23M19 126h30" stroke="#faf8f4" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <text x="240" y="205" fill="#17150f" font-family="Georgia, serif" font-size="98" font-weight="600">Tipmark</text>
+  <text x="246" y="270" fill="#6f685c" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="25" letter-spacing="4">DIRECT SUPPORT · VERIFIED RECEIPTS</text>
+  <g transform="translate(246 348)" fill="#17150f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text y="0" font-size="20" fill="#8c8474" letter-spacing="3">A CREATOR PAGE THAT KEEPS NOTHING</text>
+    <path d="M0 28h720" stroke="#d8d0c0"/>
+    <text y="78" font-size="28">Wallet to wallet.</text>
+    <text y="124" font-size="28">No platform cut.</text>
+    <text y="170" font-size="28">Every transfer on record.</text>
+  </g>
+</svg>

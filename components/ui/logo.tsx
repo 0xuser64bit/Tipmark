@@ -38,9 +38,8 @@ export function LogoMark({
 }
 
 /**
- * The wordmark is the product thesis in nine letters: `DAO` set in the
- * machine voice (mono, small caps) butted straight against `nation` in the
- * human voice (serif). The seam between the two typefaces is the logo.
+ * The wordmark pairs a compact machine voice with a human serif. The seam
+ * makes Tipmark feel both verifiable and personal.
  */
 export function Wordmark({
   className,
@@ -57,10 +56,13 @@ export function Wordmark({
 
   return (
     <span
-      className={cn("inline-flex items-baseline whitespace-nowrap text-ink", className)}
+      className={cn(
+        "inline-flex items-baseline whitespace-nowrap text-ink",
+        className,
+      )}
     >
       <span className={cn("font-mono font-medium uppercase", scale[0])}>
-        DAO
+        TIP
       </span>
       <span
         className={cn(
@@ -68,7 +70,7 @@ export function Wordmark({
           scale[1],
         )}
       >
-        nation
+        mark
       </span>
     </span>
   );
@@ -93,7 +95,10 @@ export function Logo({
       {showMark && (
         <LogoMark className={size === "lg" ? "size-[22px]" : undefined} />
       )}
-      <Wordmark size={size} className={compact ? "hidden sm:inline-flex" : undefined} />
+      <Wordmark
+        size={size}
+        className={compact ? "hidden sm:inline-flex" : undefined}
+      />
     </>
   );
 
@@ -106,7 +111,7 @@ export function Logo({
     return <span className={cn(classes, "hover:opacity-100")}>{inner}</span>;
 
   return (
-    <Link href={href} className={classes} aria-label="DAOnation home">
+    <Link href={href} className={classes} aria-label="Tipmark home">
       {inner}
     </Link>
   );

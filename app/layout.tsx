@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import "./globals.css";
 import Providers from "./provider";
+import { BRAND_HANDLE, BRAND_NAME, BRAND_URL } from "@/lib/brand";
 
 /* Three voices. Sans is the interface, mono is the machine, serif is the
    person. See app/globals.css for the reasoning. */
@@ -23,21 +24,29 @@ const geistMono = localFont({
 
 const newsreader = localFont({
   src: [
-    { path: "./fonts/Newsreader-Roman.woff2", style: "normal", weight: "200 800" },
-    { path: "./fonts/Newsreader-Italic.woff2", style: "italic", weight: "200 800" },
+    {
+      path: "./fonts/Newsreader-Roman.woff2",
+      style: "normal",
+      weight: "200 800",
+    },
+    {
+      path: "./fonts/Newsreader-Italic.woff2",
+      style: "italic",
+      weight: "200 800",
+    },
   ],
   variable: "--font-newsreader",
   display: "swap",
   fallback: ["Iowan Old Style", "Palatino Linotype", "Georgia", "serif"],
 });
 
-const TITLE = "DAOnation — a tip jar that prints receipts";
+const TITLE = `${BRAND_NAME} — a tip jar that prints receipts`;
 const DESCRIPTION =
   "Claim a link, share it, and receive SOL straight to your own wallet. No account holds it for you, no cut is taken, and every contribution leaves a receipt on Solana.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://daonation.xyz"),
-  title: { default: TITLE, template: "%s · DAOnation" },
+  metadataBase: new URL(BRAND_URL),
+  title: { default: TITLE, template: `%s · ${BRAND_NAME}` },
   description: DESCRIPTION,
   keywords: [
     "solana",
@@ -47,33 +56,26 @@ export const metadata: Metadata = {
     "non-custodial donations",
     "SOL payments",
   ],
-  authors: [{ name: "DAOnation" }],
-  creator: "DAOnation",
-  publisher: "DAOnation",
+  authors: [{ name: BRAND_NAME }],
+  creator: BRAND_NAME,
+  publisher: BRAND_NAME,
   formatDetection: { email: false, telephone: false, address: false },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "DAOnation",
+    siteName: BRAND_NAME,
     title: TITLE,
     description: DESCRIPTION,
-    images: [
-      {
-        url: "/daonation-home.png",
-        width: 1200,
-        height: 630,
-        alt: "DAOnation — receive support in SOL, directly",
-      },
-    ],
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/daonation-home.png"],
-    creator: "@DAOnation",
-    site: "@DAOnation",
+    images: ["/opengraph-image"],
+    creator: BRAND_HANDLE,
+    site: BRAND_HANDLE,
   },
   robots: {
     index: true,
@@ -86,9 +88,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/daonation.png",
-    shortcut: "/daonation.png",
-    apple: "/daonation.png",
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 

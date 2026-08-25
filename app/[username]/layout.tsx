@@ -1,5 +1,6 @@
 import getUserByUsername from "@/actions/getUserByUsername";
 import { Metadata } from "next";
+import { BRAND_HANDLE, BRAND_NAME } from "@/lib/brand";
 
 export async function generateMetadata({
   params,
@@ -14,11 +15,11 @@ export async function generateMetadata({
 
   const description = data.description
     ? data.description
-    : `Support ${displayName} on DAOnation - The coolest way to support your favorite creators`;
+    : `Support ${displayName} on ${BRAND_NAME} — direct creator support with a verifiable receipt`;
 
   const profileImageUrl = data.profile_image
     ? data.profile_image
-    : "/daonation.png";
+    : "/tipmark-mark.svg";
 
   return {
     title,
@@ -42,7 +43,7 @@ export async function generateMetadata({
       title: `${displayName} (@${username})`,
       description,
       images: [profileImageUrl],
-      creator: data.x_username ? `@${data.x_username}` : "@DAOnation",
+      creator: data.x_username ? `@${data.x_username}` : BRAND_HANDLE,
     },
     alternates: {
       canonical: `/${username}`,
