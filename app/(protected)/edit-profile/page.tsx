@@ -5,6 +5,7 @@ import { WalletAdapterWrapper } from "@/components/wallet-adapter-wrapper";
 import { EdgeStoreProvider } from "@/lib/edgestore";
 import { auth } from "@/lib/auth";
 import { getProtocolConfig } from "@/lib/protocol/config";
+import { resolveOnChainProfile } from "@/lib/protocol/public-profile";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "Your page" };
@@ -36,8 +37,15 @@ export default async function EditProfilePage({
   const { handle: desired } = await searchParams;
   const seeded = (desired ?? "").toLowerCase().replace(/[^a-z0-9-]/g, "");
 
+  const protocol = getProtocolConfig();
+  const onChain =
+    protocol.enabled && data.username
+      ? await resolveOnChainProfile(data.username).catch(() => null)
+      : null;
+
   const props = {
     email,
+    profileOwner: onChain?.owner,
     mode: live ? ("edit" as const) : ("setup" as const),
     initial: {
       username: data.username?.toLowerCase() || (live ? "" : seeded),
@@ -54,7 +62,7 @@ export default async function EditProfilePage({
     },
   };
 
-  if (getProtocolConfig().enabled) {
+  if (protocol.enabled) {
     return (
       <WalletAdapterWrapper>
         <ProtocolProfileEditor {...props} />

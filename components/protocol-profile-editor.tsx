@@ -72,6 +72,7 @@ export interface ProtocolProfileEditorProps {
   email: string;
   initial: InitialProfile;
   mode: "setup" | "edit";
+  profileOwner?: string;
 }
 
 const HANDLE = /^[a-z0-9-]{2,30}$/;
@@ -105,6 +106,7 @@ export default function ProtocolProfileEditor({
   email,
   initial,
   mode,
+  profileOwner,
 }: ProtocolProfileEditorProps) {
   const router = useRouter();
   const { connection } = useConnection();
@@ -214,6 +216,17 @@ export default function ProtocolProfileEditor({
       requestConnect();
       return;
     }
+    const connectedOwner = publicKey.toBase58();
+    if (profileOwner && connectedOwner !== profileOwner) {
+      toast.error("Connect the wallet that owns this Solana profile.");
+      return;
+    }
+    if (!profileOwner && initial.solana && connectedOwner !== initial.solana) {
+      toast.error(
+        "Migration requires the wallet already stored on this legacy profile.",
+      );
+      return;
+    }
     setSaving(true);
     try {
       const messageSigner = wallet.adapter as MessageSignerWalletAdapter;
@@ -221,7 +234,7 @@ export default function ProtocolProfileEditor({
         throw new Error("This wallet cannot sign authorization messages.");
       }
       const challenge = await createWalletChallenge({
-        wallet: publicKey.toBase58(),
+        wallet: connectedOwner,
         uri: window.location.origin + window.location.pathname,
       });
       const walletSignature = await messageSigner.signMessage(
@@ -229,7 +242,7 @@ export default function ProtocolProfileEditor({
       );
       await verifyWalletChallenge({
         challengeId: challenge.challengeId,
-        wallet: publicKey.toBase58(),
+        wallet: connectedOwner,
         signatureBase64: encodeSignature(walletSignature),
       });
 
@@ -250,17 +263,17 @@ export default function ProtocolProfileEditor({
       const quote = await quoteIrysUpload(irys, [
         {
           bytes: new TextEncoder().encode(body).byteLength,
-          tags: profileMetadataTags(publicKey.toBase58()),
+          tags: profileMetadataTags(connectedOwner),
         },
       ]);
       await fundIrysUpload(irys, quote.fundingRequiredAtomic);
       const uploaded = await uploadPermanentMetadata(
         irys,
         metadata,
-        publicKey.toBase58(),
+        connectedOwner,
       );
 
-      const [profilePda] = await deriveProfilePda(publicKey.toBase58());
+      const [profilePda] = await deriveProfilePda(connectedOwner);
       const profileKey = new PublicKey(profilePda);
       const profileAccount = await connection.getAccountInfo(profileKey);
       if (
@@ -273,14 +286,14 @@ export default function ProtocolProfileEditor({
       }
       const instruction = profileAccount
         ? await buildUpdateProfileInstruction({
-            owner: publicKey.toBase58(),
+            owner: connectedOwner,
             payoutWallet: form.solana.trim(),
             metadataUri: uploaded.metadataUri,
             metadataHash: uploaded.metadataHash,
             active: true,
           })
         : await buildCreateProfileInstruction({
-            owner: publicKey.toBase58(),
+            owner: connectedOwner,
             payoutWallet: form.solana.trim(),
             username: handle,
             metadataUri: uploaded.metadataUri,
@@ -309,7 +322,7 @@ export default function ProtocolProfileEditor({
           github_username: metadata.links.github || "",
           linkedin_username: metadata.links.linkedin || "",
           solana_public_key: form.solana.trim(),
-          owner: publicKey.toBase58(),
+          owner: connectedOwner,
         });
       } catch {
         toast.warning(
