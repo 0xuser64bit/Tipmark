@@ -1,63 +1,59 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Buttons are printed controls: a hairline, a small radius, no gradient and
+ * no glow. Pressing one moves it half a pixel down, like a stamp meeting
+ * paper. There is exactly one `primary` per screen — the money action.
+ */
 const buttonVariants = cva(
-  // Base: stable geometry — border included in sizing so focus ring never causes layout shift
   [
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md",
-    "text-sm font-medium leading-none",
-    "transition-all duration-150",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "relative inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap",
+    "font-medium leading-none",
+    "border transition-[background-color,border-color,color,transform] duration-100 ease-press",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stamp",
     "disabled:pointer-events-none disabled:opacity-40",
-    "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+    "active:translate-y-[0.5px]",
+    "[&_svg]:pointer-events-none [&_svg]:size-[15px] [&_svg]:shrink-0",
     "select-none",
   ].join(" "),
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80",
-
-        // Primary CTA — brand gradient, controlled glow, no excessive shadow
-        brand:
-          "brand-gradient text-white font-semibold glow-brand hover:brightness-110 hover:shadow-[0_10px_28px_-8px_rgba(124,78,243,0.55)] active:brightness-95 active:scale-[0.99]",
-
-        // Money / SOL action
-        money:
-          "bg-money text-money-foreground font-semibold shadow-[0_6px_20px_-8px_rgba(16,217,126,0.5)] hover:brightness-105 active:brightness-95",
-
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
-
-        // Elevated outline — no shadow, clean border
+        /** The money action. Engraved banknote green. One per screen. */
+        primary:
+          "border-stamp bg-stamp text-stamp-ink hover:bg-stamp-deep hover:border-stamp-deep",
+        /** Strong neutral — downloads, confirmations, "next". */
+        ink: "border-ink bg-ink text-paper hover:bg-ink-soft hover:border-ink-soft",
+        /** The workhorse. A sheet with a hairline. */
         outline:
-          "border border-border bg-surface/50 text-foreground hover:bg-surface hover:border-border-emphasis active:bg-surface-2",
-
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/70",
-
-        ghost:
-          "text-foreground/80 hover:bg-accent hover:text-foreground active:bg-accent/70",
-
-        link:
-          "text-brand-muted underline-offset-4 hover:underline hover:text-brand p-0 h-auto",
+          "border-rule bg-sheet text-ink hover:border-rule-strong hover:bg-well",
+        /** Tertiary — sits inside dense areas without drawing a box. */
+        quiet:
+          "border-transparent bg-transparent text-ink-soft hover:bg-well hover:text-ink",
+        /** Destructive. */
+        danger:
+          "border-seal-edge bg-seal-soft text-seal hover:border-seal hover:bg-seal hover:text-white",
+        /** Inline text action. */
+        link: "h-auto border-transparent p-0 text-stamp underline decoration-stamp-edge decoration-1 underline-offset-[3px] hover:decoration-stamp active:translate-y-0",
       },
       size: {
-        default: "h-9 px-4 py-0",
-        sm:      "h-8 rounded-md px-3 text-xs",
-        lg:      "h-11 rounded-lg px-6 text-[15px]",
-        xl:      "h-12 rounded-lg px-8 text-[15px]",
-        icon:    "h-9 w-9 p-0",
-        "icon-sm": "h-8 w-8 p-0 rounded-md",
+        xs: "h-7 rounded-[3px] px-2.5 text-[12.5px]",
+        sm: "h-8 rounded-[3px] px-3 text-[13px]",
+        md: "h-9 rounded-[4px] px-3.5 text-[13.5px]",
+        lg: "h-11 rounded-[4px] px-5 text-[14.5px]",
+        xl: "h-[52px] rounded-[5px] px-7 text-[15.5px]",
+        icon: "h-9 w-9 rounded-[4px] p-0",
+        "icon-sm": "h-8 w-8 rounded-[3px] p-0",
       },
+      /** Fill the parent's width — common in panels and dialogs. */
+      block: { true: "w-full", false: "" },
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+    defaultVariants: { variant: "outline", size: "md", block: false },
   },
 );
 
@@ -65,17 +61,48 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  /**
+   * Pending state. Swaps the leading content for a spinner and keeps the
+   * label, so the button never changes width mid-transaction.
+   */
+  loading?: boolean;
+  loadingText?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      block,
+      asChild = false,
+      loading = false,
+      loadingText,
+      children,
+      disabled,
+      ...props
+    },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, block }), className)}
         ref={ref}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
         {...props}
-      />
+      >
+        {loading ? (
+          <>
+            <Loader2 className="animate-spin" aria-hidden />
+            {loadingText ?? children}
+          </>
+        ) : (
+          children
+        )}
+      </Comp>
     );
   },
 );

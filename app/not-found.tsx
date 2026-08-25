@@ -1,32 +1,39 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
-import { Compass, Home } from "lucide-react";
+
+export const metadata = { title: "Not found" };
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 text-center">
-      <Logo className="mb-10" />
-      <p className="font-mono text-8xl font-bold tracking-tighter text-foreground/10">404</p>
-      <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-        This page went off-chain
-      </h1>
-      <p className="mt-3 max-w-sm text-[15px] text-muted-foreground leading-relaxed">
-        The link may be broken, or the page may have moved. Let&apos;s get you
-        back on track.
-      </p>
-      <div className="mt-8 flex gap-3">
-        <Button asChild variant="brand" className="h-11 px-6">
-          <Link href="/">
-            <Home className="h-4 w-4 mr-1.5" /> Home
-          </Link>
-        </Button>
-        <Button asChild variant="outline" className="h-11 px-6">
-          <Link href="/about-us">
-            <Compass className="h-4 w-4 mr-1.5 opacity-70" /> Learn more
-          </Link>
-        </Button>
+    <div className="flex min-h-screen flex-col">
+      <div className="border-b border-rule">
+        <div className="mx-auto flex h-14 max-w-3xl items-center px-5 sm:px-8">
+          <Logo />
+        </div>
       </div>
+
+      <main
+        id="main"
+        className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-5 py-20 sm:px-8"
+      >
+        <p className="field-label">404</p>
+        <h1 className="mt-4 max-w-[22ch] text-[clamp(2rem,5vw,3rem)] font-medium leading-[1.05]">
+          There is no page here.
+        </h1>
+        <p className="mt-5 max-w-[48ch] text-[15px] leading-relaxed text-ink-faint">
+          Either the handle was never claimed, its owner has not finished
+          setting up a wallet to receive with, or the link has a typo in it.
+        </p>
+        <div className="mt-9 flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href="/">Back to the start</Link>
+          </Button>
+          <Button asChild variant="quiet">
+            <Link href="/about-us">How DAOnation works</Link>
+          </Button>
+        </div>
+      </main>
     </div>
   );
 }

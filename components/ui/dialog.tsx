@@ -18,7 +18,8 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/70 backdrop-blur-sm",
+      // The page dims to the colour of the desk, not to black.
+      "fixed inset-0 z-50 bg-[#2b271e]/35",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
@@ -37,18 +38,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50",
-        "w-full max-w-md translate-x-[-50%] translate-y-[-50%]",
-        "grid gap-4",
-        "rounded-xl border border-border bg-popover p-6",
-        "shadow-[0_24px_48px_-12px_rgba(0,0,0,0.7)]",
-        // Transitions
-        "duration-200",
+        "fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md",
+        "-translate-x-1/2 -translate-y-1/2",
+        "rounded-[6px] border border-rule bg-sheet shadow-lifted",
+        "duration-150",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-        "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
-        "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+        "data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98]",
         className,
       )}
       {...props}
@@ -56,15 +52,11 @@ const DialogContent = React.forwardRef<
       {children}
       <DialogPrimitive.Close
         className={cn(
-          "absolute right-4 top-4",
-          "flex h-7 w-7 items-center justify-center rounded-md",
-          "text-muted-foreground transition-colors",
-          "hover:bg-accent hover:text-foreground",
-          "focus:outline-none focus:ring-1 focus:ring-ring",
-          "disabled:pointer-events-none",
+          "absolute right-3 top-3 flex size-7 items-center justify-center rounded-[3px]",
+          "text-ink-faint transition-colors hover:bg-well hover:text-ink",
         )}
       >
-        <X className="h-4 w-4" />
+        <X className="size-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
@@ -77,18 +69,29 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)}
+    className={cn("border-b border-rule px-5 py-4 pr-12", className)}
     {...props}
   />
 );
 DialogHeader.displayName = "DialogHeader";
+
+const DialogBody = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("p-5", className)} {...props} />
+);
+DialogBody.displayName = "DialogBody";
 
 const DialogFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+    className={cn(
+      "flex flex-col-reverse gap-2 border-t border-rule px-5 py-3.5 sm:flex-row sm:justify-end",
+      className,
+    )}
     {...props}
   />
 );
@@ -101,7 +104,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-base font-semibold leading-none tracking-tight",
+      "font-sans text-[14px] font-semibold tracking-[-0.005em] text-ink",
       className,
     )}
     {...props}
@@ -115,7 +118,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground leading-relaxed", className)}
+    className={cn("mt-1 text-[13px] leading-relaxed text-ink-faint", className)}
     {...props}
   />
 ));
@@ -129,6 +132,7 @@ export {
   DialogClose,
   DialogContent,
   DialogHeader,
+  DialogBody,
   DialogFooter,
   DialogTitle,
   DialogDescription,

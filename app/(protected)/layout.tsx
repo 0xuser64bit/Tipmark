@@ -3,12 +3,8 @@ import { redirect } from "next/navigation";
 
 export default async function ProtectedLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const session = await auth();
-  if (!session?.user) {
-    redirect("/");
-  }
-  return <div>{children}</div>;
+  if (!session?.user) redirect("/");
+  return <>{children}</>;
 }

@@ -1,12 +1,15 @@
 # DAOnation
 
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
-![nextjs](https://img.shields.io/badge/Next.js-15.2.3-black)
-![react](https://img.shields.io/badge/React-18.3.1-blue)
-![typescript](https://img.shields.io/badge/TypeScript-5.6.3-blue)
-![solana](https://img.shields.io/badge/Solana-Web3-purple)
+![nextjs](https://img.shields.io/badge/Next.js-15.5-black)
+![react](https://img.shields.io/badge/React-18.3-blue)
+![typescript](https://img.shields.io/badge/TypeScript-5.6-blue)
+![solana](https://img.shields.io/badge/Solana-Web3-14573c)
 
-DAOnation is a decentralized platform that enables creators, developers, and organizations to accept cryptocurrency contributions effortlessly. It's a crypto-powered alternative to traditional "Buy Me a Coffee" platforms, designed for the Web3 era.
+DAOnation is a non-custodial "Buy Me a Coffee" for Solana. A creator claims a
+link, shares it, and supporters send SOL straight from their wallet to the
+creator's — no platform cut, no custody, and a verifiable receipt for every
+contribution.
 
 <p align="center">
   <img src="public/daonation-home.png" alt="DAOnation Preview" width="600"/>
@@ -15,6 +18,7 @@ DAOnation is a decentralized platform that enables creators, developers, and org
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [Design](#design)
 - [Tech Stack](#tech-stack)
 - [Key Features](#key-features)
 - [Getting Started](#getting-started)
@@ -29,32 +33,50 @@ DAOnation is a decentralized platform that enables creators, developers, and org
 
 ## 🌟 Overview
 
-DAOnation bridges the gap between content creators and their supporters in the Web3 ecosystem. Our platform allows users to create personalized profiles with unique usernames, share profile links to receive crypto contributions, and track all their earnings in one dashboard.
+DAOnation bridges the gap between content creators and their supporters in the
+Web3 ecosystem. Creators build a personal page with a unique handle, share it,
+receive SOL directly to their own wallet, and track every contribution in a
+ledger where each row links to the transaction on-chain.
+
+## 🎨 Design
+
+The interface is built around one idea — **a tip jar that prints receipts**.
+Money moves wallet-to-wallet and the chain keeps the record, so the UI is
+stationery, not a trading terminal: warm paper, hairline rules, tabular
+figures, and a single engraved-green spot colour that only ever means "money".
+
+Three typographic voices each do one job:
+
+- **Newsreader** (serif) — the person: names, headlines, editorial copy.
+- **Geist Mono** — the machine: amounts, addresses, signatures, field labels.
+- **Geist Sans** — the interface: buttons, inputs, navigation.
+
+The design system lives in `app/globals.css` (tokens, utilities, the whole
+motion budget) and `components/ui/*` (primitives). The recurring structural
+element is the **ledger row** — a label/value line separated by a hairline —
+which appears on the support panel, the receipt, and the dashboard.
 
 ## 🛠️ Tech Stack
 
-- **Frontend Framework**: Next.js 15 (App Router)
-- **UI Library**: React 18
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 (CSS-first `@theme`), shadcn/ui, Radix UI
-- **Fonts**: Geist Sans + Geist Mono (`next/font/local`)
-- **Authentication**: NextAuth.js
-- **Database**: Prisma ORM
-- **Blockchain Integration**: Solana Web3.js
-- **Wallet Adapters**: Solana Wallet Adapter
-- **Animation**: Motion (`motion/react`)
-- **Charts**: Recharts
+- **Framework**: Next.js 15 (App Router) · React 18 · TypeScript
+- **Styling**: Tailwind CSS v4 (CSS-first `@theme`) + `tw-animate-css`
+- **UI primitives**: Radix (dialog, dropdown, checkbox, label) + custom system
+- **Fonts**: Geist Sans, Geist Mono, Newsreader (`next/font/local`)
+- **Authentication**: NextAuth.js (Google)
+- **Database**: Prisma ORM (PostgreSQL)
+- **Blockchain**: Solana Web3.js + Solana Wallet Adapter
+- **Uploads**: EdgeStore · **QR**: `qrcode.react` · **Export**: `html2canvas`
 - **Deployment**: Vercel
 
 ## ✨ Key Features
 
-- **Crypto-First**: Direct wallet-to-wallet transactions with no intermediaries
-- **Personalized Profiles**: Custom usernames and profile pages for easy sharing
-- **Multi-Wallet Support**: Connect with various Solana wallets
-- **Real-time Analytics**: Track contributions and engagement metrics
-- **Responsive Design**: Optimized for all devices and screen sizes
-- **QR Code Generation**: Easily shareable QR codes for your donation page
-- **Transaction Explorer**: Verify transactions on the blockchain
+- **Zero platform fee**: direct wallet-to-wallet transfers, non-custodial
+- **Personal pages**: a claimable `daonation.xyz/<handle>` letterhead
+- **Multi-wallet**: connect any Solana wallet, with an explainer for newcomers
+- **Verifiable receipts**: every contribution links to Solscan
+- **Creator ledger**: real transaction table, 12-month history, live USD
+- **Share card**: a downloadable PNG with a scannable QR
+- **Responsive & accessible**: single design language across every screen
 
 ## 🚀 Getting Started
 

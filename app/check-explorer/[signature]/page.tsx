@@ -1,26 +1,40 @@
+import { getSolPrice } from "@/actions/getSolPrice";
 import { validateSignature } from "@/actions/validateSignature";
-import { CheckExplorerCard } from "@/components/check-explorer-card";
-import { PageTransition } from "@/components/ui/page-transition";
+import { Receipt } from "@/components/receipt";
+import { SiteHeader } from "@/components/site-header";
 
-export default async function CheckExplorerPage({
+export const metadata = { title: "Receipt" };
+
+export default async function ReceiptPage({
   params,
 }: {
   params: Promise<{ signature: string }>;
 }) {
   const { signature } = await params;
-  const { transaction, creator } = await validateSignature(signature);
+  const [{ transaction, creator }, priceUsd] = await Promise.all([
+    validateSignature(signature),
+    getSolPrice(),
+  ]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-grid p-4">
-      <PageTransition>
-        <CheckExplorerCard
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader width="text" />
+      <main
+        id="main"
+        className="flex flex-1 items-start justify-center px-5 py-12 sm:py-16"
+      >
+        <Receipt
           signature={signature}
           amount={transaction.amount}
           toPublicKey={transaction.toPublicKey}
+          fromPublicKey={transaction.fromPublicKey}
+          status={transaction.status}
+          createdAt={transaction.createdAt}
+          priceUsd={priceUsd}
           creatorUsername={creator?.username ?? undefined}
           creatorName={creator?.display_name ?? undefined}
         />
-      </PageTransition>
+      </main>
     </div>
   );
 }

@@ -2,23 +2,23 @@
 
 import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
-import { cva, type VariantProps } from "class-variance-authority";
-
 import { cn } from "@/lib/utils";
 
-const labelVariants = cva(
-  // Slightly smaller, medium weight — labels should guide, not compete with inputs
-  "text-[13px] font-medium leading-none text-foreground/90 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-);
-
+/**
+ * Field labels are the mono small-caps tags that name a line on a form —
+ * the same voice used for ledger row labels, so a form reads as a document
+ * being filled in.
+ */
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
-    VariantProps<typeof labelVariants>
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn(labelVariants(), className)}
+    className={cn(
+      "field-label block peer-disabled:opacity-50",
+      className,
+    )}
     {...props}
   />
 ));

@@ -1,96 +1,119 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/*
-  DAOnation design system — Protocol Finance aesthetic.
-  Solana-native palette used with restraint:
-    Brand (#7c4ef3) = primary actions & logo only.
-    Money (#10d97e) = SOL amounts, confirmed states only.
-  Flat canvas. No ambient glow. Color earns its place.
-*/
+/* ═══════════════════════════════════════════════════════════════════════
+   DAOnation — "Ledger"
+
+   The product is a tip jar that prints receipts. Money moves wallet to
+   wallet and the chain keeps the record. So the interface is stationery,
+   not a trading terminal: warm paper, hairline rules, tabular figures,
+   generous margins, and one printed spot colour.
+
+   Three typographic voices, each with a job:
+     serif  — the person   (names, headlines, editorial voice)
+     mono   — the machine  (amounts, addresses, signatures, field labels)
+     sans   — the interface (buttons, inputs, nav — quiet, gets out of the way)
+
+   Rules:
+     · Money is set in ink and given weight, never colour or glow.
+     · Borders do the separating. Shadow is a single sheet-lift, used twice.
+     · Radius is small, because paper does not have 16px corners.
+     · Colour is information. If it does not mean something, it is grey.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── Brand ───────────────────────────────────────────────────────── */
-  --color-brand:            #7c4ef3;
-  --color-brand-hover:      #6f44e0;
-  --color-brand-foreground: #ffffff;
-  --color-brand-muted:      #a47af8;
-  --color-brand-surface:    rgba(124, 78, 243, 0.09);
+  /* ── Paper: the substrate ─────────────────────────────────────────── */
+  --color-paper: #faf8f4; /* page — warm newsprint white       */
+  --color-sheet: #ffffff; /* raised stock — receipts, dialogs  */
+  --color-well: #f2efe8; /* recessed — inputs, code, wells    */
+  --color-well-deep: #e9e5dc; /* pressed / hover on a well         */
 
-  /* ── Money / SOL / Success ───────────────────────────────────────── */
-  --color-money:            #10d97e;
-  --color-money-foreground: #031a0f;
-  --color-money-surface:    rgba(16, 217, 126, 0.08);
+  /* ── Ink: the marks ───────────────────────────────────────────────── */
+  --color-ink: #17150f; /* primary type                      */
+  --color-ink-soft: #504a3d; /* secondary type                    */
+  --color-ink-faint: #8c8474; /* tertiary / captions / labels      */
+  --color-ink-ghost: #b8b0a0; /* placeholders, disabled            */
 
-  /* ── Canvas & surfaces (dark-only, flat) ────────────────────────── */
-  --color-canvas:           #080810;
-  --color-background:       #080810;
-  --color-foreground:       #f0f0f5;
+  /* ── Rules: hairlines that structure the page ─────────────────────── */
+  --color-rule: #e2ddd1; /* default hairline                  */
+  --color-rule-strong: #cdc5b4; /* emphasis / hover                  */
+  --color-rule-ink: #17150f; /* a deliberate heavy rule           */
 
-  --color-surface:          #0f0f18;
-  --color-surface-2:        #16161f;
+  /* ── Stamp: the one spot colour. Engraved banknote green. ─────────── */
+  --color-stamp: #14573c;
+  --color-stamp-deep: #0e4530; /* pressed                           */
+  --color-stamp-soft: #dfeae2; /* tint field                        */
+  --color-stamp-edge: #b6cfc0; /* tint border                       */
+  --color-stamp-ink: #f7fbf8; /* type on stamp                     */
 
-  --color-card:             #0f0f18;
-  --color-card-foreground:  #f0f0f5;
-  --color-popover:          #16161f;
-  --color-popover-foreground: #f0f0f5;
+  /* ── Status: seal red, ledger amber ───────────────────────────────── */
+  --color-seal: #9a2b18;
+  --color-seal-soft: #f6e5e0;
+  --color-seal-edge: #e3c2b8;
 
-  /* ── Semantic roles ──────────────────────────────────────────────── */
-  --color-primary:          #7c4ef3;
-  --color-primary-foreground: #ffffff;
+  --color-pending: #8a5a08;
+  --color-pending-soft: #f7ecd8;
+  --color-pending-edge: #e3d0ac;
 
-  --color-secondary:        #16161f;
-  --color-secondary-foreground: #f0f0f5;
-
-  --color-muted:            #16161f;
-  --color-muted-foreground: #7a7a94;
-
-  --color-accent:           #1e1e2a;
-  --color-accent-foreground: #f0f0f5;
-
-  --color-destructive:      #e54060;
+  /* ── shadcn / Radix aliases → mapped onto the ledger palette ─────── */
+  --color-background: #faf8f4;
+  --color-foreground: #17150f;
+  --color-card: #ffffff;
+  --color-card-foreground: #17150f;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #17150f;
+  --color-primary: #14573c;
+  --color-primary-foreground: #f7fbf8;
+  --color-secondary: #f2efe8;
+  --color-secondary-foreground: #17150f;
+  --color-muted: #f2efe8;
+  --color-muted-foreground: #8c8474;
+  --color-accent: #f2efe8;
+  --color-accent-foreground: #17150f;
+  --color-destructive: #9a2b18;
   --color-destructive-foreground: #ffffff;
+  --color-border: #e2ddd1;
+  --color-input: #e2ddd1;
+  --color-ring: #14573c;
 
-  /* ── Borders ────────────────────────────────────────────────────── */
-  --color-border:           #1e1e2c;
-  --color-border-emphasis:  #30304a;
-  --color-input:            #1e1e2c;
-  --color-ring:             #7c4ef3;
+  /* ── Radius: printed, not pillowy ─────────────────────────────────── */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
 
-  /* ── Chart palette ───────────────────────────────────────────────── */
-  --color-chart-1:  #7c4ef3;
-  --color-chart-2:  #10d97e;
-  --color-chart-3:  #22d3ee;
-  --color-chart-4:  #f59e0b;
-  --color-chart-5:  #e54060;
+  /* ── Elevation: a sheet of paper resting on a desk. That is all. ─── */
+  --shadow-sheet:
+    0 1px 1px rgba(23, 21, 15, 0.03), 0 4px 12px -4px rgba(23, 21, 15, 0.06);
+  --shadow-lifted:
+    0 1px 2px rgba(23, 21, 15, 0.04), 0 16px 40px -12px rgba(23, 21, 15, 0.16);
 
-  /* ── Radius scale ────────────────────────────────────────────────── */
-  --radius:    0.625rem;
-  --radius-sm: calc(var(--radius) - 3px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 3px);
-  --radius-xl: calc(var(--radius) + 6px);
-
-  /* ── Typography ──────────────────────────────────────────────────── */
+  /* ── Type ─────────────────────────────────────────────────────────── */
+  --font-serif: var(--font-newsreader), "Iowan Old Style", "Palatino Linotype",
+    Palatino, Georgia, ui-serif, serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", SFMono-Regular,
     Menlo, monospace;
 
-  /* ── Motion ──────────────────────────────────────────────────────── */
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+  /* ── Motion: two curves, short durations, few uses ────────────────── */
+  --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-press: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Base ──────────────────────────────────────────────────────────── */
+/* ═══ Base ══════════════════════════════════════════════════════════ */
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
+    /* Numerals are tabular everywhere by default. This is a ledger. */
+    font-variant-numeric: tabular-nums;
   }
 
   * {
-    border-color: var(--color-border);
+    border-color: var(--color-rule);
     box-sizing: border-box;
   }
 
@@ -98,191 +121,358 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 15px;
-    line-height: 1.65;
-    letter-spacing: -0.01em;
-    /* Flat canvas — no ambient gradients */
+    line-height: 1.55;
+    letter-spacing: -0.006em;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar        { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track  { background: transparent; }
-  ::-webkit-scrollbar-thumb  { background: var(--color-border-emphasis); border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover { background: #44445e; }
+  /* Headings default to the serif voice — the human speaking. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.018em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Focus: a printed rule, not a glow. */
+  :focus-visible {
+    outline: 2px solid var(--color-stamp);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 
   ::selection {
-    background: rgba(124, 78, 243, 0.28);
-    color: #fff;
+    background: #cfe0d5;
+    color: var(--color-ink);
   }
 
-  /* Heading defaults — tight tracking */
-  h1, h2, h3, h4, h5, h6 {
-    letter-spacing: -0.02em;
-    line-height: 1.15;
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-paper);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-rule-strong);
+    border: 3px solid var(--color-paper);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-ghost);
   }
 
-  /* Tabular numerals on all mono-rendered numbers */
-  .tnum {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
+  /* Native inputs inherit the paper, not the browser's chrome. */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    letter-spacing: inherit;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 }
 
-/* ── Utilities ─────────────────────────────────────────────────────── */
+/* ═══ Utilities ═════════════════════════════════════════════════════ */
 
-/* Brand gradient — reserved for logo mark & primary CTA button only */
-@utility brand-gradient {
-  background-image: linear-gradient(135deg, #7c4ef3 0%, #5e35d4 60%, #10d97e 200%);
+/* Field label — the small-caps mono tag that names a ledger line. */
+@utility field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
 }
 
-/* Text gradient — for exceptional hero moments only */
-@utility text-gradient {
-  background-image: linear-gradient(
-    135deg,
-    var(--color-brand-muted) 0%,
-    var(--color-money) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* A figure that lines up in a column. */
+@utility figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  letter-spacing: -0.02em;
 }
 
-/* Subtle grid overlay for cards/hero areas */
-@utility bg-grid {
+/* Torn edges — for the two artefacts that are literally printed: the
+   transaction receipt and the share card. Scallops are cut out of the sheet
+   itself, so no border or shadow is needed to read as paper. */
+@utility perforated {
+  --perf: 7px;
+  mask-image:
+    radial-gradient(
+      circle var(--perf) at var(--perf) 0,
+      transparent 0 var(--perf),
+      #000 calc(var(--perf) + 0.5px)
+    ),
+    radial-gradient(
+      circle var(--perf) at var(--perf) 100%,
+      transparent 0 var(--perf),
+      #000 calc(var(--perf) + 0.5px)
+    );
+  mask-size: calc(var(--perf) * 2) 100%;
+  mask-repeat: repeat-x;
+  mask-position: calc(var(--perf) * -1) 0;
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* Engraved guilloche — banknote line-work. Used once, on the share card. */
+@utility engraved {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
-  background-size: 32px 32px;
+    repeating-linear-gradient(
+      66deg,
+      rgba(20, 87, 60, 0.055) 0 1px,
+      transparent 1px 7px
+    ),
+    repeating-linear-gradient(
+      -66deg,
+      rgba(20, 87, 60, 0.045) 0 1px,
+      transparent 1px 7px
+    );
 }
 
-/* Surface shorthand */
-@utility surface {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+/* A row of dot leaders, like a printed statement. */
+@utility leaders {
+  background-image: radial-gradient(
+    circle 1px at center,
+    var(--color-rule-strong) 1px,
+    transparent 1px
+  );
+  background-size: 5px 1px;
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
 }
 
-/* Brand glow — used only on primary CTA button */
-@utility glow-brand {
-  box-shadow:
-    0 0 0 1px rgba(124, 78, 243, 0.2),
-    0 8px 32px -8px rgba(124, 78, 243, 0.45);
+/* ═══ Motion — the entire budget ════════════════════════════════════ */
+
+/* Content arriving on the page: one short rise. Never staggered chains. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* ── Keyframes ─────────────────────────────────────────────────────── */
-
-@keyframes shimmer {
-  100% { transform: translateX(100%); }
+/* The receipt printing: the sheet unrolls from the printer head. */
+@keyframes print {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+/* Skeleton: paper being loaded, not a neon shimmer. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
 
-/* Gradient shift kept only for the UserCard share card stripe */
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
+.animate-rise {
+  animation: rise 0.4s var(--ease-paper) both;
 }
-
-.animate-gradient-shift {
-  background-size: 200% 200%;
-  animation: gradient-shift 6s ease infinite;
+.animate-print {
+  animation: print 0.5s var(--ease-paper) both;
 }
-
-.animate-pulse-dot {
-  animation: pulse-dot 2s ease-in-out infinite;
+.animate-breathe {
+  animation: breathe 1.6s var(--ease-press) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-gradient-shift,
-  .animate-pulse-dot {
+  .animate-rise,
+  .animate-print {
     animation: none;
   }
 }
 
-/* ── Markdown (bio / descriptions) ───────────────────────────────── */
+/* ═══ Prose — a creator's bio, set as editorial text ════════════════ */
 
-.markdown {
-  color: var(--color-foreground);
-  font-size: 0.9375rem;
-  line-height: 1.7;
+.prose-ledger {
+  color: var(--color-ink-soft);
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  letter-spacing: 0;
+  max-width: 62ch;
 }
-.markdown > * + * {
-  margin-top: 0.75rem;
+.prose-ledger > * + * {
+  margin-top: 0.85em;
 }
-.markdown h1,
-.markdown h2,
-.markdown h3 {
+.prose-ledger h1,
+.prose-ledger h2,
+.prose-ledger h3 {
+  color: var(--color-ink);
+  font-family: var(--font-serif);
   font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin-top: 1.5em;
 }
-.markdown h1 { font-size: 1.3rem; }
-.markdown h2 { font-size: 1.1rem; }
-.markdown h3 { font-size: 1rem; }
-.markdown a {
-  color: var(--color-brand-muted);
+.prose-ledger h1 {
+  font-size: 1.4em;
+}
+.prose-ledger h2 {
+  font-size: 1.2em;
+}
+.prose-ledger h3 {
+  font-size: 1.05em;
+}
+.prose-ledger a {
+  color: var(--color-stamp);
   text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-color: rgba(164, 122, 248, 0.4);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2.5px;
+  text-decoration-color: var(--color-stamp-edge);
 }
-.markdown a:hover {
-  color: var(--color-brand);
-  text-decoration-color: var(--color-brand);
+.prose-ledger a:hover {
+  text-decoration-color: var(--color-stamp);
 }
-.markdown ul {
-  list-style: disc;
-  padding-left: 1.25rem;
+.prose-ledger strong {
+  color: var(--color-ink);
+  font-weight: 600;
 }
-.markdown ol {
+.prose-ledger em {
+  font-style: italic;
+}
+.prose-ledger ul {
+  list-style: none;
+  padding-left: 1.1em;
+}
+.prose-ledger ul > li {
+  position: relative;
+}
+.prose-ledger ul > li::before {
+  content: "—";
+  position: absolute;
+  left: -1.1em;
+  color: var(--color-ink-ghost);
+}
+.prose-ledger ol {
   list-style: decimal;
-  padding-left: 1.25rem;
+  padding-left: 1.3em;
 }
-.markdown li { margin-top: 0.25rem; }
-.markdown code {
+.prose-ledger li + li {
+  margin-top: 0.3em;
+}
+.prose-ledger code {
   font-family: var(--font-mono);
   font-size: 0.82em;
-  background: var(--color-surface-2);
-  padding: 0.1em 0.38em;
+  background: var(--color-well);
+  border: 1px solid var(--color-rule);
+  padding: 0.08em 0.34em;
+  border-radius: 2px;
+  letter-spacing: -0.02em;
+}
+.prose-ledger pre {
+  background: var(--color-well);
+  border: 1px solid var(--color-rule);
+  padding: 0.9rem 1rem;
   border-radius: 4px;
-  letter-spacing: -0.01em;
-}
-.markdown pre {
-  background: var(--color-surface-2);
-  padding: 0.9rem;
-  border-radius: 0.5rem;
   overflow-x: auto;
-  border: 1px solid var(--color-border);
+  font-size: 0.85em;
 }
-.markdown pre code {
-  background: transparent;
+.prose-ledger pre code {
+  background: none;
+  border: 0;
   padding: 0;
 }
-.markdown blockquote {
-  border-left: 2px solid var(--color-brand);
-  padding-left: 0.9rem;
-  color: var(--color-muted-foreground);
+.prose-ledger blockquote {
+  border-left: 2px solid var(--color-rule-strong);
+  padding-left: 1rem;
+  font-style: italic;
+  color: var(--color-ink-faint);
 }
-.markdown strong {
-  color: var(--color-foreground);
+.prose-ledger hr {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  margin: 1.6em 0;
+}
+.prose-ledger img {
+  border-radius: 4px;
+  border: 1px solid var(--color-rule);
+}
+.prose-ledger table {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 0.9em;
+  border-collapse: collapse;
+}
+.prose-ledger th,
+.prose-ledger td {
+  border-bottom: 1px solid var(--color-rule);
+  padding: 0.45em 0.6em;
+  text-align: left;
+}
+.prose-ledger th {
+  color: var(--color-ink);
   font-weight: 600;
 }
-.markdown hr {
-  border-color: var(--color-border);
-  margin: 1.25rem 0;
+
+/* Compact variant, for previews and tight columns. */
+.prose-ledger-sm {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.prose-ledger-sm > * + * {
+  margin-top: 0.5em;
 }
 
-/* ── Share card export ───────────────────────────────────────────── */
-.download-text {
-  color: #fff !important;
-  background: none !important;
-  -webkit-text-fill-color: #fff !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+/* ═══ html2canvas export ════════════════════════════════════════════
+   html2canvas cannot rasterise `mask-image`, so anything being captured
+   drops its torn edge and exports square. */
+.exporting .perforated {
+  mask-image: none;
 }

@@ -2,67 +2,97 @@
 
 import db from "@/db";
 
-const DAY_MS = 1000 * 60 * 60 * 24;
+const DAY = 86_400_000;
 
-export const getEarningData = async ({ userId }: { userId: string }) => {
+export interface EarningRow {
+  hash: string;
+  amount: number;
+  fromPublicKey: string;
+  status: string;
+  createdAt: Date;
+}
+
+export interface EarningSummary {
+  total: number;
+  last7: number;
+  last30: number;
+  contributions: number;
+  supporters: number;
+  /** Largest single contribution — a creator's most-asked question. */
+  largest: number;
+  /** Rolling 12 months, oldest first. */
+  months: { label: string; year: number; total: number }[];
+  rows: EarningRow[];
+}
+
+/**
+ * Everything the creator's statement needs, in one query.
+ *
+ * Buckets are built per request — an earlier version mutated a module-level
+ * array, which leaked one creator's earnings into the next request.
+ */
+export const getEarningData = async ({
+  userId,
+}: {
+  userId: string;
+}): Promise<EarningSummary> => {
   const transactions = await db.transaction.findMany({
     where: { user_id: userId },
+    orderBy: { createdAt: "desc" },
     select: {
+      hash: true,
       amount: true,
       createdAt: true,
-      hash: true,
       fromPublicKey: true,
       status: true,
     },
   });
 
-  const now = new Date();
-  const amountOf = (a: string) => parseFloat(a) || 0;
+  const rows: EarningRow[] = transactions.map((t) => ({
+    ...t,
+    amount: parseFloat(t.amount) || 0,
+  }));
 
-  const totalEarning = transactions.reduce((acc, t) => acc + amountOf(t.amount), 0);
-
+  const now = Date.now();
   const sumWithin = (days: number) =>
-    transactions.reduce((acc, t) => {
-      const diff = now.getTime() - new Date(t.createdAt).getTime();
-      return diff < days * DAY_MS ? acc + amountOf(t.amount) : acc;
-    }, 0);
+    rows.reduce(
+      (acc, r) =>
+        now - new Date(r.createdAt).getTime() < days * DAY
+          ? acc + r.amount
+          : acc,
+      0,
+    );
 
-  // Rolling last-12-months buckets — built per request (no shared mutable state).
+  const today = new Date();
   const months = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+    const d = new Date(today.getFullYear(), today.getMonth() - (11 - i), 1);
     return {
       key: `${d.getFullYear()}-${d.getMonth()}`,
-      month: d.toLocaleString("en-US", { month: "short" }),
+      label: d.toLocaleString("en-US", { month: "short" }),
+      year: d.getFullYear(),
       total: 0,
     };
   });
-  const indexByKey = new Map(months.map((m, i) => [m.key, i]));
+  const indexOf = new Map(months.map((m, i) => [m.key, i]));
 
-  for (const t of transactions) {
-    const d = new Date(t.createdAt);
-    const i = indexByKey.get(`${d.getFullYear()}-${d.getMonth()}`);
-    if (i !== undefined) months[i].total += amountOf(t.amount);
+  for (const r of rows) {
+    const d = new Date(r.createdAt);
+    const i = indexOf.get(`${d.getFullYear()}-${d.getMonth()}`);
+    if (i !== undefined) months[i].total += r.amount;
   }
 
-  const monthlyEarningData = months.map(({ month, total }) => ({
-    month,
-    total: Number(total.toFixed(4)),
-  }));
-
-  const recentTransactions = [...transactions]
-    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
-    .slice(0, 6);
-
-  const uniqueSupporters = new Set(transactions.map((t) => t.fromPublicKey))
-    .size;
-
   return {
-    totalEarning,
-    last30daysEarning: sumWithin(30),
-    last7daysEarning: sumWithin(7),
-    totalTrasactions: transactions.length,
-    uniqueSupporters,
-    recentTransactions,
-    monthlyEarningData,
+    total: rows.reduce((acc, r) => acc + r.amount, 0),
+    last7: sumWithin(7),
+    last30: sumWithin(30),
+    contributions: rows.length,
+    supporters: new Set(rows.map((r) => r.fromPublicKey)).size,
+    largest: rows.reduce((max, r) => Math.max(max, r.amount), 0),
+    months: months.map(({ label, year, total }) => ({
+      label,
+      year,
+      total: Number(total.toFixed(6)),
+    })),
+    rows,
   };
 };

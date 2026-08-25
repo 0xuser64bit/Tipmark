@@ -1,41 +1,75 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export function LogoMark({ className }: { className?: string }) {
+/**
+ * The mark is a receipt: a small sheet with two ledger rules and a torn
+ * bottom edge. It is the artefact the product makes, so it is the artefact
+ * that stands for the product.
+ */
+export function LogoMark({
+  className,
+  tone = "stamp",
+}: {
+  className?: string;
+  tone?: "stamp" | "ink" | "paper";
+}) {
+  const fill =
+    tone === "paper" ? "#faf8f4" : tone === "ink" ? "#17150f" : "#14573c";
+
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={cn("size-[18px] shrink-0", className)}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M3.5 2.2h13v13.05l-1.625 1.35-1.625-1.35-1.625 1.35L10 15.25l-1.625 1.35-1.625-1.35L5.125 16.6 3.5 15.25V2.2Z"
+        fill={fill}
+      />
+      <path
+        d="M6.4 6.6h7.2M6.4 9.9h4.4"
+        stroke={tone === "paper" ? "#17150f" : "#faf8f4"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * The wordmark is the product thesis in nine letters: `DAO` set in the
+ * machine voice (mono, small caps) butted straight against `nation` in the
+ * human voice (serif). The seam between the two typefaces is the logo.
+ */
+export function Wordmark({
+  className,
+  size = "md",
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  const scale = {
+    sm: ["text-[11px] tracking-[0.02em]", "text-[15px]"],
+    md: ["text-[12.5px] tracking-[0.02em]", "text-[17px]"],
+    lg: ["text-[15px] tracking-[0.02em]", "text-[21px]"],
+  }[size];
+
   return (
     <span
-      className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-[0.55rem]",
-        "brand-gradient",
-        "h-7 w-7",
-        className,
-      )}
-      aria-hidden="true"
+      className={cn("inline-flex items-baseline whitespace-nowrap text-ink", className)}
     >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+      <span className={cn("font-mono font-medium uppercase", scale[0])}>
+        DAO
+      </span>
+      <span
+        className={cn(
+          "font-serif font-medium leading-none tracking-[-0.02em]",
+          scale[1],
+        )}
       >
-        {/* Rising value — double chevron mark */}
-        <path
-          d="M4.5 13.5L12 7l7.5 6.5"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M4.5 18L12 11.5l7.5 6.5"
-          stroke="white"
-          strokeOpacity="0.4"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        nation
+      </span>
     </span>
   );
 }
@@ -43,28 +77,37 @@ export function LogoMark({ className }: { className?: string }) {
 export function Logo({
   href = "/",
   className,
-  showWordmark = true,
-  markClassName,
+  size = "md",
+  showMark = true,
+  /** Drop the wordmark on narrow screens to make room for navigation. */
+  compact = false,
 }: {
-  href?: string;
+  href?: string | null;
   className?: string;
-  showWordmark?: boolean;
-  markClassName?: string;
+  size?: "sm" | "md" | "lg";
+  showMark?: boolean;
+  compact?: boolean;
 }) {
+  const inner = (
+    <>
+      {showMark && (
+        <LogoMark className={size === "lg" ? "size-[22px]" : undefined} />
+      )}
+      <Wordmark size={size} className={compact ? "hidden sm:inline-flex" : undefined} />
+    </>
+  );
+
+  const classes = cn(
+    "inline-flex shrink-0 items-center gap-2 transition-opacity hover:opacity-70",
+    className,
+  );
+
+  if (!href)
+    return <span className={cn(classes, "hover:opacity-100")}>{inner}</span>;
+
   return (
-    <Link
-      href={href}
-      className={cn(
-        "group inline-flex items-center gap-2 transition-opacity hover:opacity-85",
-        className,
-      )}
-    >
-      <LogoMark className={markClassName} />
-      {showWordmark && (
-        <span className="text-[15px] font-semibold tracking-[-0.025em] text-foreground">
-          DAO<span className="text-muted-foreground font-normal">nation</span>
-        </span>
-      )}
+    <Link href={href} className={classes} aria-label="DAOnation home">
+      {inner}
     </Link>
   );
 }
