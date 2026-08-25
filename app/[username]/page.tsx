@@ -17,7 +17,10 @@ export default async function CreatorPage({
      page yet. Better a 404 than a page whose primary action cannot work. */
   if (!data.solana_public_key || !data.display_name) notFound();
 
-  const stats = await getSupporterStats(data.email);
+  const stats = await getSupporterStats(
+    data.email,
+    "profile_owner" in data ? String(data.profile_owner) : undefined,
+  );
 
   return (
     <WalletAdapterWrapper>

@@ -62,7 +62,7 @@ export default async function MyPage() {
         solana_address: data.solana_public_key,
         profileOwner: undefined,
       };
-  const stats = await getSupporterStats(data.email);
+  const stats = await getSupporterStats(data.email, onChain?.address);
 
   return (
     <WalletAdapterWrapper>

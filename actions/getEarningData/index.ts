@@ -1,6 +1,8 @@
 "use server";
 
 import db from "@/db";
+import { getProtocolConfig } from "@/lib/protocol/config";
+import { scanTipReceipts, summarizeChainTips } from "@/lib/protocol/earnings";
 
 const DAY = 86_400_000;
 
@@ -33,9 +35,24 @@ export interface EarningSummary {
  */
 export const getEarningData = async ({
   userId,
+  profileAddress,
 }: {
   userId: string;
+  profileAddress?: string;
 }): Promise<EarningSummary> => {
+  if (getProtocolConfig().enabled && profileAddress) {
+    const rows = await scanTipReceipts(profileAddress);
+    const summary = summarizeChainTips(rows);
+    return {
+      ...summary,
+      rows: summary.rows.map((row) => ({
+        ...row,
+        hash: row.signature,
+        amount: Number(row.amount),
+      })),
+    };
+  }
+
   const transactions = await db.transaction.findMany({
     where: { user_id: userId },
     orderBy: { createdAt: "desc" },

@@ -6,6 +6,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Statement } from "@/components/statement";
 import { auth } from "@/lib/auth";
+import { getProtocolConfig } from "@/lib/protocol/config";
+import { resolveOnChainProfile } from "@/lib/protocol/public-profile";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "Ledger" };
@@ -15,10 +17,16 @@ export default async function LedgerPage() {
   const email = session?.user?.email;
   if (!email) redirect("/");
 
-  const [data, priceUsd, user] = await Promise.all([
-    getEarningData({ userId: email }),
+  const user = await getUserByEmail({ email });
+  const protocol = getProtocolConfig();
+  const onChain =
+    protocol.enabled && user?.username
+      ? await resolveOnChainProfile(user.username).catch(() => null)
+      : null;
+  if (protocol.enabled && !onChain) redirect("/edit-profile");
+  const [data, priceUsd] = await Promise.all([
+    getEarningData({ userId: email, profileAddress: onChain?.address }),
     getSolPrice(),
-    getUserByEmail({ email }),
   ]);
 
   return (
