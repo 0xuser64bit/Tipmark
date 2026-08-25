@@ -48,6 +48,39 @@ model WalletChallenge {
   @@index([wallet, expiresAt])
 }
 
+model ProtocolTip {
+  signature     String   @id
+  cluster       String
+  program       String
+  profile       String
+  profileOwner  String
+  supporter     String
+  payoutWallet  String
+  amountLamports String
+  reference     String
+  slot          BigInt
+  blockTime     DateTime?
+  status        String
+  verifiedAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([cluster, program, profile, slot])
+  @@index([profileOwner, slot])
+}
+
+model ProtocolIndexerCheckpoint {
+  id               String   @id
+  cluster          String
+  program          String
+  headSlot         BigInt   @default(0)
+  headSignature    String?
+  backfillBefore   String?
+  backfillComplete Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
+
+  @@unique([cluster, program])
+}
+
 model Transaction {
   id            String   @id @default(uuid())
   user          User     @relation(fields: [user_id], references: [email])

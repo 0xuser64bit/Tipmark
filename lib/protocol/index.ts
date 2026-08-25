@@ -9,3 +9,4 @@ export * from "./irys";
 export * from "./transactions";
 export * from "./tip-receipt";
 export * from "./earnings";
+export * from "./indexer";

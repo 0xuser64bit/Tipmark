@@ -13,7 +13,9 @@
     "format": "prettier --write .",
     "protocol:build": "NO_DNA=1 anchor build --ignore-keys && cp target/idl/tipmark_protocol.json idls/tipmark_protocol.json",
     "protocol:generate": "bun scripts/generate-protocol-client.mjs",
-    "protocol:test": "cargo test --workspace && cargo clippy --workspace --all-targets -- -D warnings && bun test lib/protocol"
+    "protocol:test": "cargo test --workspace && cargo clippy --workspace --all-targets -- -D warnings && bun test lib/protocol",
+    "protocol:index": "bun scripts/index-protocol-tips.ts",
+    "protocol:reconcile": "bun scripts/reconcile-protocol-tips.ts"
   },
   "dependencies": {
     "@edgestore/react": "^0.2.2",
