@@ -1,0 +1,16 @@
+{
+  "name": "@tipmark/protocol-client",
+  "version": "0.1.0",
+  "description": "Generated TypeScript client for the Tipmark Solana program",
+  "main": "src/index.ts",
+  "files": [
+    "./dist/src",
+    "./dist/types",
+    "./src/"
+  ],
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "peerDependencies": { "@solana/kit": "^6.10.0" },
+  "dependencies": { "@solana/program-client-core": "^6.10.0" }
+}
