@@ -10,6 +10,7 @@ import {
   type ParsedInstruction,
 } from "@solana/web3.js";
 import { getProtocolConfig } from "./config";
+import { readWithRpcFailover } from "@/lib/solana/rpc";
 
 export class TipReceiptVerificationError extends Error {
   constructor(message: string) {
@@ -69,10 +70,18 @@ function decodeEventLogs(logs: readonly string[]): TipReceivedEvent[] {
 
 export async function readTipReceipt(
   signature: string,
-  connection: Connection = new Connection(
-    getProtocolConfig().rpcUrl,
-    "confirmed",
-  ),
+  connection?: Connection,
+): Promise<VerifiedTipReceipt> {
+  return readWithRpcFailover(
+    (activeConnection) =>
+      readTipReceiptFromConnection(signature, activeConnection),
+    connection,
+  );
+}
+
+async function readTipReceiptFromConnection(
+  signature: string,
+  connection: Connection,
 ): Promise<VerifiedTipReceipt> {
   if (!/^[1-9A-HJ-NP-Za-km-z]{80,90}$/.test(signature)) {
     throw new TipReceiptVerificationError("Invalid Solana signature.");

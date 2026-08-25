@@ -20,6 +20,7 @@ export interface TipmarkProtocolRuntimeConfig {
   cluster: TipmarkCluster;
   programAddress: Address;
   rpcUrl: string;
+  rpcUrls: string[];
   websocketUrl: string;
 }
 
@@ -36,6 +37,12 @@ export function getProtocolConfig(): TipmarkProtocolRuntimeConfig {
       configuredProgram || TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
     ),
     rpcUrl: configuredRpc || network.rpcUrl,
+    rpcUrls: configuredRpc
+      ? [
+          configuredRpc,
+          ...network.rpcUrls.filter((url) => url !== configuredRpc),
+        ]
+      : network.rpcUrls,
     websocketUrl: configuredWebsocket || network.websocketUrl,
   };
 }

@@ -3,6 +3,7 @@ import { getProtocolConfig } from "./config";
 import { deriveProfilePda } from "./pdas";
 import { lamportsToSol } from "@/lib/solana/amount";
 import { readTipReceipt, type VerifiedTipReceipt } from "./tip-receipt";
+import { readWithRpcFailover } from "@/lib/solana/rpc";
 
 export interface ChainTipRow {
   signature: string;
@@ -25,9 +26,7 @@ export async function scanTipReceipts(
     pageSize?: number;
   } = {},
 ): Promise<ChainTipRow[]> {
-  const connection =
-    options.connection ||
-    new Connection(getProtocolConfig().rpcUrl, "confirmed");
+  const connection = options.connection;
   const profile = new PublicKey(profileAddress);
   const rows: ChainTipRow[] = [];
   let before: string | undefined;
@@ -35,10 +34,14 @@ export async function scanTipReceipts(
   const pageSize = Math.max(1, Math.min(options.pageSize ?? 1000, 1000));
 
   for (let page = 0; page < maxPages; page += 1) {
-    const signatures = await connection.getSignaturesForAddress(profile, {
-      before,
-      limit: pageSize,
-    });
+    const signatures = await readWithRpcFailover(
+      (activeConnection) =>
+        activeConnection.getSignaturesForAddress(profile, {
+          before,
+          limit: pageSize,
+        }),
+      connection,
+    );
     if (!signatures.length) break;
 
     for (const item of signatures) {

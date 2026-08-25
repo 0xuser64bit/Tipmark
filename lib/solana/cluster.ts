@@ -20,6 +20,7 @@ export interface SolanaNetworkConfig {
   cluster: SolanaCluster;
   label: string;
   rpcUrl: string;
+  rpcUrls: string[];
   websocketUrl: string;
 }
 
@@ -38,13 +39,21 @@ export function parseSolanaCluster(value: string | undefined): SolanaCluster {
 
 export function getSolanaNetworkConfig(): SolanaNetworkConfig {
   const cluster = parseSolanaCluster(process.env.NEXT_PUBLIC_SOLANA_CLUSTER);
+  const rpcUrl =
+    process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim() || DEFAULT_RPC_URLS[cluster];
+  const rpcUrls = [
+    rpcUrl,
+    ...(process.env.NEXT_PUBLIC_SOLANA_RPC_URLS || "")
+      .split(",")
+      .map((url) => url.trim())
+      .filter(Boolean),
+  ].filter((url, index, urls) => urls.indexOf(url) === index);
 
   return {
     cluster,
     label: cluster === "mainnet-beta" ? "Solana mainnet" : `Solana ${cluster}`,
-    rpcUrl:
-      process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim() ||
-      DEFAULT_RPC_URLS[cluster],
+    rpcUrl,
+    rpcUrls,
     websocketUrl:
       process.env.NEXT_PUBLIC_SOLANA_WS_URL?.trim() ||
       DEFAULT_WEBSOCKET_URLS[cluster],
