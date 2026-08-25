@@ -32,6 +32,22 @@ model User {
   Transaction        Transaction[]
 }
 
+model WalletChallenge {
+  id        String    @id @default(uuid())
+  nonce     String    @unique
+  wallet    String
+  email     String?
+  domain    String
+  uri       String
+  cluster   String
+  issuedAt  DateTime
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([wallet, expiresAt])
+}
+
 model Transaction {
   id            String   @id @default(uuid())
   user          User     @relation(fields: [user_id], references: [email])

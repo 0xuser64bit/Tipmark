@@ -2,6 +2,7 @@
 
 import db from "@/db";
 import { auth } from "@/lib/auth";
+import { getWalletAuthorization } from "@/actions/walletAuth";
 
 export interface ProtocolProfileCacheInput {
   email: string;
@@ -15,6 +16,7 @@ export interface ProtocolProfileCacheInput {
   github_username: string;
   linkedin_username: string;
   solana_public_key: string;
+  owner: string;
 }
 
 /** Keep the legacy dashboard cache current after a confirmed on-chain write. */
@@ -24,6 +26,10 @@ export default async function cacheProtocolProfile(
   const session = await auth();
   if (session?.user?.email !== input.email) {
     throw new Error("The signed-in user cannot update this profile cache.");
+  }
+  const authorization = await getWalletAuthorization();
+  if (!authorization || authorization.wallet !== input.owner) {
+    throw new Error("A verified wallet authorization is required.");
   }
 
   return db.user.update({

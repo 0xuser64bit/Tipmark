@@ -1,6 +1,10 @@
 "use client";
 
 import cacheProtocolProfile from "@/actions/cacheProtocolProfile";
+import {
+  createWalletChallenge,
+  verifyWalletChallenge,
+} from "@/actions/walletAuth";
 import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
 import {
   createIrysClient,
@@ -89,6 +93,12 @@ function previewUri(value: string): string {
   } catch {
     return "";
   }
+}
+
+function encodeSignature(signature: Uint8Array): string {
+  let binary = "";
+  for (const byte of signature) binary += String.fromCharCode(byte);
+  return btoa(binary);
 }
 
 export default function ProtocolProfileEditor({
@@ -206,6 +216,23 @@ export default function ProtocolProfileEditor({
     }
     setSaving(true);
     try {
+      const messageSigner = wallet.adapter as MessageSignerWalletAdapter;
+      if (!messageSigner.signMessage) {
+        throw new Error("This wallet cannot sign authorization messages.");
+      }
+      const challenge = await createWalletChallenge({
+        wallet: publicKey.toBase58(),
+        uri: window.location.origin + window.location.pathname,
+      });
+      const walletSignature = await messageSigner.signMessage(
+        new TextEncoder().encode(challenge.message),
+      );
+      await verifyWalletChallenge({
+        challengeId: challenge.challengeId,
+        wallet: publicKey.toBase58(),
+        signatureBase64: encodeSignature(walletSignature),
+      });
+
       const metadata = normalizeProfileMetadata({
         displayName: form.displayName,
         bio: form.description,
@@ -282,6 +309,7 @@ export default function ProtocolProfileEditor({
           github_username: metadata.links.github || "",
           linkedin_username: metadata.links.linkedin || "",
           solana_public_key: form.solana.trim(),
+          owner: publicKey.toBase58(),
         });
       } catch {
         toast.warning(
