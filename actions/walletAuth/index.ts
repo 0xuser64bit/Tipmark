@@ -14,6 +14,7 @@ import {
 import { PublicKey } from "@solana/web3.js";
 import nacl from "tweetnacl";
 import { cookies } from "next/headers";
+import { BRAND_URL } from "@/lib/brand";
 
 const CHALLENGE_TTL_MS = 10 * 60 * 1000;
 
@@ -27,7 +28,19 @@ function assertWallet(wallet: string): string {
 
 function assertUri(uri: string): string {
   const normalized = uri.trim();
-  if (!/^https?:\/\//i.test(normalized) || normalized.length > 300) {
+  let parsed: URL;
+  try {
+    parsed = new URL(normalized);
+  } catch {
+    throw new Error("Invalid authorization URI.");
+  }
+  const configuredOrigin = new URL(process.env.NEXTAUTH_URL || BRAND_URL)
+    .origin;
+  if (
+    !/^https?:$/i.test(parsed.protocol) ||
+    parsed.origin !== configuredOrigin ||
+    normalized.length > 300
+  ) {
     throw new Error("Invalid authorization URI.");
   }
   return normalized;

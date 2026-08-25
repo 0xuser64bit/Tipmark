@@ -69,7 +69,7 @@ type InitialProfile = {
 };
 
 export interface ProtocolProfileEditorProps {
-  email: string;
+  email?: string;
   initial: InitialProfile;
   mode: "setup" | "edit";
   profileOwner?: string;
@@ -309,32 +309,34 @@ export default function ProtocolProfileEditor({
         toast.warning("Submitted to Solana; confirmation is still pending.");
         return;
       }
-      try {
-        await cacheProtocolProfile({
-          email,
-          username: handle,
-          profile_image: metadata.images.avatar || "",
-          cover_image: metadata.images.cover || "",
-          display_name: metadata.displayName,
-          description: metadata.bio,
-          x_username: metadata.links.x || "",
-          instagram_username: metadata.links.instagram || "",
-          github_username: metadata.links.github || "",
-          linkedin_username: metadata.links.linkedin || "",
-          solana_public_key: form.solana.trim(),
-          owner: connectedOwner,
-        });
-      } catch {
-        toast.warning(
-          "Published on Solana; the dashboard cache will catch up.",
-        );
+      if (email) {
+        try {
+          await cacheProtocolProfile({
+            email,
+            username: handle,
+            profile_image: metadata.images.avatar || "",
+            cover_image: metadata.images.cover || "",
+            display_name: metadata.displayName,
+            description: metadata.bio,
+            x_username: metadata.links.x || "",
+            instagram_username: metadata.links.instagram || "",
+            github_username: metadata.links.github || "",
+            linkedin_username: metadata.links.linkedin || "",
+            solana_public_key: form.solana.trim(),
+            owner: connectedOwner,
+          });
+        } catch {
+          toast.warning(
+            "Published on Solana; the dashboard cache will catch up.",
+          );
+        }
       }
       toast.success(
         mode === "setup"
           ? "Your page is live on Solana."
           : "Changes saved on Solana.",
       );
-      router.push("/home");
+      router.push(email ? "/home" : `/${handle}`);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "That did not save.",
@@ -358,7 +360,7 @@ export default function ProtocolProfileEditor({
         actions={
           <div className="flex items-center gap-2">
             <WalletTrigger />
-            <AccountMenu />
+            {email && <AccountMenu />}
           </div>
         }
       />
@@ -496,15 +498,17 @@ export default function ProtocolProfileEditor({
                   />
                 ))}
               </div>
-              <label className="flex cursor-pointer items-start gap-2.5 pt-1">
-                <Checkbox
-                  checked={form.updates}
-                  onCheckedChange={(value) => set("updates", Boolean(value))}
-                />
-                <span className="text-[13px] leading-snug text-ink-soft">
-                  Email me when {BRAND_NAME} ships something.
-                </span>
-              </label>
+              {email && (
+                <label className="flex cursor-pointer items-start gap-2.5 pt-1">
+                  <Checkbox
+                    checked={form.updates}
+                    onCheckedChange={(value) => set("updates", Boolean(value))}
+                  />
+                  <span className="text-[13px] leading-snug text-ink-soft">
+                    Email me when {BRAND_NAME} ships something.
+                  </span>
+                </label>
+              )}
             </section>
             <div className="flex items-center justify-end border-t border-rule pt-6">
               <Button

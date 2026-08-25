@@ -13,6 +13,7 @@ import { PaidMark } from "./ui/stamp";
 import { Wordmark } from "./ui/logo";
 import { cn } from "@/lib/utils";
 import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
+import { getProtocolConfig } from "@/lib/protocol/config";
 
 /* ── Content ────────────────────────────────────────────────────────── */
 
@@ -20,7 +21,7 @@ const STEPS = [
   {
     n: "01",
     title: "Claim a handle",
-    body: "Sign in with Google and pick your link. Nothing to install, nothing to deploy.",
+    body: "Connect your wallet and pick your link. The wallet owns the page; no platform account controls it.",
   },
   {
     n: "02",
@@ -86,6 +87,7 @@ const CAVEATS = [
 
 export function Landing({ priceUsd }: { priceUsd: number | null }) {
   const [handle, setHandle] = useState("");
+  const protocolEnabled = getProtocolConfig().enabled;
 
   const start = (desired?: string) => {
     const slug = (desired ?? "")
@@ -96,6 +98,12 @@ export function Landing({ priceUsd }: { priceUsd: number | null }) {
     const callbackUrl = slug
       ? `/edit-profile?handle=${encodeURIComponent(slug)}`
       : "/edit-profile";
+    if (protocolEnabled) {
+      window.location.assign(
+        slug ? `/claim?handle=${encodeURIComponent(slug)}` : "/claim",
+      );
+      return;
+    }
     signIn("google", { redirect: true, callbackUrl });
   };
 
