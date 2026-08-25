@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "1.0.1"
+package_manager = "bun"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+tipmark_protocol = "7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test --workspace"
+
+[hooks]

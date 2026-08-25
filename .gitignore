@@ -19,6 +19,11 @@
 
 # production
 /build
+/target
+/.anchor
+
+# local Solana identities and program keypairs
+*-keypair.json
 
 # misc
 .DS_Store
