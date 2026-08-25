@@ -8,22 +8,12 @@ import {
   type Address,
 } from "@solana/kit";
 import { TIPMARK_PROTOCOL_PROGRAM_ADDRESS } from "@/clients/tipmark-protocol/src";
+import {
+  getSolanaNetworkConfig,
+  type SolanaCluster,
+} from "@/lib/solana/cluster";
 
-export type TipmarkCluster = "localnet" | "devnet" | "testnet" | "mainnet-beta";
-
-const DEFAULT_HTTP_ENDPOINTS: Record<TipmarkCluster, string> = {
-  localnet: "http://127.0.0.1:8899",
-  devnet: "https://api.devnet.solana.com",
-  testnet: "https://api.testnet.solana.com",
-  "mainnet-beta": "https://api.mainnet-beta.solana.com",
-};
-
-const DEFAULT_WS_ENDPOINTS: Record<TipmarkCluster, string> = {
-  localnet: "ws://127.0.0.1:8900",
-  devnet: "wss://api.devnet.solana.com",
-  testnet: "wss://api.testnet.solana.com",
-  "mainnet-beta": "wss://api.mainnet-beta.solana.com",
-};
+export type TipmarkCluster = SolanaCluster;
 
 export interface TipmarkProtocolRuntimeConfig {
   enabled: boolean;
@@ -33,33 +23,20 @@ export interface TipmarkProtocolRuntimeConfig {
   websocketUrl: string;
 }
 
-function parseCluster(value: string | undefined): TipmarkCluster {
-  if (
-    value === "localnet" ||
-    value === "devnet" ||
-    value === "testnet" ||
-    value === "mainnet-beta"
-  ) {
-    return value;
-  }
-
-  return "devnet";
-}
-
 export function getProtocolConfig(): TipmarkProtocolRuntimeConfig {
-  const cluster = parseCluster(process.env.NEXT_PUBLIC_SOLANA_CLUSTER);
+  const network = getSolanaNetworkConfig();
   const configuredProgram = process.env.NEXT_PUBLIC_TIPMARK_PROGRAM_ID?.trim();
   const configuredRpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim();
   const configuredWebsocket = process.env.NEXT_PUBLIC_SOLANA_WS_URL?.trim();
 
   return {
     enabled: process.env.NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED === "true",
-    cluster,
+    cluster: network.cluster,
     programAddress: address(
       configuredProgram || TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
     ),
-    rpcUrl: configuredRpc || DEFAULT_HTTP_ENDPOINTS[cluster],
-    websocketUrl: configuredWebsocket || DEFAULT_WS_ENDPOINTS[cluster],
+    rpcUrl: configuredRpc || network.rpcUrl,
+    websocketUrl: configuredWebsocket || network.websocketUrl,
   };
 }
 

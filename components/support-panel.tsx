@@ -20,6 +20,7 @@ import { Panel, PanelHeader, PanelTitle } from "./ui/panel";
 import { useWalletConnect } from "./wallet-adapter-wrapper";
 import { formatSol, formatUsd } from "@/lib/format";
 import { useSolPrice } from "@/lib/use-sol-price";
+import { solToLamports } from "@/lib/solana/amount";
 import { cn } from "@/lib/utils";
 
 /**
@@ -105,32 +106,30 @@ export function SupportPanel({
 
       setSending(true);
       try {
+        const lamports = solToLamports(amount.toString());
         const tx = new Transaction().add(
           SystemProgram.transfer({
             fromPubkey: publicKey!,
             toPubkey: new PublicKey(solanaAddress),
-            lamports: Math.round(LAMPORTS_PER_SOL * amount),
+            lamports: Number(lamports),
           }),
         );
 
         const signature = await sendTransaction(tx, connection);
 
-        /* Poll briefly for a confirmation status so the receipt can state
-           what the cluster actually said, rather than guessing. */
-        let status = (await connection.getSignatureStatus(signature))?.value;
-        for (let i = 0; i < 10 && !status; i++) {
-          await new Promise((r) => setTimeout(r, 1000));
-          status = (await connection.getSignatureStatus(signature))?.value;
+        try {
+          await addTransactionToDB({
+            userId: email,
+            hash: signature,
+            amount: amount.toString(),
+            fromPublicKey: publicKey!.toString(),
+            toPublicKey: solanaAddress,
+          });
+        } catch {
+          toast.warning(
+            "The payment was sent, but dashboard indexing is still catching up.",
+          );
         }
-
-        await addTransactionToDB({
-          userId: email,
-          hash: signature,
-          amount: amount.toString(),
-          fromPublicKey: publicKey!.toString(),
-          toPublicKey: solanaAddress,
-          status: status?.confirmationStatus ?? "processing",
-        });
 
         router.push(`/check-explorer/${signature}`);
       } catch (error) {

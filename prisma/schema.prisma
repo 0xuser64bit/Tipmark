@@ -36,7 +36,7 @@ model Transaction {
   id            String   @id @default(uuid())
   user          User     @relation(fields: [user_id], references: [email])
   user_id       String
-  hash          String
+  hash          String   @unique
   amount        String
   fromPublicKey String
   toPublicKey   String

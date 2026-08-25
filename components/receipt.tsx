@@ -6,6 +6,10 @@ import { Ledger, LedgerRow } from "@/components/ui/ledger";
 import { Money } from "@/components/ui/money";
 import { PaidMark, Stamp } from "@/components/ui/stamp";
 import { Wordmark } from "@/components/ui/logo";
+import {
+  getSolanaNetworkConfig,
+  getSolscanTransactionUrl,
+} from "@/lib/solana/cluster";
 
 /**
  * The receipt.
@@ -34,12 +38,13 @@ export function Receipt({
   toPublicKey: string;
   fromPublicKey: string;
   status: string;
-  createdAt: Date;
+  createdAt: Date | null;
   priceUsd: number | null;
   creatorUsername?: string;
   creatorName?: string;
 }) {
   const settled = /confirmed|finalized/i.test(status);
+  const network = getSolanaNetworkConfig();
 
   return (
     <div className="mx-auto w-full max-w-[400px]">
@@ -67,8 +72,8 @@ export function Receipt({
               <PaidMark />
             ) : (
               <p className="max-w-[30ch] text-[12.5px] leading-relaxed text-pending">
-                The cluster is still confirming this. It is already on its way
-                — reload in a few seconds.
+                The cluster is still confirming this. It is already on its way —
+                reload in a few seconds.
               </p>
             )}
           </div>
@@ -89,17 +94,19 @@ export function Receipt({
           </LedgerRow>
           <LedgerRow label="Date">
             <span className="figure text-[12.5px] text-ink-soft">
-              {new Date(createdAt).toLocaleString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {createdAt
+                ? new Date(createdAt).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Unavailable"}
             </span>
           </LedgerRow>
           <LedgerRow label="Network">
-            <span className="text-[13px] text-ink-soft">Solana mainnet</span>
+            <span className="text-[13px] text-ink-soft">{network.label}</span>
           </LedgerRow>
           <LedgerRow label="Status">
             <Stamp status={status} />
@@ -113,7 +120,7 @@ export function Receipt({
         <div className="px-5 pb-8 pt-5">
           <Button asChild variant="outline" block>
             <a
-              href={`https://solscan.io/tx/${signature}`}
+              href={getSolscanTransactionUrl(signature, network)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -132,9 +139,7 @@ export function Receipt({
       <div className="mt-8 flex flex-col items-center gap-4 text-center">
         {creatorUsername && (
           <Button asChild variant="quiet" size="sm">
-            <Link href={`/${creatorUsername}`}>
-              Back to @{creatorUsername}
-            </Link>
+            <Link href={`/${creatorUsername}`}>Back to @{creatorUsername}</Link>
           </Button>
         )}
 

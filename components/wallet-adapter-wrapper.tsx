@@ -10,12 +10,12 @@ import {
   WalletModalProvider,
   useWalletModal,
 } from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
 import { ArrowUpRight } from "lucide-react";
 import React, { createContext, useContext, useMemo, useState } from "react";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import "./wallet-button-styles.css";
 import { Button } from "./ui/button";
+import { getSolanaNetworkConfig } from "@/lib/solana/cluster";
 import {
   Dialog,
   DialogBody,
@@ -84,7 +84,8 @@ function WalletConnectProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       hasWallet,
-      requestConnect: () => (hasWallet ? setVisible(true) : setExplaining(true)),
+      requestConnect: () =>
+        hasWallet ? setVisible(true) : setExplaining(true),
     }),
     [hasWallet, setVisible],
   );
@@ -133,8 +134,8 @@ function WalletConnectProvider({ children }: { children: React.ReactNode }) {
 
             <div className="px-5 py-4">
               <p className="text-[12.5px] leading-relaxed text-ink-faint">
-                Once one is installed, reload this page and it will appear
-                here. Never share your seed phrase with anyone — including us.
+                Once one is installed, reload this page and it will appear here.
+                Never share your seed phrase with anyone — including us.
               </p>
               <Button
                 variant="quiet"
@@ -155,12 +156,9 @@ function WalletConnectProvider({ children }: { children: React.ReactNode }) {
 export const WalletAdapterWrapper = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  /* The public cluster endpoint is rate-limited and unreliable for payment
-     traffic — set NEXT_PUBLIC_SOLANA_RPC_URL to a dedicated RPC in prod. */
-  const endpoint = useMemo(
-    () => process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl("mainnet-beta"),
-    [],
-  );
+  /* Public endpoints are rate-limited. Production should configure a
+     dedicated RPC while keeping the cluster explicit. */
+  const endpoint = useMemo(() => getSolanaNetworkConfig().rpcUrl, []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
