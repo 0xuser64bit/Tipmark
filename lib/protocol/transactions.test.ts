@@ -78,7 +78,9 @@ describe("protocol wallet transaction boundary", () => {
       simulateTransaction: async () => ({
         value: { err: null, logs: [], unitsConsumed: 12_345 },
       }),
-      confirmTransaction: async () => ({ value: { err: null } }),
+      getSignatureStatuses: async () => ({
+        value: [{ err: null, confirmationStatus: "confirmed" }],
+      }),
     };
 
     const result = await simulateAndSendProtocolTransaction({

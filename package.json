@@ -14,6 +14,7 @@
     "protocol:build": "NO_DNA=1 anchor build --ignore-keys && cp target/idl/tipmark_protocol.json idls/tipmark_protocol.json",
     "protocol:generate": "bun scripts/generate-protocol-client.mjs",
     "protocol:test": "cargo test --workspace && cargo clippy --workspace --all-targets -- -D warnings && bun test lib/protocol",
+    "protocol:integration": "NO_DNA=1 bun run protocol:build && NEXT_PUBLIC_SOLANA_CLUSTER=localnet NEXT_PUBLIC_SOLANA_RPC_URL=http://127.0.0.1:18899 NO_DNA=1 bun scripts/protocol-localnet-smoke.ts",
     "protocol:index": "bun scripts/index-protocol-tips.ts",
     "protocol:reconcile": "bun scripts/reconcile-protocol-tips.ts"
   },

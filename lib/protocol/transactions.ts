@@ -18,12 +18,14 @@ import {
 } from "@solana/web3.js";
 import {
   getCreateProfileInstructionAsync,
+  getInitializeConfigInstructionAsync,
   getTipInstruction,
   getUpdateProfileInstructionAsync,
 } from "@/clients/tipmark-protocol/src";
 import { getProtocolConfig } from "./config";
 
 const CONFIRMATION_TIMEOUT_MS = 45_000;
+const CONFIRMATION_POLL_MS = 250;
 
 export class ProtocolSimulationError extends Error {
   readonly logs: readonly string[];
@@ -57,6 +59,26 @@ export type WalletTransactionSender = (
   options?: SendOptions,
 ) => Promise<TransactionSignature>;
 
+async function pollProtocolConfirmation(
+  connection: Connection,
+  signature: string,
+): Promise<{ value: { err: unknown } } | null> {
+  const deadline = Date.now() + CONFIRMATION_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const status = (await connection.getSignatureStatuses([signature]))
+      .value[0];
+    if (status?.err) return { value: { err: status.err } };
+    if (
+      status?.confirmationStatus === "confirmed" ||
+      status?.confirmationStatus === "finalized"
+    ) {
+      return { value: { err: null } };
+    }
+    await new Promise((resolve) => setTimeout(resolve, CONFIRMATION_POLL_MS));
+  }
+  return null;
+}
+
 function copyInstructionBytes(value: unknown): Uint8Array {
   const bytes = value as {
     readonly [index: number]: number;
@@ -81,7 +103,9 @@ export function toWeb3Instruction(
       isSigner: isSignerRole(account.role),
       isWritable: isWritableRole(account.role),
     })),
-    data: Buffer.from(copyInstructionBytes(instruction.data || new Uint8Array())),
+    data: Buffer.from(
+      copyInstructionBytes(instruction.data || new Uint8Array()),
+    ),
   });
 }
 
@@ -101,6 +125,22 @@ export async function buildCreateProfileInstruction(input: {
       username: input.username,
       metadataUri: input.metadataUri,
       metadataHash: input.metadataHash,
+    },
+    { programAddress: config.programAddress },
+  );
+  return toWeb3Instruction(instruction);
+}
+
+export async function buildInitializeConfigInstruction(input: {
+  authority: string | Address;
+  programData: string | Address;
+}): Promise<TransactionInstruction> {
+  const config = getProtocolConfig();
+  const authority = address(input.authority);
+  const instruction = await getInitializeConfigInstructionAsync(
+    {
+      authority: createNoopSigner(authority),
+      programData: address(input.programData),
     },
     { programAddress: config.programAddress },
   );
@@ -178,21 +218,10 @@ export async function simulateAndSendProtocolTransaction(input: {
     skipPreflight: false,
   });
 
-  const confirmation = await Promise.race([
-    input.connection
-      .confirmTransaction(
-        {
-          signature,
-          blockhash: latest.value.blockhash,
-          lastValidBlockHeight: latest.value.lastValidBlockHeight,
-        },
-        "confirmed",
-      )
-      .catch(() => null),
-    new Promise<null>((resolve) =>
-      setTimeout(() => resolve(null), CONFIRMATION_TIMEOUT_MS),
-    ),
-  ]);
+  const confirmation = await pollProtocolConfirmation(
+    input.connection,
+    signature,
+  );
 
   if (confirmation?.value.err) {
     throw new ProtocolTransactionError(signature);
