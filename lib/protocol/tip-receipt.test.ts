@@ -1,13 +1,22 @@
 import { describe, expect, test } from "bun:test";
-import { getTipReceivedEventEncoder } from "@/clients/tipmark-protocol/src";
-import { address } from "@solana/kit";
-import { PublicKey } from "@solana/web3.js";
+import { getBase58Decoder, address } from "@solana/kit";
+import {
+  getTipInstructionDataEncoder,
+  getTipReceivedEventEncoder,
+  TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
+} from "@/clients/tipmark-protocol/src";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { readTipReceipt } from "./tip-receipt";
 
 const supporter = new PublicKey("Vote111111111111111111111111111111111111111");
 const payout = new PublicKey("11111111111111111111111111111111");
-const profile = new PublicKey("Sysvar1111111111111111111111111111111111111");
 const owner = new PublicKey("Config1111111111111111111111111111111111111");
+const protocol = new PublicKey(TIPMARK_PROTOCOL_PROGRAM_ADDRESS);
+const [profile] = PublicKey.findProgramAddressSync(
+  [Buffer.from("profile"), owner.toBuffer()],
+  protocol,
+);
+const reference = Uint8Array.from({ length: 32 }, (_, index) => index + 1);
 
 function eventLog() {
   const data = getTipReceivedEventEncoder().encode({
@@ -16,7 +25,7 @@ function eventLog() {
     supporter: address(supporter.toBase58()),
     payoutWallet: address(payout.toBase58()),
     amount: 1234n,
-    reference: new Uint8Array(32),
+    reference,
     timestamp: 100n,
   });
   const bytes = new Uint8Array(data.length);
@@ -25,12 +34,20 @@ function eventLog() {
 }
 
 function connection(overrides: Record<string, unknown> = {}) {
+  const tipData = getTipInstructionDataEncoder().encode({
+    amount: 1234n,
+    reference,
+  });
   return {
     getParsedTransaction: async () => ({
       blockTime: 100,
       meta: {
         err: null,
-        logMessages: [eventLog()],
+        logMessages: [
+          `Program ${protocol.toBase58()} invoke [1]`,
+          eventLog(),
+          `Program ${protocol.toBase58()} success`,
+        ],
         innerInstructions: [
           {
             index: 0,
@@ -61,6 +78,14 @@ function connection(overrides: Record<string, unknown> = {}) {
                 "7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT",
               ),
               signer: false,
+            },
+            { pubkey: protocol, signer: false },
+          ],
+          instructions: [
+            {
+              programId: protocol,
+              accounts: [supporter, profile, payout, SystemProgram.programId],
+              data: getBase58Decoder().decode(tipData),
             },
           ],
         },
@@ -107,6 +132,92 @@ describe("protocol tip receipts", () => {
                     },
                   ],
                 },
+              ],
+            },
+          }),
+        }) as never,
+      ),
+    ).rejects.toThrow("does not match");
+  });
+
+  test("rejects an event that is not emitted by the protocol program", async () => {
+    await expect(
+      readTipReceipt(
+        "1".repeat(88),
+        connection({
+          getParsedTransaction: async () => ({
+            ...(await connection().getParsedTransaction()),
+            meta: {
+              ...(await connection().getParsedTransaction()).meta,
+              logMessages: [eventLog()],
+            },
+          }),
+        }) as never,
+      ),
+    ).rejects.toThrow("TipReceived event");
+  });
+
+  test("rejects protocol instructions with a forged discriminator", async () => {
+    const transaction = await connection().getParsedTransaction();
+    const instruction = transaction.transaction.message.instructions[0];
+    const forgedData = getTipInstructionDataEncoder().encode({
+      amount: 1234n,
+      reference,
+    });
+    (forgedData as unknown as { [index: number]: number })[0] ^= 0xff;
+
+    await expect(
+      readTipReceipt(
+        "1".repeat(88),
+        connection({
+          getParsedTransaction: async () => ({
+            ...transaction,
+            transaction: {
+              ...transaction.transaction,
+              message: {
+                ...transaction.transaction.message,
+                instructions: [
+                  {
+                    ...instruction,
+                    data: getBase58Decoder().decode(forgedData),
+                  },
+                ],
+              },
+            },
+          }),
+        }) as never,
+      ),
+    ).rejects.toThrow("protocol tip instruction");
+  });
+
+  test("rejects an event whose profile is not derived from its owner", async () => {
+    const forgedEvent = getTipReceivedEventEncoder().encode({
+      profile: address(
+        new PublicKey("Sysvar1111111111111111111111111111111111111").toBase58(),
+      ),
+      profileOwner: address(owner.toBase58()),
+      supporter: address(supporter.toBase58()),
+      payoutWallet: address(payout.toBase58()),
+      amount: 1234n,
+      reference,
+      timestamp: 100n,
+    });
+    const forgedLog = `Program data: ${Buffer.from(
+      Uint8Array.from(forgedEvent as unknown as ArrayLike<number>),
+    ).toString("base64")}`;
+
+    await expect(
+      readTipReceipt(
+        "1".repeat(88),
+        connection({
+          getParsedTransaction: async () => ({
+            ...(await connection().getParsedTransaction()),
+            meta: {
+              ...(await connection().getParsedTransaction()).meta,
+              logMessages: [
+                `Program ${protocol.toBase58()} invoke [1]`,
+                forgedLog,
+                `Program ${protocol.toBase58()} success`,
               ],
             },
           }),

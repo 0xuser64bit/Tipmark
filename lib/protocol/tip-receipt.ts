@@ -1,12 +1,16 @@
 import {
   parseTipReceivedEvent,
   TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
+  TIP_DISCRIMINATOR,
+  getTipInstructionDataDecoder,
   type TipReceivedEvent,
 } from "@/clients/tipmark-protocol/src";
+import { getBase58Encoder } from "@solana/kit";
 import {
   Connection,
   PublicKey,
   SystemProgram,
+  type PartiallyDecodedInstruction,
   type ParsedInstruction,
 } from "@solana/web3.js";
 import { getProtocolConfig } from "./config";
@@ -34,6 +38,24 @@ function parseKey(value: string, label: string): PublicKey {
   }
 }
 
+function copyBytes(value: {
+  readonly [index: number]: number;
+  readonly length?: number;
+}): Uint8Array {
+  const bytes = new Uint8Array(value.length ?? 0);
+  for (let index = 0; index < bytes.length; index += 1) {
+    bytes[index] = value[index];
+  }
+  return bytes;
+}
+
+function bytesEqual(
+  left: { readonly [index: number]: number; readonly length?: number },
+  right: { readonly [index: number]: number; readonly length?: number },
+): boolean {
+  return Buffer.from(copyBytes(left)).equals(Buffer.from(copyBytes(right)));
+}
+
 function isTransfer(
   instruction: ParsedInstruction,
 ): instruction is ParsedInstruction & {
@@ -55,10 +77,34 @@ function isTransfer(
   );
 }
 
-function decodeEventLogs(logs: readonly string[]): TipReceivedEvent[] {
+function decodeProtocolEventLogs(
+  logs: readonly string[],
+  programId: PublicKey,
+): TipReceivedEvent[] {
   const events: TipReceivedEvent[] = [];
+  const stack: PublicKey[] = [];
   for (const log of logs) {
-    if (!log.startsWith("Program data: ")) continue;
+    const invoke = log.match(
+      /^Program ([1-9A-HJ-NP-Za-km-z]{32,44}) invoke \[/,
+    );
+    if (invoke) {
+      try {
+        stack.push(new PublicKey(invoke[1]));
+      } catch {
+        stack.length = 0;
+      }
+      continue;
+    }
+    if (
+      log.startsWith("Program ") &&
+      (log.endsWith(" success") || log.includes(" failed:"))
+    ) {
+      stack.pop();
+      continue;
+    }
+    if (!log.startsWith("Program data: ") || !stack.at(-1)?.equals(programId)) {
+      continue;
+    }
     try {
       events.push(parseTipReceivedEvent(Buffer.from(log.slice(14), "base64")));
     } catch {
@@ -66,6 +112,68 @@ function decodeEventLogs(logs: readonly string[]): TipReceivedEvent[] {
     }
   }
   return events;
+}
+
+function isPartiallyDecodedInstruction(
+  instruction: ParsedInstruction | PartiallyDecodedInstruction,
+): instruction is PartiallyDecodedInstruction {
+  return "accounts" in instruction && "data" in instruction;
+}
+
+function readTopLevelTip(
+  transaction: NonNullable<
+    Awaited<ReturnType<Connection["getParsedTransaction"]>>
+  >,
+  programId: PublicKey,
+): {
+  index: number;
+  supporter: PublicKey;
+  profile: PublicKey;
+  payoutWallet: PublicKey;
+  amount: bigint;
+  reference: Uint8Array;
+} {
+  const candidates = transaction.transaction.message.instructions.flatMap(
+    (instruction, index) => {
+      if (
+        !isPartiallyDecodedInstruction(instruction) ||
+        !instruction.programId.equals(programId) ||
+        instruction.accounts.length < 4
+      ) {
+        return [];
+      }
+      try {
+        const data = getTipInstructionDataDecoder().decode(
+          getBase58Encoder().encode(instruction.data),
+        );
+        if (
+          !bytesEqual(data.discriminator, TIP_DISCRIMINATOR) ||
+          !instruction.accounts[3].equals(SystemProgram.programId)
+        ) {
+          return [];
+        }
+        return [
+          {
+            index,
+            supporter: instruction.accounts[0],
+            profile: instruction.accounts[1],
+            payoutWallet: instruction.accounts[2],
+            amount: data.amount,
+            reference: copyBytes(data.reference),
+          },
+        ];
+      } catch {
+        return [];
+      }
+    },
+  );
+
+  if (candidates.length !== 1) {
+    throw new TipReceiptVerificationError(
+      "The transaction does not contain exactly one protocol tip instruction.",
+    );
+  }
+  return candidates[0];
 }
 
 export async function readTipReceipt(
@@ -94,7 +202,7 @@ async function readTipReceiptFromConnection(
   if (!transaction || !transaction.meta || transaction.meta.err) {
     throw new TipReceiptVerificationError("The Solana tip did not settle.");
   }
-  if (!transaction.transaction.signatures.includes(signature)) {
+  if (transaction.transaction.signatures[0] !== signature) {
     throw new TipReceiptVerificationError("The requested signature is absent.");
   }
 
@@ -102,7 +210,11 @@ async function readTipReceiptFromConnection(
     getProtocolConfig().programAddress || TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
     "protocol program",
   );
-  const events = decodeEventLogs(transaction.meta.logMessages || []);
+  const tipInstruction = readTopLevelTip(transaction, programId);
+  const events = decodeProtocolEventLogs(
+    transaction.meta.logMessages || [],
+    programId,
+  );
   if (events.length !== 1) {
     throw new TipReceiptVerificationError(
       "The transaction does not contain exactly one TipReceived event.",
@@ -114,6 +226,7 @@ async function readTipReceiptFromConnection(
   }
 
   const transfers = (transaction.meta.innerInstructions || [])
+    .filter((group) => group.index === tipInstruction.index)
     .flatMap((group) => group.instructions)
     .filter(
       (instruction): instruction is ParsedInstruction =>
@@ -137,7 +250,23 @@ async function readTipReceiptFromConnection(
     throw new TipReceiptVerificationError("The tip supporter did not sign.");
   }
 
+  const eventProfile = parseKey(String(event.profile), "event profile");
+  const eventProfileOwner = parseKey(
+    String(event.profileOwner),
+    "event profile owner",
+  );
+  const [expectedProfile] = PublicKey.findProgramAddressSync(
+    [Buffer.from("profile"), eventProfileOwner.toBuffer()],
+    programId,
+  );
+
   if (
+    !tipInstruction.supporter.equals(source) ||
+    !tipInstruction.profile.equals(eventProfile) ||
+    !tipInstruction.payoutWallet.equals(destination) ||
+    !tipInstruction.profile.equals(expectedProfile) ||
+    tipInstruction.amount !== event.amount ||
+    !bytesEqual(tipInstruction.reference, event.reference) ||
     String(event.supporter) !== source.toBase58() ||
     String(event.payoutWallet) !== destination.toBase58() ||
     BigInt(transfer.parsed.info.lamports) !== event.amount ||
