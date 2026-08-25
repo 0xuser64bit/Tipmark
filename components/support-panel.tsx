@@ -46,7 +46,7 @@ export function SupportPanel({
 }: {
   displayName: string;
   solanaAddress: string;
-  email: string;
+  email?: string;
 }) {
   const router = useRouter();
   const { connection } = useConnection();
@@ -117,18 +117,20 @@ export function SupportPanel({
 
         const signature = await sendTransaction(tx, connection);
 
-        try {
-          await addTransactionToDB({
-            userId: email,
-            hash: signature,
-            amount: amount.toString(),
-            fromPublicKey: publicKey!.toString(),
-            toPublicKey: solanaAddress,
-          });
-        } catch {
-          toast.warning(
-            "The payment was sent, but dashboard indexing is still catching up.",
-          );
+        if (email) {
+          try {
+            await addTransactionToDB({
+              userId: email,
+              hash: signature,
+              amount: amount.toString(),
+              fromPublicKey: publicKey!.toString(),
+              toPublicKey: solanaAddress,
+            });
+          } catch {
+            toast.warning(
+              "The payment was sent, but dashboard indexing is still catching up.",
+            );
+          }
         }
 
         router.push(`/check-explorer/${signature}`);

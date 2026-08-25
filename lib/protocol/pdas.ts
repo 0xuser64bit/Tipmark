@@ -13,18 +13,17 @@ export function deriveConfigPda(): Promise<ProgramDerivedAddress> {
 
 export function deriveProfilePda(
   owner: string | Address,
+  programAddress = getProtocolConfig().programAddress,
 ): Promise<ProgramDerivedAddress> {
-  return findProfilePda(
-    { owner: address(owner) },
-    { programAddress: getProtocolConfig().programAddress },
-  );
+  return findProfilePda({ owner: address(owner) }, { programAddress });
 }
 
 export function deriveUsernamePda(
   username: string,
+  programAddress = getProtocolConfig().programAddress,
 ): Promise<ProgramDerivedAddress> {
   return findUsernameRecordPda(
     { username: parseProtocolUsername(username) },
-    { programAddress: getProtocolConfig().programAddress },
+    { programAddress },
   );
 }

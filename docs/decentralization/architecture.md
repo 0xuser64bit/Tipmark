@@ -99,6 +99,10 @@ During migration, public routes resolve on-chain profiles first and fall back to
 legacy database profiles only when no on-chain claim exists. This preserves old
 links while making the new protocol progressively authoritative.
 
+The fallback is feature-flagged during rollout. Once a username PDA exists,
+invalid account relationships or metadata hash/schema failures are treated as
+an unavailable profile rather than silently replaced with a database row.
+
 ## Indexing and reads
 
 The first implementation reads profile accounts and transaction signatures
