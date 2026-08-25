@@ -134,3 +134,8 @@ proof.
 7. Audit, multisig-govern, and only then consider mainnet deployment.
 
 No mainnet transaction or program deployment is authorized by this plan.
+
+Builds use `anchor build --ignore-keys` so the committed program ID and IDL are
+reproducible without checking in a local deployment keypair. Deployment
+keypairs and upgrade-authority custody are external operational secrets; the
+first config initialization must be signed by the loader upgrade authority.

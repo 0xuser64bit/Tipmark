@@ -11,7 +11,7 @@
     "test": "bun test",
     "postinstall": "prisma generate",
     "format": "prettier --write .",
-    "protocol:build": "NO_DNA=1 anchor build && cp target/idl/tipmark_protocol.json idls/tipmark_protocol.json",
+    "protocol:build": "NO_DNA=1 anchor build --ignore-keys && cp target/idl/tipmark_protocol.json idls/tipmark_protocol.json",
     "protocol:generate": "bun scripts/generate-protocol-client.mjs",
     "protocol:test": "cargo test --workspace && cargo clippy --workspace --all-targets -- -D warnings && bun test lib/protocol"
   },

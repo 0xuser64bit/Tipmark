@@ -51,6 +51,9 @@ export function getInitializeConfigDiscriminatorBytes(): ReadonlyUint8Array {
 export type InitializeConfigInstruction<
   TProgram extends string = typeof TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
   TAccountConfig extends string | AccountMeta<string> = string,
+  TAccountProgram extends string | AccountMeta<string> =
+    "7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT",
+  TAccountProgramData extends string | AccountMeta<string> = string,
   TAccountAuthority extends string | AccountMeta<string> = string,
   TAccountSystemProgram extends string | AccountMeta<string> =
     "11111111111111111111111111111111",
@@ -62,6 +65,12 @@ export type InitializeConfigInstruction<
       TAccountConfig extends string
         ? WritableAccount<TAccountConfig>
         : TAccountConfig,
+      TAccountProgram extends string
+        ? ReadonlyAccount<TAccountProgram>
+        : TAccountProgram,
+      TAccountProgramData extends string
+        ? ReadonlyAccount<TAccountProgramData>
+        : TAccountProgramData,
       TAccountAuthority extends string
         ? WritableSignerAccount<TAccountAuthority> &
             AccountSignerMeta<TAccountAuthority>
@@ -104,22 +113,30 @@ export function getInitializeConfigInstructionDataCodec(): FixedSizeCodec<
 
 export type InitializeConfigAsyncInput<
   TAccountConfig extends string = string,
+  TAccountProgram extends string = string,
+  TAccountProgramData extends string = string,
   TAccountAuthority extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
   config?: Address<TAccountConfig>;
+  program?: Address<TAccountProgram>;
+  programData: Address<TAccountProgramData>;
   authority: TransactionSigner<TAccountAuthority>;
   systemProgram?: Address<TAccountSystemProgram>;
 };
 
 export async function getInitializeConfigInstructionAsync<
   TAccountConfig extends string,
+  TAccountProgram extends string,
+  TAccountProgramData extends string,
   TAccountAuthority extends string,
   TAccountSystemProgram extends string,
   TProgramAddress extends Address = typeof TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
 >(
   input: InitializeConfigAsyncInput<
     TAccountConfig,
+    TAccountProgram,
+    TAccountProgramData,
     TAccountAuthority,
     TAccountSystemProgram
   >,
@@ -128,6 +145,8 @@ export async function getInitializeConfigInstructionAsync<
   InitializeConfigInstruction<
     TProgramAddress,
     TAccountConfig,
+    TAccountProgram,
+    TAccountProgramData,
     TAccountAuthority,
     TAccountSystemProgram
   >
@@ -139,6 +158,8 @@ export async function getInitializeConfigInstructionAsync<
   // Original accounts.
   const originalAccounts = {
     config: { value: input.config ?? null, isWritable: true },
+    program: { value: input.program ?? null, isWritable: false },
+    programData: { value: input.programData ?? null, isWritable: false },
     authority: { value: input.authority ?? null, isWritable: true },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
   };
@@ -151,6 +172,10 @@ export async function getInitializeConfigInstructionAsync<
   if (!accounts.config.value) {
     accounts.config.value = await findConfigPda({ programAddress });
   }
+  if (!accounts.program.value) {
+    accounts.program.value =
+      "7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT" as Address<"7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT">;
+  }
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
       "11111111111111111111111111111111" as Address<"11111111111111111111111111111111">;
@@ -160,6 +185,8 @@ export async function getInitializeConfigInstructionAsync<
   return Object.freeze({
     accounts: [
       getAccountMeta("config", accounts.config),
+      getAccountMeta("program", accounts.program),
+      getAccountMeta("programData", accounts.programData),
       getAccountMeta("authority", accounts.authority),
       getAccountMeta("systemProgram", accounts.systemProgram),
     ],
@@ -168,6 +195,8 @@ export async function getInitializeConfigInstructionAsync<
   } as InitializeConfigInstruction<
     TProgramAddress,
     TAccountConfig,
+    TAccountProgram,
+    TAccountProgramData,
     TAccountAuthority,
     TAccountSystemProgram
   >);
@@ -175,22 +204,30 @@ export async function getInitializeConfigInstructionAsync<
 
 export type InitializeConfigInput<
   TAccountConfig extends string = string,
+  TAccountProgram extends string = string,
+  TAccountProgramData extends string = string,
   TAccountAuthority extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
   config: Address<TAccountConfig>;
+  program?: Address<TAccountProgram>;
+  programData: Address<TAccountProgramData>;
   authority: TransactionSigner<TAccountAuthority>;
   systemProgram?: Address<TAccountSystemProgram>;
 };
 
 export function getInitializeConfigInstruction<
   TAccountConfig extends string,
+  TAccountProgram extends string,
+  TAccountProgramData extends string,
   TAccountAuthority extends string,
   TAccountSystemProgram extends string,
   TProgramAddress extends Address = typeof TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
 >(
   input: InitializeConfigInput<
     TAccountConfig,
+    TAccountProgram,
+    TAccountProgramData,
     TAccountAuthority,
     TAccountSystemProgram
   >,
@@ -198,6 +235,8 @@ export function getInitializeConfigInstruction<
 ): InitializeConfigInstruction<
   TProgramAddress,
   TAccountConfig,
+  TAccountProgram,
+  TAccountProgramData,
   TAccountAuthority,
   TAccountSystemProgram
 > {
@@ -208,6 +247,8 @@ export function getInitializeConfigInstruction<
   // Original accounts.
   const originalAccounts = {
     config: { value: input.config ?? null, isWritable: true },
+    program: { value: input.program ?? null, isWritable: false },
+    programData: { value: input.programData ?? null, isWritable: false },
     authority: { value: input.authority ?? null, isWritable: true },
     systemProgram: { value: input.systemProgram ?? null, isWritable: false },
   };
@@ -217,6 +258,10 @@ export function getInitializeConfigInstruction<
   >;
 
   // Resolve default values.
+  if (!accounts.program.value) {
+    accounts.program.value =
+      "7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT" as Address<"7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT">;
+  }
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
       "11111111111111111111111111111111" as Address<"11111111111111111111111111111111">;
@@ -226,6 +271,8 @@ export function getInitializeConfigInstruction<
   return Object.freeze({
     accounts: [
       getAccountMeta("config", accounts.config),
+      getAccountMeta("program", accounts.program),
+      getAccountMeta("programData", accounts.programData),
       getAccountMeta("authority", accounts.authority),
       getAccountMeta("systemProgram", accounts.systemProgram),
     ],
@@ -234,6 +281,8 @@ export function getInitializeConfigInstruction<
   } as InitializeConfigInstruction<
     TProgramAddress,
     TAccountConfig,
+    TAccountProgram,
+    TAccountProgramData,
     TAccountAuthority,
     TAccountSystemProgram
   >);
@@ -246,8 +295,10 @@ export type ParsedInitializeConfigInstruction<
   programAddress: Address<TProgram>;
   accounts: {
     config: TAccountMetas[0];
-    authority: TAccountMetas[1];
-    systemProgram: TAccountMetas[2];
+    program: TAccountMetas[1];
+    programData: TAccountMetas[2];
+    authority: TAccountMetas[3];
+    systemProgram: TAccountMetas[4];
   };
   data: InitializeConfigInstructionData;
 };
@@ -260,12 +311,12 @@ export function parseInitializeConfigInstruction<
     InstructionWithAccounts<TAccountMetas> &
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedInitializeConfigInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 3) {
+  if (instruction.accounts.length < 5) {
     throw new SolanaError(
       SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
       {
         actualAccountMetas: instruction.accounts.length,
-        expectedAccountMetas: 3,
+        expectedAccountMetas: 5,
       },
     );
   }
@@ -279,6 +330,8 @@ export function parseInitializeConfigInstruction<
     programAddress: instruction.programAddress,
     accounts: {
       config: getNextAccount(),
+      program: getNextAccount(),
+      programData: getNextAccount(),
       authority: getNextAccount(),
       systemProgram: getNextAccount(),
     },

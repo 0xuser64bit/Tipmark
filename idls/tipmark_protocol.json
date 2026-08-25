@@ -192,6 +192,13 @@
           }
         },
         {
+          "name": "program",
+          "address": "7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT"
+        },
+        {
+          "name": "program_data"
+        },
+        {
           "name": "authority",
           "writable": true,
           "signer": true

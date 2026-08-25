@@ -12,7 +12,15 @@ pub struct InitializeConfig<'info> {
         bump
     )]
     pub config: Account<'info, ProtocolConfig>,
-    #[account(mut)]
+    pub program: Program<'info, crate::program::TipmarkProtocol>,
+    #[account(
+        constraint = program.programdata_address()? == Some(program_data.key())
+    )]
+    pub program_data: Account<'info, ProgramData>,
+    #[account(
+        mut,
+        constraint = program_data.upgrade_authority_address == Some(authority.key())
+    )]
     pub authority: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
