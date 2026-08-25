@@ -27,6 +27,8 @@ repeat a read, but repeating an ambiguous write can create a duplicate payment.
    and test database deletion followed by a full backfill.
 6. Obtain independent program/security review before enabling the flag for real
    users. No mainnet deployment is implied by a passing build.
+7. Run `bun run protocol:release-check` with the devnet program address and
+   public multisig metadata. The check must pass before any deployment change.
 
 ## Indexer and rebuild
 

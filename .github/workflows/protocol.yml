@@ -1,0 +1,31 @@
+name: protocol
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://tipmark:tipmark@127.0.0.1:5432/tipmark_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: 1.89.0
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Rust tests and clippy
+        run: NO_DNA=1 cargo test --workspace && NO_DNA=1 cargo clippy --workspace --all-targets -- -D warnings
+      - name: Generate protocol artifacts
+        run: bun run protocol:build && bun run protocol:generate
+      - name: TypeScript and protocol tests
+        run: bun run typecheck && bun test lib/protocol lib/solana
+      - name: Application build
+        run: bun run build

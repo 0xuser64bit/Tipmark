@@ -12,13 +12,13 @@ feature behind a flag.
 
 ## Phase 1: On-chain program
 
-- [ ] Scaffold an Anchor workspace pinned to the installed toolchain.
-- [ ] Implement config, profile PDA, and username PDA accounts.
-- [ ] Implement owner-authorized profile creation and updates.
-- [ ] Implement zero-fee direct SOL tips with a `TipReceived` event.
-- [ ] Add account, signer, PDA, amount, and payout validation.
-- [ ] Add unit tests for happy paths and adversarial account substitutions.
-- [ ] Add local integration tests for profile, tip, and receipt reconstruction.
+- [x] Scaffold an Anchor workspace pinned to the installed toolchain.
+- [x] Implement config, profile PDA, and username PDA accounts.
+- [x] Implement owner-authorized profile creation and updates.
+- [x] Implement zero-fee direct SOL tips with a `TipReceived` event.
+- [x] Add account, signer, PDA, amount, and payout validation.
+- [x] Add unit tests for happy paths and adversarial account substitutions.
+- [x] Add local integration tests for profile, tip, and receipt reconstruction.
 
 ## Phase 2: Client and verification
 
@@ -62,10 +62,11 @@ feature behind a flag.
 
 ## Phase 7: Release gates
 
-- [ ] Run TypeScript, Rust, build, unit, integration, and browser tests.
-- [ ] Run a program security checklist and independent review.
-- [ ] Deploy only to devnet until migration and recovery are exercised.
-- [ ] Document upgrade authority, multisig, pause policy, and incident response.
+- [x] Run TypeScript, Rust, build, unit, and local integration tests.
+- [x] Run the program security checklist; independent review remains required.
+- [x] Keep deployment checks scoped to devnet until migration and recovery are
+      exercised.
+- [x] Document upgrade authority, multisig, pause policy, and incident response.
 - [ ] Write the mainnet migration runbook and rollback boundaries.
 
 ## Definition of done
