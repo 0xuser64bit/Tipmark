@@ -44,7 +44,7 @@ export function ShareCardDialog({
       });
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png", 1);
-      link.download = `daonation-${username}.png`;
+      link.download = `tipmark-${username}.png`;
       link.click();
     } catch {
       toast.error("Couldn't build the image. Try again in a moment.");

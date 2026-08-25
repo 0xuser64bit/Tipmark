@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Github, Instagram, Linkedin, Twitter } from "lucide-react";
+import { BRAND_DOMAIN } from "@/lib/brand";
 
 const ICONS = [
   { key: "x", Icon: Twitter },
@@ -44,7 +45,7 @@ export function LetterheadPreview({
         <span className="size-[7px] rounded-full bg-rule-strong" />
         <span className="size-[7px] rounded-full bg-rule-strong" />
         <span className="figure ml-2 truncate text-[10px] text-ink-faint">
-          daonation.xyz/{handle}
+          {BRAND_DOMAIN}/{handle}
         </span>
       </div>
 

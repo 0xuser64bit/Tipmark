@@ -15,6 +15,7 @@ import { WalletTrigger } from "./ui/wallet-button";
 import { AccountMenu } from "./account-menu";
 import { formatSol } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { BRAND_NAME, profileUrl } from "@/lib/brand";
 
 export interface ProfilePageProps {
   profileImage: string;
@@ -52,7 +53,7 @@ export default function ProfilePage({
   stats,
   isOwner = false,
 }: ProfilePageProps) {
-  const url = `https://daonation.xyz/${username}`;
+  const url = profileUrl(username);
   const hasHistory = Boolean(stats && stats.supporters > 0);
 
   return (
@@ -213,9 +214,9 @@ export default function ProfilePage({
                 email={email}
               />
               <p className="mt-3 px-1 text-[12px] leading-relaxed text-ink-faint">
-                DAOnation never touches the money. Your wallet signs a transfer
-                to {displayName}&rsquo;s address and Solana records it — you
-                get a receipt you can verify yourself.
+                {BRAND_NAME} never touches the money. Your wallet signs a
+                transfer to {displayName}&rsquo;s address and Solana records it
+                — you get a receipt you can verify yourself.
               </p>
             </div>
           </div>

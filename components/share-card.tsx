@@ -3,6 +3,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { LogoMark } from "./ui/logo";
+import { BRAND_DOMAIN } from "@/lib/brand";
 
 /**
  * The share card is the one printed artefact a creator takes off the
@@ -46,13 +47,13 @@ export function ShareCard({
               className="font-mono text-[11px] font-medium uppercase tracking-[0.02em]"
               style={{ color: "#17150f" }}
             >
-              DAO
+              TIP
             </span>
             <span
               className="font-serif text-[15px] font-medium leading-none tracking-[-0.02em]"
               style={{ color: "#17150f" }}
             >
-              nation
+              mark
             </span>
           </span>
         </span>
@@ -125,7 +126,7 @@ export function ShareCard({
           className="px-5 py-3 font-mono text-[12px] tracking-[-0.01em]"
           style={{ color: "#14573c" }}
         >
-          daonation.xyz/{username}
+          {BRAND_DOMAIN}/{username}
         </p>
       </div>
     </div>

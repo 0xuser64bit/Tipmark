@@ -12,6 +12,7 @@ import { Money } from "./ui/money";
 import { PaidMark } from "./ui/stamp";
 import { Wordmark } from "./ui/logo";
 import { cn } from "@/lib/utils";
+import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
 
 /* ── Content ────────────────────────────────────────────────────────── */
 
@@ -24,7 +25,7 @@ const STEPS = [
   {
     n: "02",
     title: "Paste your wallet address",
-    body: "Your own Solana address. DAOnation stores it and nothing else — no keys, no custody, no balance of yours to hold.",
+    body: `Your own Solana address. ${BRAND_NAME} stores it and nothing else — no keys, no custody, no balance of yours to hold.`,
   },
   {
     n: "03",
@@ -41,9 +42,25 @@ const STEPS = [
 /** Published rates, rounded. See the note under the table. */
 const COSTS = [
   { name: "Patreon", cut: "8–12%", processing: "~2.9% + 30¢", keep: "$85–89" },
-  { name: "Buy Me a Coffee", cut: "5%", processing: "~2.9% + 30¢", keep: "≈ $92" },
-  { name: "Ko-fi Gold", cut: "0% + $6/mo", processing: "~2.9% + 30¢", keep: "≈ $97" },
-  { name: "DAOnation", cut: "0%", processing: "≈ $0.0004", keep: "$100.00", ours: true },
+  {
+    name: "Buy Me a Coffee",
+    cut: "5%",
+    processing: "~2.9% + 30¢",
+    keep: "≈ $92",
+  },
+  {
+    name: "Ko-fi Gold",
+    cut: "0% + $6/mo",
+    processing: "~2.9% + 30¢",
+    keep: "≈ $97",
+  },
+  {
+    name: BRAND_NAME,
+    cut: "0%",
+    processing: "≈ $0.0004",
+    keep: "$100.00",
+    ours: true,
+  },
 ];
 
 const CAVEATS = [
@@ -111,7 +128,7 @@ export function Landing({ priceUsd }: { priceUsd: number | null }) {
 
               <p className="mt-7 max-w-[46ch] font-serif text-[clamp(1.0625rem,1.7vw,1.25rem)] leading-[1.55] text-ink-soft">
                 Share one link. People send SOL straight from their wallet to
-                yours. DAOnation never holds the money, never takes a
+                yours. {BRAND_NAME} never holds the money, never takes a
                 percentage, and leaves a receipt you can check on Solana.
               </p>
 
@@ -128,7 +145,7 @@ export function Landing({ priceUsd }: { priceUsd: number | null }) {
                 </label>
                 <div className="mt-2.5 flex items-stretch rounded-[4px] border border-rule-strong bg-sheet transition-colors focus-within:outline-2 focus-within:outline-offset-[-1px] focus-within:outline-stamp">
                   <span className="figure flex select-none items-center pl-3.5 text-[13.5px] text-ink-faint">
-                    daonation.xyz/
+                    {BRAND_DOMAIN}/
                   </span>
                   <input
                     id="claim"
@@ -158,9 +175,9 @@ export function Landing({ priceUsd }: { priceUsd: number | null }) {
             <figure className="mx-auto w-full max-w-[340px] lg:mx-0">
               <ReceiptSpecimen priceUsd={priceUsd} />
               <figcaption className="mt-5 border-t border-rule pt-3.5 text-[12.5px] leading-relaxed text-ink-faint">
-                Every contribution prints one of these — for the person who
-                sent it and for you. It is the transaction itself, not a
-                notification about one.
+                Every contribution prints one of these — for the person who sent
+                it and for you. It is the transaction itself, not a notification
+                about one.
               </figcaption>
             </figure>
           </div>
@@ -408,7 +425,9 @@ function ReceiptSpecimen({ priceUsd }: { priceUsd: number | null }) {
         <LedgerRow label="To">
           <span className="flex flex-col items-end gap-1">
             <span className="text-[13px] text-ink">Ada Lovelace</span>
-            <span className="figure text-[12.5px] text-ink-soft">7Xk4…9fPq</span>
+            <span className="figure text-[12.5px] text-ink-soft">
+              7Xk4…9fPq
+            </span>
           </span>
         </LedgerRow>
         <LedgerRow label="From">
@@ -417,7 +436,7 @@ function ReceiptSpecimen({ priceUsd }: { priceUsd: number | null }) {
         <LedgerRow label="Solana fee">
           <span className="figure text-[12.5px] text-ink-soft">0.000005</span>
         </LedgerRow>
-        <LedgerRow label="DAOnation fee">
+        <LedgerRow label={`${BRAND_NAME} fee`}>
           <span className="text-[13px] font-medium text-stamp">None</span>
         </LedgerRow>
       </Ledger>

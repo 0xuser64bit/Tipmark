@@ -4,6 +4,7 @@ import { checkUsernameAvailable } from "@/actions/checkUsername";
 import UpdateUserProfileAction from "@/actions/updateUserProfile";
 import { useEdgeStore } from "@/lib/edgestore";
 import { cn } from "@/lib/utils";
+import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
 import {
   ArrowLeft,
   ArrowRight,
@@ -151,7 +152,8 @@ export default function ProfileEditor({
       const addr = form.solana.trim();
       if (!addr) e.solana = "Add the wallet you want the SOL to land in.";
       else if (!SOLANA_ADDRESS.test(addr))
-        e.solana = "That isn't a Solana address — check for a missing character.";
+        e.solana =
+          "That isn't a Solana address — check for a missing character.";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -222,13 +224,13 @@ export default function ProfileEditor({
         error={errors.username}
         hint={
           handleState === "free" && handle
-            ? `daonation.xyz/${handle} is yours.`
+            ? `${BRAND_DOMAIN}/${handle} is yours.`
             : "Lowercase letters, numbers and dashes."
         }
       >
         <div className="flex">
           <span className="figure inline-flex items-center rounded-l-[4px] border border-r-0 border-rule bg-well-deep px-3 text-[13px] text-ink-faint">
-            daonation.xyz/
+            {BRAND_DOMAIN}/
           </span>
           <div className="relative flex-1">
             <Input
@@ -386,7 +388,7 @@ export default function ProfileEditor({
           onCheckedChange={(v) => set("updates", Boolean(v))}
         />
         <span className="text-[13px] leading-snug text-ink-soft">
-          Email me when DAOnation ships something. Rarely, and never your
+          Email me when {BRAND_NAME} ships something. Rarely, and never your
           address.
         </span>
       </label>
@@ -399,7 +401,10 @@ export default function ProfileEditor({
     <div className="flex min-h-screen flex-col">
       <SiteHeader nav={mode === "edit"} actions={<AccountMenu />} />
 
-      <main id="main" className="mx-auto w-full max-w-[1120px] flex-1 px-5 pb-28 sm:px-8">
+      <main
+        id="main"
+        className="mx-auto w-full max-w-[1120px] flex-1 px-5 pb-28 sm:px-8"
+      >
         <header className="border-b border-rule py-8">
           <h1 className="text-[clamp(1.75rem,4vw,2.35rem)] font-medium">
             {wizard ? "Set up your page" : "Edit your page"}
@@ -441,7 +446,11 @@ export default function ProfileEditor({
                             : "border-rule-strong text-ink-ghost",
                       )}
                     >
-                      {done ? <Check className="size-2.5" strokeWidth={3} /> : n}
+                      {done ? (
+                        <Check className="size-2.5" strokeWidth={3} />
+                      ) : (
+                        n
+                      )}
                     </span>
                     {title}
                   </button>
@@ -552,7 +561,9 @@ function Section({
 }) {
   if (hidden) return null;
   return (
-    <section className={cn("max-w-[560px]", showTitle ? "py-8 first:pt-0" : "pb-2")}>
+    <section
+      className={cn("max-w-[560px]", showTitle ? "py-8 first:pt-0" : "pb-2")}
+    >
       <div className="mb-6">
         {showTitle && (
           <h2 className="font-sans text-[15px] font-semibold tracking-[-0.005em]">

@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
 
 export const metadata = {
   title: "How it works",
-  description:
-    "What DAOnation does, what it does not do, what it costs, and what happens to your money. Written plainly.",
+  description: `What ${BRAND_NAME} does, what it does not do, what it costs, and what happens to your money. Written plainly.`,
 };
 
 const SECTIONS = [
@@ -14,7 +14,7 @@ const SECTIONS = [
     id: "what",
     heading: "What this is",
     body: [
-      "DAOnation gives you a page at daonation.xyz/your-handle. Someone opens it, connects a Solana wallet, chooses an amount and approves a transfer. The SOL goes from their wallet to the address you entered. That is the entire mechanism.",
+      `${BRAND_NAME} gives you a page at ${BRAND_DOMAIN}/your-handle. Someone opens it, connects a Solana wallet, chooses an amount and approves a transfer. The SOL goes from their wallet to the address you entered. That is the entire mechanism.`,
       "There is no balance held on your behalf, no payout schedule and no withdrawal step, because there is never a moment when the money is ours.",
     ],
   },
@@ -30,7 +30,7 @@ const SECTIONS = [
     id: "fees",
     heading: "What it costs",
     body: [
-      "DAOnation takes nothing. There is no subscription, no percentage and no per-transaction charge.",
+      `${BRAND_NAME} takes nothing. There is no subscription, no percentage and no per-transaction charge.`,
       "Solana charges a network fee of roughly 0.000005 SOL — a fraction of a cent — and the sender pays it. So a contribution of 1 SOL arrives as 1 SOL.",
       "The honest caveat: we are not charging you today. If that ever changes it will be announced before it applies, never retroactively, and your page keeps working either way because the money was never routed through us.",
     ],
@@ -77,14 +77,14 @@ export default function AboutPage() {
 
       <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-5 sm:px-8">
         <header className="border-b border-rule py-14 sm:py-20">
-          <p className="field-label">DAOnation</p>
+          <p className="field-label">{BRAND_NAME}</p>
           <h1 className="mt-4 max-w-[24ch] text-[clamp(2.1rem,5.5vw,3.25rem)] font-medium leading-[1.02]">
             How this works, in plain terms.
           </h1>
           <p className="mt-6 max-w-[54ch] font-serif text-[18px] leading-relaxed text-ink-soft">
             A crypto product that explains itself badly is asking to be
-            distrusted. So: what it does, what it costs, where your money
-            goes, and the four things it is bad at.
+            distrusted. So: what it does, what it costs, where your money goes,
+            and the four things it is bad at.
           </p>
         </header>
 

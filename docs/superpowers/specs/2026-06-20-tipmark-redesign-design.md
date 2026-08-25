@@ -1,18 +1,18 @@
-# DAOnation Redesign — Design Spec
+# Tipmark Redesign — Design Spec
 
 **Date:** 2026-06-20
 **Status:** Approved direction, pending spec review
 
 ## 1. Product context
 
-DAOnation is a **crypto-native "Buy Me a Coffee"** on Solana. The core loop:
+Tipmark is a **crypto-native creator support page** on Solana. The core loop:
 
-- A **creator** signs in (Google), claims `daonation.xyz/<username>`, fills a profile, shares the link.
+- A **creator** signs in (Google), claims `tipmark.xyz/<username>`, fills a profile, shares the link.
 - A **supporter** lands on the public page, connects a Solana wallet, sends SOL **wallet-to-wallet** (non-custodial, no middleman).
 - The creator tracks earnings in a dashboard and shares a downloadable QR "card".
 
 **Value prop:** money goes directly to the creator, transparently, with near-zero fees, verifiable on-chain.
-**Two users the current UI fails to distinguish:** the *creator* (wants to look legit + track earnings) and the *supporter* (wants to tip in 3 clicks and trust it worked).
+**Two users the current UI fails to distinguish:** the _creator_ (wants to look legit + track earnings) and the _supporter_ (wants to tip in 3 clicks and trust it worked).
 
 ## 2. Audit summary (why redesign)
 
@@ -23,7 +23,7 @@ Bones are solid (Next App Router, server actions, Prisma, sensible flow). The ex
 3. The shadcn token system in `globals.css` is defined but unused; components hardcode `zinc-*`; `.dark` class never applied.
 4. The money moment (support card) is tiny and trust-poor; USD is `"$$$"` placeholder; dashboard ships `"+XXX since last hour"`.
 5. Onboarding is an 11-field wall (4 socials forced to `#`); `/home` redirects unless all fields filled.
-6. Inconsistent identity: "DAOnation" plain text styled 3 different ways; no logo; dashboard has bespoke nav.
+6. Inconsistent identity: "Tipmark" plain text styled 3 different ways; no logo; dashboard has bespoke nav.
 7. Trust gaps for a finance product: rate-limited public RPC, kitten-gif success page, raw-SVG 404.
 8. **Bug:** `getEarningData` mutates a module-level `monthlyEarningData` array → earnings bleed across requests/users.
 
@@ -40,25 +40,28 @@ Bones are solid (Next App Router, server actions, Prisma, sensible flow). The ex
 ## 4. Design system
 
 ### Tokens (Tailwind v4 `@theme`, dark-first, in `app/globals.css`)
-| Token | Value | Use |
-|---|---|---|
-| `--color-canvas` | `#0A0A0F` near-black | app background |
-| `--color-surface` | `#141419` | cards |
-| `--color-surface-2` | `#1C1C23` | elevated |
-| `--color-border` | `rgba(255,255,255,0.08)` | hairlines |
-| `--color-brand` | `#9945FF` Solana purple | CTA, brand, focus ring |
-| `--color-money` | `#14F195` Solana green | amounts, confirmed, "live" |
-| `--color-fg` | `#FAFAFA` | text |
-| `--color-muted` | `#A1A1AA` zinc-400 | secondary text |
-| gradient | `linear-gradient(135deg,#9945FF,#14F195)` | sparing accents |
+
+| Token               | Value                                     | Use                        |
+| ------------------- | ----------------------------------------- | -------------------------- |
+| `--color-canvas`    | `#0A0A0F` near-black                      | app background             |
+| `--color-surface`   | `#141419`                                 | cards                      |
+| `--color-surface-2` | `#1C1C23`                                 | elevated                   |
+| `--color-border`    | `rgba(255,255,255,0.08)`                  | hairlines                  |
+| `--color-brand`     | `#9945FF` Solana purple                   | CTA, brand, focus ring     |
+| `--color-money`     | `#14F195` Solana green                    | amounts, confirmed, "live" |
+| `--color-fg`        | `#FAFAFA`                                 | text                       |
+| `--color-muted`     | `#A1A1AA` zinc-400                        | secondary text             |
+| gradient            | `linear-gradient(135deg,#9945FF,#14F195)` | sparing accents            |
 
 Map shadcn aliases (`--background`, `--card`, `--primary`, `--ring`, etc.) onto these so existing shadcn components inherit the theme.
 
 ### Typography
+
 - **Geist Sans** (local, `app/fonts/GeistVF.woff`) → UI/display. Drop `Sour_Gummy`.
 - **Geist Mono** (local, `app/fonts/GeistMonoVF.woff`) → SOL amounts, addresses, signatures, stats (`font-mono` + `tabular-nums`).
 
 ### Motion philosophy
+
 Calm. Remove glitch/typewriter/particles/magnetic/3D-tilt/floating-icons. Keep: gentle fade/slide on mount, **count-up** for money, one tasteful **success confetti**, subtle hover lift. All gated by `prefers-reduced-motion`. Use `motion` (`motion/react`).
 
 ## 5. Shared components
@@ -77,7 +80,7 @@ Calm. Remove glitch/typewriter/particles/magnetic/3D-tilt/floating-icons. Keep: 
 
 ## 6. Pages
 
-- **Landing `/`** — Remove particles/glitch/fake testimonial. Hero ("Get paid in crypto. Keep all of it."), value line, primary CTA + inline `daonation.xyz/<claim>` input. Show the real product (profile + QR card, gentle float). 3-step "How it works". Trust band (Non-custodial · Wallet-to-wallet · Verifiable on Solana). Clean footer.
+- **Landing `/`** — Remove particles/glitch/fake testimonial. Hero ("Get paid in crypto. Keep all of it."), value line, primary CTA + inline `tipmark.xyz/<claim>` input. Show the real product (profile + QR card, gentle float). 3-step "How it works". Trust band (Non-custodial · Wallet-to-wallet · Verifiable on Solana). Clean footer.
 - **Onboarding `/edit-profile`** — Guided wizard + **live profile preview**: ① claim handle (real-time availability via existing 409 path) + name → ② avatar/cover/bio (markdown edit/preview retained) → ③ wallet + **optional** socials → ④ "You're live 🎉" share. Relax `/home` gate to require only handle + name + wallet.
 - **Money moment `/[username]` (+ authed `/home` self-view)** — Preset amounts with **live USD**, custom amount with USD, "Sending to: `<AddressChip>`" trust line, graceful wallet-connect state, confident CTA, light social proof ("N people supported"). Responsive: single column on mobile, support panel prominent.
 - **Success `/check-explorer/[signature]`** — Branded receipt: green check + tasteful confetti, amount SOL+USD, recipient, signature `AddressChip`, "View on Solscan", growth-loop CTA "Create your own page".

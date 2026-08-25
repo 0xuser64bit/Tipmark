@@ -11,6 +11,7 @@ import { Panel, PanelHeader, PanelTitle } from "./ui/panel";
 import { Stamp, isSettled } from "./ui/stamp";
 import { formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { profileUrl } from "@/lib/brand";
 
 /**
  * The creator's statement.
@@ -33,7 +34,7 @@ export function Statement({
   displayName: string;
   profileImage: string;
 }) {
-  const url = username ? `https://daonation.xyz/${username}` : null;
+  const url = username ? profileUrl(username) : null;
 
   /* A statement of nothing is four zeros and a flat chart — an accurate
      but useless screen, and the one almost every new creator sees first.
@@ -86,7 +87,12 @@ export function Statement({
           {
             label: "Last 7 days",
             body: (
-              <Money sol={data.last7} priceUsd={priceUsd} size="lg" fiat="below" />
+              <Money
+                sol={data.last7}
+                priceUsd={priceUsd}
+                size="lg"
+                fiat="below"
+              />
             ),
           },
           {
@@ -186,81 +192,76 @@ export function Statement({
           </PanelHeader>
 
           <>
-              {/* Wide: a real table you can read down a column.
+            {/* Wide: a real table you can read down a column.
                   Narrow: one block per contribution. A horizontally
                   scrolling table would put the amount — the only figure
                   anyone opens this for — off the edge of the screen. */}
-              <table className="hidden w-full border-collapse text-left sm:table">
-                <thead>
-                  <tr className="border-b border-rule">
-                    <Th>Date</Th>
-                    <Th>From</Th>
-                    <Th>Status</Th>
-                    <Th align="right">Amount · SOL</Th>
-                    <Th align="right">
-                      <span className="sr-only">Receipt</span>
-                    </Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.rows.map((row) => (
-                    <tr
-                      key={row.hash}
-                      className="border-b border-rule transition-colors last:border-0 hover:bg-well/60"
-                    >
-                      <Td>
-                        <span className="figure whitespace-nowrap text-[12.5px] text-ink-soft">
-                          {formatDay(row.createdAt)}
-                        </span>
-                      </Td>
-                      <Td>
-                        <Hash value={row.fromPublicKey} label="sender address" />
-                      </Td>
-                      <Td>
-                        <Stamp status={row.status} />
-                      </Td>
-                      <Td align="right">
-                        <Money
-                          sol={row.amount}
-                          sign="+"
-                          size="sm"
-                          unit={false}
-                        />
-                      </Td>
-                      <Td align="right">
-                        <SolscanLink hash={row.hash} />
-                      </Td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <ul className="sm:hidden">
+            <table className="hidden w-full border-collapse text-left sm:table">
+              <thead>
+                <tr className="border-b border-rule">
+                  <Th>Date</Th>
+                  <Th>From</Th>
+                  <Th>Status</Th>
+                  <Th align="right">Amount · SOL</Th>
+                  <Th align="right">
+                    <span className="sr-only">Receipt</span>
+                  </Th>
+                </tr>
+              </thead>
+              <tbody>
                 {data.rows.map((row) => (
-                  <li
+                  <tr
                     key={row.hash}
-                    className="flex items-start gap-3 border-b border-rule px-4 py-3.5 last:border-0"
+                    className="border-b border-rule transition-colors last:border-0 hover:bg-well/60"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2.5">
-                        <span className="figure shrink-0 text-[12.5px] text-ink-soft">
-                          {formatDay(row.createdAt)}
-                        </span>
-                        <Hash value={row.fromPublicKey} label="sender address" />
-                      </div>
-                      {!isSettled(row.status) && (
-                        <div className="mt-2">
-                          <Stamp status={row.status} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Money sol={row.amount} sign="+" size="sm" />
+                    <Td>
+                      <span className="figure whitespace-nowrap text-[12.5px] text-ink-soft">
+                        {formatDay(row.createdAt)}
+                      </span>
+                    </Td>
+                    <Td>
+                      <Hash value={row.fromPublicKey} label="sender address" />
+                    </Td>
+                    <Td>
+                      <Stamp status={row.status} />
+                    </Td>
+                    <Td align="right">
+                      <Money sol={row.amount} sign="+" size="sm" unit={false} />
+                    </Td>
+                    <Td align="right">
                       <SolscanLink hash={row.hash} />
-                    </div>
-                  </li>
+                    </Td>
+                  </tr>
                 ))}
-              </ul>
+              </tbody>
+            </table>
+
+            <ul className="sm:hidden">
+              {data.rows.map((row) => (
+                <li
+                  key={row.hash}
+                  className="flex items-start gap-3 border-b border-rule px-4 py-3.5 last:border-0"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="figure shrink-0 text-[12.5px] text-ink-soft">
+                        {formatDay(row.createdAt)}
+                      </span>
+                      <Hash value={row.fromPublicKey} label="sender address" />
+                    </div>
+                    {!isSettled(row.status) && (
+                      <div className="mt-2">
+                        <Stamp status={row.status} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Money sol={row.amount} sign="+" size="sm" />
+                    <SolscanLink hash={row.hash} />
+                  </div>
+                </li>
+              ))}
+            </ul>
           </>
         </Panel>
       </div>

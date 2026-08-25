@@ -1,4 +1,4 @@
-# DAOnation
+# Tipmark
 
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 ![nextjs](https://img.shields.io/badge/Next.js-15.5-black)
@@ -6,13 +6,13 @@
 ![typescript](https://img.shields.io/badge/TypeScript-5.6-blue)
 ![solana](https://img.shields.io/badge/Solana-Web3-14573c)
 
-DAOnation is a non-custodial "Buy Me a Coffee" for Solana. A creator claims a
+Tipmark is a non-custodial creator support page for Solana. A creator claims a
 link, shares it, and supporters send SOL straight from their wallet to the
 creator's — no platform cut, no custody, and a verifiable receipt for every
 contribution.
 
 <p align="center">
-  <img src="public/daonation-home.png" alt="DAOnation Preview" width="600"/>
+  <img src="public/tipmark-home.svg" alt="Tipmark brand preview" width="600"/>
 </p>
 
 ## 📋 Table of Contents
@@ -33,7 +33,7 @@ contribution.
 
 ## 🌟 Overview
 
-DAOnation bridges the gap between content creators and their supporters in the
+Tipmark bridges the gap between content creators and their supporters in the
 Web3 ecosystem. Creators build a personal page with a unique handle, share it,
 receive SOL directly to their own wallet, and track every contribution in a
 ledger where each row links to the transaction on-chain.
@@ -71,7 +71,7 @@ which appears on the support panel, the receipt, and the dashboard.
 ## ✨ Key Features
 
 - **Zero platform fee**: direct wallet-to-wallet transfers, non-custodial
-- **Personal pages**: a claimable `daonation.xyz/<handle>` letterhead
+- **Personal pages**: a claimable `tipmark.xyz/<handle>` letterhead
 - **Multi-wallet**: connect any Solana wallet, with an explainer for newcomers
 - **Verifiable receipts**: every contribution links to Solscan
 - **Creator ledger**: real transaction table, 12-month history, live USD
@@ -90,8 +90,8 @@ which appears on the support panel, the receipt, and the dashboard.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/daonation.git
-   cd daonation
+   git clone https://github.com/yourusername/tipmark.git
+   cd tipmark
    ```
 
 2. Install dependencies:
@@ -150,7 +150,7 @@ NEXT_PUBLIC_SOLANA_RPC_URL=
    Add your details, social links, and a description of your work.
 
 3. **Share Your Profile**:  
-   Use your unique link (daonation.xyz/yourusername) to receive contributions.
+   Use your unique link (tipmark.xyz/yourusername) to receive contributions.
 
 4. **Track Your Contributions**:  
    Access your personal dashboard to monitor earnings and manage transactions.
@@ -158,7 +158,7 @@ NEXT_PUBLIC_SOLANA_RPC_URL=
 ## 📂 Project Structure
 
 ```
-daonation/
+tipmark/
 ├── actions/         # Server actions for data mutations
 ├── app/             # Next.js app directory with routes
 ├── components/      # Reusable UI components
@@ -171,7 +171,7 @@ daonation/
 
 ## 👥 Contributing
 
-We welcome contributions to DAOnation! Please follow these steps:
+We welcome contributions to Tipmark! Please follow these steps:
 
 1. Fork the repository
 2. Create a new branch (`git checkout -b feature/amazing-feature`)
@@ -194,5 +194,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  <a href="https://daonation.xyz">Visit DAOnation</a> 
+  <a href="https://tipmark.xyz">Visit Tipmark</a>
 </p>

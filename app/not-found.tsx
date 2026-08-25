@@ -30,7 +30,7 @@ export default function NotFound() {
             <Link href="/">Back to the start</Link>
           </Button>
           <Button asChild variant="quiet">
-            <Link href="/about-us">How DAOnation works</Link>
+            <Link href="/about-us">How Tipmark works</Link>
           </Button>
         </div>
       </main>

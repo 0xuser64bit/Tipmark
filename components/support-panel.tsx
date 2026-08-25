@@ -254,7 +254,7 @@ export function SupportPanel({
                 {NETWORK_FEE.toFixed(6)}
               </span>
             </LedgerRow>
-            <LedgerRow label="DAOnation fee">
+            <LedgerRow label="Tipmark fee">
               <span className="text-[13px] font-medium text-stamp">None</span>
             </LedgerRow>
             <LedgerRow label="Leaves your wallet" total>
