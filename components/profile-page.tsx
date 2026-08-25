@@ -31,6 +31,8 @@ export interface ProfilePageProps {
   email: string;
   stats?: { supporters: number; contributions: number; totalSol: number };
   isOwner?: boolean;
+  protocolEnabled?: boolean;
+  profileOwner?: string;
 }
 
 /**
@@ -52,6 +54,8 @@ export default function ProfilePage({
   email,
   stats,
   isOwner = false,
+  protocolEnabled = false,
+  profileOwner,
 }: ProfilePageProps) {
   const url = profileUrl(username);
   const hasHistory = Boolean(stats && stats.supporters > 0);
@@ -212,6 +216,8 @@ export default function ProfilePage({
                 displayName={displayName}
                 solanaAddress={solana_address}
                 email={email}
+                protocolEnabled={protocolEnabled}
+                profileOwner={profileOwner}
               />
               <p className="mt-3 px-1 text-[12px] leading-relaxed text-ink-faint">
                 {BRAND_NAME} never touches the money. Your wallet signs a

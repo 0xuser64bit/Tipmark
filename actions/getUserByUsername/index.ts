@@ -29,6 +29,7 @@ export default async function getUserByUsername({
       if (!onChain.active) notFound();
       return {
         id: onChain.address,
+        profile_owner: onChain.owner,
         email: "",
         username: onChain.username,
         description: onChain.metadata.bio,

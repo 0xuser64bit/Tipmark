@@ -2,6 +2,7 @@ import getUserByUsername from "@/actions/getUserByUsername";
 import { getSupporterStats } from "@/actions/getSupporterStats";
 import ProfilePage from "@/components/profile-page";
 import { WalletAdapterWrapper } from "@/components/wallet-adapter-wrapper";
+import { getProtocolConfig } from "@/lib/protocol/config";
 import { notFound } from "next/navigation";
 
 export default async function CreatorPage({
@@ -33,6 +34,10 @@ export default async function CreatorPage({
         solana_address={data.solana_public_key}
         email={data.email}
         stats={stats}
+        protocolEnabled={getProtocolConfig().enabled}
+        profileOwner={
+          "profile_owner" in data ? String(data.profile_owner) : undefined
+        }
       />
     </WalletAdapterWrapper>
   );
