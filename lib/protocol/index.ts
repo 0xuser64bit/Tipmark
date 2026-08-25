@@ -3,3 +3,4 @@ export * from "./config";
 export * from "./pdas";
 export * from "./reference";
 export * from "./username";
+export * from "./metadata";

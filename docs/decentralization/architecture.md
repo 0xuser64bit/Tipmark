@@ -73,6 +73,11 @@ contains a version, display fields, social links, and image CIDs. Sensitive
 information, email addresses, and notification preferences never go on-chain
 or into permanent storage.
 
+Version 1 metadata is canonical JSON with bounded display name, Markdown bio,
+`ar://` or `ipfs://` image URIs, and normalized social handles. Clients hash
+that exact canonical byte sequence with SHA-256 and must reject gateway data
+whose hash or schema does not match the profile account.
+
 Permanent storage is intentionally append-only. Updating a profile creates a
 new metadata object and updates the profile URI; old objects remain addressable
 and must not be presented as deletable user data.
