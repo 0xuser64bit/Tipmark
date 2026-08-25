@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { planCheckpointUpdate } from "./indexer";
+import { fetchProtocolSignaturePages, planCheckpointUpdate } from "./indexer";
 
 const empty = {
   headSlot: 0n,
@@ -63,5 +63,45 @@ describe("protocol index checkpoints", () => {
         true,
       ),
     ).toEqual({ backfillBefore: "older", backfillComplete: true });
+  });
+
+  test("paginates all pages on the supplied RPC connection", async () => {
+    const calls: unknown[] = [];
+    const connection = {
+      getSignaturesForAddress: async (_program: unknown, options: unknown) => {
+        calls.push({ connection, options });
+        return calls.length === 1
+          ? [
+              { signature: "newest", slot: 20, err: null },
+              { signature: "middle", slot: 15, err: null },
+            ]
+          : [{ signature: "oldest", slot: 10, err: null }];
+      },
+    };
+
+    const result = await fetchProtocolSignaturePages({
+      program: {} as never,
+      pages: 2,
+      pageSize: 2,
+      connection: connection as never,
+    });
+
+    expect(result.rows.map((row) => row.signature)).toEqual([
+      "newest",
+      "middle",
+      "oldest",
+    ]);
+    expect(calls).toHaveLength(2);
+    expect(calls[0]).toMatchObject({
+      options: { before: undefined, limit: 2 },
+    });
+    expect(calls[1]).toMatchObject({
+      options: { before: "middle", limit: 2 },
+    });
+    expect(
+      calls.every(
+        (call) => (call as { connection: unknown }).connection === connection,
+      ),
+    ).toBe(true);
   });
 });

@@ -72,6 +72,7 @@ model ProtocolIndexerCheckpoint {
   id               String   @id
   cluster          String
   program          String
+  revision         Int      @default(0)
   headSlot         BigInt   @default(0)
   headSignature    String?
   backfillBefore   String?

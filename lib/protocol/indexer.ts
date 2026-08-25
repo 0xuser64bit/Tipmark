@@ -1,11 +1,26 @@
 import db from "@/db";
 import { PublicKey, type Connection } from "@solana/web3.js";
-import { readWithRpcFailover } from "@/lib/solana/rpc";
+import {
+  NonRetryableRpcReadError,
+  readWithRpcFailover,
+} from "@/lib/solana/rpc";
 import { getProtocolConfig } from "./config";
 import { encodeTipReference } from "./reference";
-import { readTipReceipt, type VerifiedTipReceipt } from "./tip-receipt";
+import {
+  readTipReceipt,
+  TipReceiptVerificationError,
+  type VerifiedTipReceipt,
+} from "./tip-receipt";
 
 const DEFAULT_PAGE_SIZE = 100;
+const MAX_CHECKPOINT_ATTEMPTS = 3;
+
+class ProtocolIndexerCheckpointConflict extends NonRetryableRpcReadError {
+  constructor() {
+    super("The protocol index checkpoint changed during this run.");
+    this.name = "ProtocolIndexerCheckpointConflict";
+  }
+}
 
 export interface IndexProtocolTipsOptions {
   mode?: "incremental" | "backfill";
@@ -110,26 +125,25 @@ async function persistTip(
   });
 }
 
-async function fetchSignatures(input: {
+export async function fetchProtocolSignaturePages(input: {
   program: PublicKey;
   before?: string;
   until?: string;
   pages: number;
   pageSize: number;
-  connection?: Connection;
+  connection: Connection;
 }): Promise<{ rows: SignatureRow[]; reachedEnd: boolean }> {
   const rows: SignatureRow[] = [];
   let before = input.before;
   let reachedEnd = false;
   for (let page = 0; page < input.pages; page += 1) {
-    const signatures = await readWithRpcFailover(
-      (connection) =>
-        connection.getSignaturesForAddress(input.program, {
-          before,
-          until: input.until,
-          limit: input.pageSize,
-        }),
-      input.connection,
+    const signatures = await input.connection.getSignaturesForAddress(
+      input.program,
+      {
+        before,
+        until: input.until,
+        limit: input.pageSize,
+      },
     );
     if (!signatures.length) {
       reachedEnd = true;
@@ -145,12 +159,15 @@ async function fetchSignatures(input: {
   return { rows, reachedEnd };
 }
 
-/** Replay verified protocol signatures into a disposable PostgreSQL cache. */
-export async function indexProtocolTips(
+async function indexProtocolTipsOnce(
   options: IndexProtocolTipsOptions = {},
 ): Promise<IndexProtocolTipsResult> {
   const config = getProtocolConfig();
   const program = new PublicKey(config.programAddress);
+  const connection = options.connection;
+  if (!connection) {
+    throw new Error("An indexer connection is required for a single RPC run.");
+  }
   const mode = options.mode || "incremental";
   const pages = Math.max(1, Math.min(options.pages ?? 1, 100));
   const pageSize = Math.max(
@@ -176,11 +193,11 @@ export async function indexProtocolTips(
     };
   }
 
-  const page = await fetchSignatures({
+  const page = await fetchProtocolSignaturePages({
     program,
     pages,
     pageSize,
-    connection: options.connection,
+    connection,
     until:
       mode === "incremental"
         ? checkpoint.headSignature || undefined
@@ -198,7 +215,7 @@ export async function indexProtocolTips(
       continue;
     }
     try {
-      const receipt = await readTipReceipt(item.signature, options.connection);
+      const receipt = await readTipReceipt(item.signature, connection);
       await persistTip(
         receipt,
         item.slot,
@@ -206,7 +223,8 @@ export async function indexProtocolTips(
         config.programAddress,
       );
       verified += 1;
-    } catch {
+    } catch (error) {
+      if (!(error instanceof TipReceiptVerificationError)) throw error;
       skipped += 1;
     }
   }
@@ -217,9 +235,15 @@ export async function indexProtocolTips(
     page.rows,
     page.reachedEnd,
   );
-  const updated = await db.protocolIndexerCheckpoint.update({
+  const committed = await db.protocolIndexerCheckpoint.updateMany({
+    where: { id, revision: checkpoint.revision },
+    data: { ...data, revision: { increment: 1 } },
+  });
+  if (committed.count !== 1) {
+    throw new ProtocolIndexerCheckpointConflict();
+  }
+  const updated = await db.protocolIndexerCheckpoint.findUniqueOrThrow({
     where: { id },
-    data,
   });
 
   return {
@@ -234,6 +258,29 @@ export async function indexProtocolTips(
   };
 }
 
+/** Replay verified protocol signatures into a disposable PostgreSQL cache. */
+export async function indexProtocolTips(
+  options: IndexProtocolTipsOptions = {},
+): Promise<IndexProtocolTipsResult> {
+  for (let attempt = 0; attempt < MAX_CHECKPOINT_ATTEMPTS; attempt += 1) {
+    try {
+      const run = (connection: Connection) =>
+        indexProtocolTipsOnce({ ...options, connection });
+      return options.connection
+        ? await run(options.connection)
+        : await readWithRpcFailover((connection) => run(connection));
+    } catch (error) {
+      if (
+        !(error instanceof ProtocolIndexerCheckpointConflict) ||
+        attempt + 1 === MAX_CHECKPOINT_ATTEMPTS
+      ) {
+        throw error;
+      }
+    }
+  }
+  throw new ProtocolIndexerCheckpointConflict();
+}
+
 export async function resetProtocolIndex(): Promise<void> {
   const config = getProtocolConfig();
   const id = checkpointId(config.cluster, config.programAddress);
@@ -246,8 +293,9 @@ export async function resetProtocolIndex(): Promise<void> {
 }
 
 /** Re-verify cached rows and repair or remove anything that diverged. */
-export async function reconcileProtocolTips(
-  options: { limit?: number; connection?: Connection } = {},
+async function reconcileProtocolTipsOnce(
+  connection: Connection,
+  options: { limit?: number } = {},
 ): Promise<{ checked: number; repaired: number; removed: number }> {
   const config = getProtocolConfig();
   const rows = await db.protocolTip.findMany({
@@ -259,7 +307,7 @@ export async function reconcileProtocolTips(
   let removed = 0;
   for (const row of rows) {
     try {
-      const receipt = await readTipReceipt(row.signature, options.connection);
+      const receipt = await readTipReceipt(row.signature, connection);
       const differs =
         row.profile !== String(receipt.event.profile) ||
         row.profileOwner !== String(receipt.event.profileOwner) ||
@@ -275,10 +323,22 @@ export async function reconcileProtocolTips(
         );
         repaired += 1;
       }
-    } catch {
+    } catch (error) {
+      if (!(error instanceof TipReceiptVerificationError)) throw error;
       await db.protocolTip.delete({ where: { signature: row.signature } });
       removed += 1;
     }
   }
   return { checked: rows.length, repaired, removed };
+}
+
+export async function reconcileProtocolTips(
+  options: { limit?: number; connection?: Connection } = {},
+): Promise<{ checked: number; repaired: number; removed: number }> {
+  if (options.connection) {
+    return reconcileProtocolTipsOnce(options.connection, options);
+  }
+  return readWithRpcFailover((connection) =>
+    reconcileProtocolTipsOnce(connection, options),
+  );
 }

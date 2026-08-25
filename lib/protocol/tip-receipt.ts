@@ -14,9 +14,12 @@ import {
   type ParsedInstruction,
 } from "@solana/web3.js";
 import { getProtocolConfig } from "./config";
-import { readWithRpcFailover } from "@/lib/solana/rpc";
+import {
+  NonRetryableRpcReadError,
+  readWithRpcFailover,
+} from "@/lib/solana/rpc";
 
-export class TipReceiptVerificationError extends Error {
+export class TipReceiptVerificationError extends NonRetryableRpcReadError {
   constructor(message: string) {
     super(message);
     this.name = "TipReceiptVerificationError";

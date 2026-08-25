@@ -9,7 +9,10 @@ export interface RpcReadOptions {
   retryDelayMs?: number;
 }
 
+export class NonRetryableRpcReadError extends Error {}
+
 function isRetryable(error: unknown): boolean {
+  if (error instanceof NonRetryableRpcReadError) return false;
   if (!(error instanceof Error)) return true;
   return !/invalid|malformed|signature|account|program|metadata/i.test(
     error.message,

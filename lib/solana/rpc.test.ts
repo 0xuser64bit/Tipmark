@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { withRpcReadFailoverFromEndpoints } from "./rpc";
+import {
+  NonRetryableRpcReadError,
+  withRpcReadFailoverFromEndpoints,
+} from "./rpc";
 
 describe("Solana RPC read failover", () => {
   test("retries a transient endpoint before moving to the next", async () => {
@@ -33,6 +36,21 @@ describe("Solana RPC read failover", () => {
         { attemptsPerEndpoint: 2, retryDelayMs: 0 },
       ),
     ).rejects.toThrow("invalid signature");
+    expect(calls).toEqual(["https://primary.example"]);
+  });
+
+  test("does not fail over explicitly non-retryable errors", async () => {
+    const calls: string[] = [];
+    await expect(
+      withRpcReadFailoverFromEndpoints(
+        ["https://primary.example", "https://secondary.example"],
+        async (_connection, endpoint) => {
+          calls.push(endpoint);
+          throw new NonRetryableRpcReadError("checkpoint conflict");
+        },
+        { attemptsPerEndpoint: 2, retryDelayMs: 0 },
+      ),
+    ).rejects.toThrow("checkpoint conflict");
     expect(calls).toEqual(["https://primary.example"]);
   });
 });
