@@ -1,6 +1,9 @@
 "use server";
 
-import { scanTipReceipts, summarizeChainTips } from "@/lib/protocol/earnings";
+import {
+  getContributionLedger,
+  withDates,
+} from "@/lib/protocol/contributions";
 
 export interface EarningRow {
   hash: string;
@@ -25,22 +28,27 @@ export interface EarningSummary {
 
 /**
  * Everything the creator's statement needs, derived from verified
- * `TipReceived` events on the profile PDA. Nothing here is read from a
- * cache, so deleting any local state cannot change a creator's totals.
+ * `TipReceived` events on the profile PDA. No stored total exists to drift
+ * from the ledger.
  */
 export const getEarningData = async ({
   profileAddress,
 }: {
   profileAddress: string;
 }): Promise<EarningSummary> => {
-  const rows = await scanTipReceipts(profileAddress);
-  const summary = summarizeChainTips(rows);
+  const ledger = withDates(await getContributionLedger(profileAddress));
 
   return {
-    ...summary,
-    rows: summary.rows.map((row) => ({
+    total: ledger.total,
+    last7: ledger.last7,
+    last30: ledger.last30,
+    contributions: ledger.contributions,
+    supporters: ledger.supporters,
+    largest: ledger.largest,
+    months: ledger.months,
+    rows: ledger.rows.map((row) => ({
       hash: row.signature,
-      amount: Number(row.amount),
+      amount: row.amount,
       fromPublicKey: row.fromPublicKey,
       status: row.status,
       createdAt: row.createdAt,

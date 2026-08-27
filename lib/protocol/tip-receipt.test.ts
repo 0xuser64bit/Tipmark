@@ -6,7 +6,7 @@ import {
   TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
 } from "@/clients/tipmark-protocol/src";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
-import { readTipReceipt } from "./tip-receipt";
+import { readTipReceipt, readTipReceipts } from "./tip-receipt";
 
 const supporter = new PublicKey("Vote111111111111111111111111111111111111111");
 const payout = new PublicKey("11111111111111111111111111111111");
@@ -224,5 +224,77 @@ describe("protocol tip receipts", () => {
         }) as never,
       ),
     ).rejects.toThrow("does not match");
+  });
+
+  test("batches a scan into one request per page of signatures", async () => {
+    const signature = "1".repeat(88);
+    const base = connection();
+    let transactionCalls = 0;
+    let statusCalls = 0;
+
+    const receipts = await readTipReceipts(
+      [signature, signature],
+      connection({
+        getParsedTransactions: async (signatures: string[]) => {
+          transactionCalls += 1;
+          const transaction = await base.getParsedTransaction();
+          return signatures.map(() => transaction);
+        },
+        getSignatureStatuses: async (signatures: string[]) => {
+          statusCalls += 1;
+          return {
+            value: signatures.map(() => ({
+              err: null,
+              confirmationStatus: "confirmed",
+            })),
+          };
+        },
+      }) as never,
+    );
+
+    expect(receipts).toHaveLength(2);
+    expect(transactionCalls).toBe(1);
+    expect(statusCalls).toBe(1);
+  });
+
+  test("omits unverifiable signatures from a scan instead of failing it", async () => {
+    const good = "1".repeat(88);
+    const base = connection();
+
+    const receipts = await readTipReceipts(
+      [good, "not-a-signature", "2".repeat(88)],
+      connection({
+        getParsedTransactions: async (signatures: string[]) => {
+          const transaction = await base.getParsedTransaction();
+          /* The second valid signature has no transaction: a settled tip and
+             an unrelated or missing one must not be conflated. */
+          return signatures.map((value) =>
+            value === good ? transaction : null,
+          );
+        },
+        getSignatureStatuses: async (signatures: string[]) => ({
+          value: signatures.map(() => ({
+            err: null,
+            confirmationStatus: "confirmed",
+          })),
+        }),
+      }) as never,
+    );
+
+    expect(receipts).toHaveLength(1);
+    expect(receipts[0].signature).toBe(good);
+  });
+
+  test("propagates transport failures rather than reporting no tips", async () => {
+    await expect(
+      readTipReceipts(
+        ["1".repeat(88)],
+        connection({
+          getParsedTransactions: async () => {
+            throw new Error("rpc unavailable");
+          },
+        }) as never,
+      ),
+    ).rejects.toThrow("rpc unavailable");
   });
 });

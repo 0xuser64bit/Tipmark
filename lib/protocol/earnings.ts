@@ -1,9 +1,8 @@
 import { PublicKey, Connection } from "@solana/web3.js";
-import { getProtocolConfig } from "./config";
-import { deriveProfilePda } from "./pdas";
 import { lamportsToSol } from "@/lib/solana/amount";
-import { readTipReceipt, type VerifiedTipReceipt } from "./tip-receipt";
+import { readTipReceipts, type VerifiedTipReceipt } from "./tip-receipt";
 import { readWithRpcFailover } from "@/lib/solana/rpc";
+import { deriveProfilePda } from "./pdas";
 
 export interface ChainTipRow {
   signature: string;
@@ -15,51 +14,77 @@ export interface ChainTipRow {
   createdAt: Date;
 }
 
+export interface ScanTipOptions {
+  connection?: Connection;
+  /** Signature pages to walk. Each page is one `getSignaturesForAddress` call. */
+  maxPages?: number;
+  pageSize?: number;
+}
+
 const DAY = 86_400_000;
 
-/** Scan profile-address signatures and keep only verified protocol tips. */
+/** Signatures per page. The RPC maximum is 1000. */
+const DEFAULT_PAGE_SIZE = 1_000;
+
+/**
+ * A bounded default depth: 10 pages is up to 10,000 signatures, well beyond any
+ * realistic profile, while keeping a pathological address from scanning
+ * unboundedly on a page request.
+ */
+const DEFAULT_MAX_PAGES = 10;
+
+/**
+ * Read a profile's verified contributions from Solana.
+ *
+ * Signature pages must be walked in order because each page's cursor is the
+ * previous page's last signature, but the transactions within a page are
+ * fetched as a single batched request rather than one round trip per tip —
+ * a profile with 400 contributions costs one page call plus four batches,
+ * not 400 sequential lookups.
+ *
+ * Verification is unchanged: every row is bound to its instruction, event, and
+ * inner transfer, so an unrelated instruction in the profile's history is
+ * skipped rather than counted.
+ */
 export async function scanTipReceipts(
   profileAddress: string,
-  options: {
-    connection?: Connection;
-    maxPages?: number;
-    pageSize?: number;
-  } = {},
+  options: ScanTipOptions = {},
 ): Promise<ChainTipRow[]> {
-  const connection = options.connection;
   const profile = new PublicKey(profileAddress);
-  const rows: ChainTipRow[] = [];
-  let before: string | undefined;
-  const maxPages = Math.max(1, Math.min(options.maxPages ?? 10, 100));
-  const pageSize = Math.max(1, Math.min(options.pageSize ?? 1000, 1000));
+  const maxPages = Math.max(1, Math.min(options.maxPages ?? DEFAULT_MAX_PAGES, 100));
+  const pageSize = Math.max(
+    1,
+    Math.min(options.pageSize ?? DEFAULT_PAGE_SIZE, 1_000),
+  );
 
-  for (let page = 0; page < maxPages; page += 1) {
-    const signatures = await readWithRpcFailover(
-      (activeConnection) =>
-        activeConnection.getSignaturesForAddress(profile, {
-          before,
-          limit: pageSize,
-        }),
-      connection,
-    );
-    if (!signatures.length) break;
+  return readWithRpcFailover(async (connection) => {
+    const rows: ChainTipRow[] = [];
+    let before: string | undefined;
 
-    for (const item of signatures) {
-      if (item.err) continue;
-      try {
-        const receipt = await readTipReceipt(item.signature, connection);
+    for (let page = 0; page < maxPages; page += 1) {
+      const signatures = await connection.getSignaturesForAddress(profile, {
+        before,
+        limit: pageSize,
+      });
+      if (!signatures.length) break;
+
+      const receipts = await readTipReceipts(
+        signatures.filter((item) => !item.err).map((item) => item.signature),
+        connection,
+      );
+      for (const receipt of receipts) {
+        /* The scan is anchored on the profile address, but an address appears
+           in a transaction for many reasons; keep only tips to this profile. */
         if (String(receipt.event.profile) !== profile.toBase58()) continue;
         rows.push(toTipRow(receipt));
-      } catch {
-        // Profile signatures can include unrelated instructions; ignore them.
       }
+
+      if (signatures.length < pageSize) break;
+      before = signatures[signatures.length - 1].signature;
     }
 
-    if (signatures.length < pageSize) break;
-    before = signatures[signatures.length - 1].signature;
-  }
-
-  return rows;
+    return rows;
+  }, options.connection);
 }
 
 function toTipRow(receipt: VerifiedTipReceipt): ChainTipRow {
@@ -122,11 +147,7 @@ export function summarizeChainTips(rows: ChainTipRow[]) {
 
 export async function scanProfileTipsByOwner(
   owner: string,
-  options: {
-    connection?: Connection;
-    maxPages?: number;
-    pageSize?: number;
-  } = {},
+  options: ScanTipOptions = {},
 ) {
   const [profile] = await deriveProfilePda(owner);
   return scanTipReceipts(profile, options);
