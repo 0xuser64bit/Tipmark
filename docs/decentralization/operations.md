@@ -3,9 +3,10 @@
 ## Clusters and endpoints
 
 Keep `NEXT_PUBLIC_SOLANA_CLUSTER` explicit. Use `localnet` for program tests and
-`devnet` for wallet and Irys rehearsal. Mainnet is a release decision, not a
-default. `NEXT_PUBLIC_SOLANA_RPC_URL` is the primary endpoint used by browser
-wallet connections and writes. `NEXT_PUBLIC_SOLANA_RPC_URLS` is an ordered,
+`devnet` for wallet and Irys rehearsal; those are the only accepted values, so
+mainnet is a deliberate code change rather than an environment typo.
+`NEXT_PUBLIC_SOLANA_RPC_URL` is the primary endpoint used by browser wallet
+connections and writes. `NEXT_PUBLIC_SOLANA_RPC_URLS` is an ordered,
 comma-separated server read-failover list; it must contain providers with the
 same cluster and compatible transaction history.
 
@@ -25,8 +26,8 @@ repeat a read, but repeating an ambiguous write can create a duplicate payment.
    protocol tip, receipt verification, and indexer replay on that cluster.
 5. Compare chain-derived totals with the disposable cache, run reconciliation,
    and test database deletion followed by a full backfill.
-6. Obtain independent program/security review before enabling the flag for real
-   users. No mainnet deployment is implied by a passing build.
+6. Obtain independent program/security review before opening the deployment to
+   real users. No mainnet deployment is implied by a passing build.
 7. Run `bun run protocol:release-check` with the devnet program address and
    public multisig metadata. The check must pass before any deployment change.
 

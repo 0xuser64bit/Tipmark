@@ -84,24 +84,14 @@ and must not be presented as deletable user data.
 
 ## Identity and migration
 
-New accounts use wallet signatures instead of Google as the ownership proof.
-The web app may still provide an optional email notification feature, but an
-email session cannot mutate an on-chain profile.
+Accounts use wallet signatures as the ownership proof. The web app may still
+provide an optional email notification feature, but an email session cannot
+mutate an on-chain profile.
 
-Existing database profiles migrate by having the creator sign with the wallet
-currently stored in `solana_public_key`. The migration tool verifies the
-signature, claims the handle on-chain, publishes metadata, and records the
-result in the database as a cache marker. Profiles without a controlled wallet
-cannot be trustlessly claimed by Tipmark; they require an explicit recovery
-policy and must not be silently reassigned.
-
-During migration, public routes resolve on-chain profiles first and fall back to
-legacy database profiles only when no on-chain claim exists. This preserves old
-links while making the new protocol progressively authoritative.
-
-The fallback is feature-flagged during rollout. Once a username PDA exists,
-invalid account relationships or metadata hash/schema failures are treated as
-an unavailable profile rather than silently replaced with a database row.
+Public routes resolve handles from the username and profile PDAs. There is no
+database fallback: a handle no username PDA claims does not exist, and a claim
+whose account relationships or metadata hash/schema fail verification is
+treated as an unavailable profile rather than silently replaced.
 
 ## Indexing and reads
 
@@ -135,12 +125,9 @@ proof.
 
 1. Build and test the program locally without touching mainnet.
 2. Deploy to devnet and run wallet-to-wallet integration tests.
-3. Add on-chain reads and verification behind a feature flag.
-4. Migrate volunteer creators and compare chain-derived data with the legacy
-   database.
-5. Make on-chain profiles authoritative for migrated handles.
-6. Publish the indexer and metadata tooling so anyone can rebuild the cache.
-7. Audit, multisig-govern, and only then consider mainnet deployment.
+3. Resolve every product surface from chain data and permanent metadata.
+4. Publish the metadata tooling so anyone can verify a profile independently.
+5. Audit, multisig-govern, and only then consider mainnet deployment.
 
 No mainnet transaction or program deployment is authorized by this plan.
 

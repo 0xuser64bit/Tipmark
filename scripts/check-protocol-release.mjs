@@ -18,11 +18,6 @@ function publicKey(name) {
 
 const cluster = required("TIPMARK_RELEASE_CLUSTER");
 if (cluster !== "devnet") throw new Error("release checks must target devnet");
-if (process.env.NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED === "true") {
-  throw new Error(
-    "the protocol flag must remain disabled during release checks",
-  );
-}
 
 const program = publicKey("TIPMARK_PROGRAM_ADDRESS");
 const upgradeAuthority = publicKey("TIPMARK_UPGRADE_AUTHORITY");
@@ -70,6 +65,5 @@ console.log(
     multisig: multisig.toBase58(),
     threshold,
     signerCount: signers.length,
-    protocolEnabled: false,
   }),
 );

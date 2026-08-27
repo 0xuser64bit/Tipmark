@@ -155,9 +155,8 @@ hosting provider and redeploy after changing any `NEXT_PUBLIC_*` value.
 | `NEXTAUTH_SECRET` | Yes | Generate locally with `openssl rand -base64 32` and store it as a deployment secret. It also signs the wallet-authorization cookie, which falls back to a hardcoded development value when unset — never deploy without it. |
 | `AUTH_TRUST_HOST` | Outside Vercel | Set to `1`. Auth.js derives host trust from `AUTH_URL`, `AUTH_TRUST_HOST`, `VERCEL`, or a non-production `NODE_ENV`; `NEXTAUTH_URL` alone leaves every auth route returning `UntrustedHost`. |
 | `NEXT_PUBLIC_BRAND_DOMAIN` | Recommended | The production domain you control, without `https://`. |
-| `NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED` | Yes | Set to `true` only after the reviewed Devnet program and config PDA exist. |
-| `NEXT_PUBLIC_SOLANA_CLUSTER` | Yes | Set literally to `devnet`. Other clusters are rejected when the protocol is enabled. |
-| `NEXT_PUBLIC_TIPMARK_PROGRAM_ID` | Yes | The public program address produced by the Devnet Anchor deployment. It must match `Anchor.toml` and the generated IDL. |
+| `NEXT_PUBLIC_SOLANA_CLUSTER` | Yes | Set literally to `devnet`. Only `devnet` and `localnet` are accepted; anything else is rejected at startup. |
+| `NEXT_PUBLIC_TIPMARK_PROGRAM_ID` | Yes | The public program address produced by the Devnet Anchor deployment. It must match `Anchor.toml` and the generated IDL, and its config PDA must already be initialized. |
 | `NEXT_PUBLIC_SOLANA_RPC_URL` | Yes | A Devnet HTTPS endpoint from Helius, QuickNode, Triton, Alchemy, or another Solana RPC provider. |
 | `NEXT_PUBLIC_SOLANA_RPC_URLS` | Recommended | Additional same-cluster Devnet HTTPS endpoints, comma-separated, for server read failover. |
 | `NEXT_PUBLIC_SOLANA_WS_URL` | Recommended | The matching Devnet WebSocket endpoint supplied by the RPC provider. |

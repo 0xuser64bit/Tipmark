@@ -1,10 +1,6 @@
 "use server";
 
-import db from "@/db";
-import { getProtocolConfig } from "@/lib/protocol/config";
 import { scanTipReceipts, summarizeChainTips } from "@/lib/protocol/earnings";
-
-const DAY = 86_400_000;
 
 export interface EarningRow {
   hash: string;
@@ -28,88 +24,26 @@ export interface EarningSummary {
 }
 
 /**
- * Everything the creator's statement needs, in one query.
- *
- * Buckets are built per request — an earlier version mutated a module-level
- * array, which leaked one creator's earnings into the next request.
+ * Everything the creator's statement needs, derived from verified
+ * `TipReceived` events on the profile PDA. Nothing here is read from a
+ * cache, so deleting any local state cannot change a creator's totals.
  */
 export const getEarningData = async ({
-  userId,
   profileAddress,
 }: {
-  userId: string;
-  profileAddress?: string;
+  profileAddress: string;
 }): Promise<EarningSummary> => {
-  if (getProtocolConfig().enabled && profileAddress) {
-    const rows = await scanTipReceipts(profileAddress);
-    const summary = summarizeChainTips(rows);
-    return {
-      ...summary,
-      rows: summary.rows.map((row) => ({
-        ...row,
-        hash: row.signature,
-        amount: Number(row.amount),
-      })),
-    };
-  }
-
-  const transactions = await db.transaction.findMany({
-    where: { user_id: userId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      hash: true,
-      amount: true,
-      createdAt: true,
-      fromPublicKey: true,
-      status: true,
-    },
-  });
-
-  const rows: EarningRow[] = transactions.map((t) => ({
-    ...t,
-    amount: parseFloat(t.amount) || 0,
-  }));
-
-  const now = Date.now();
-  const sumWithin = (days: number) =>
-    rows.reduce(
-      (acc, r) =>
-        now - new Date(r.createdAt).getTime() < days * DAY
-          ? acc + r.amount
-          : acc,
-      0,
-    );
-
-  const today = new Date();
-  const months = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(today.getFullYear(), today.getMonth() - (11 - i), 1);
-    return {
-      key: `${d.getFullYear()}-${d.getMonth()}`,
-      label: d.toLocaleString("en-US", { month: "short" }),
-      year: d.getFullYear(),
-      total: 0,
-    };
-  });
-  const indexOf = new Map(months.map((m, i) => [m.key, i]));
-
-  for (const r of rows) {
-    const d = new Date(r.createdAt);
-    const i = indexOf.get(`${d.getFullYear()}-${d.getMonth()}`);
-    if (i !== undefined) months[i].total += r.amount;
-  }
+  const rows = await scanTipReceipts(profileAddress);
+  const summary = summarizeChainTips(rows);
 
   return {
-    total: rows.reduce((acc, r) => acc + r.amount, 0),
-    last7: sumWithin(7),
-    last30: sumWithin(30),
-    contributions: rows.length,
-    supporters: new Set(rows.map((r) => r.fromPublicKey)).size,
-    largest: rows.reduce((max, r) => Math.max(max, r.amount), 0),
-    months: months.map(({ label, year, total }) => ({
-      label,
-      year,
-      total: Number(total.toFixed(6)),
+    ...summary,
+    rows: summary.rows.map((row) => ({
+      hash: row.signature,
+      amount: Number(row.amount),
+      fromPublicKey: row.fromPublicKey,
+      status: row.status,
+      createdAt: row.createdAt,
     })),
-    rows,
   };
 };

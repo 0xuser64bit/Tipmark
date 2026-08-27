@@ -8,26 +8,22 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const data = await getUserByUsername({ username });
+  const creator = await getUserByUsername({ username });
 
-  const displayName = data.display_name || `@${username}`;
-  const title = displayName;
-
-  const description = data.description
-    ? data.description
-    : `Support ${displayName} on ${BRAND_NAME} — direct creator support with a verifiable receipt`;
-
-  const profileImageUrl = data.profile_image
-    ? data.profile_image
-    : "/tipmark-mark.svg";
+  const displayName = creator.displayName;
+  const handle = creator.username;
+  const description =
+    creator.description ||
+    `Support ${displayName} on ${BRAND_NAME} — direct creator support with a verifiable receipt`;
+  const profileImageUrl = creator.profileImage || "/tipmark-mark.svg";
 
   return {
-    title,
+    title: displayName,
     description,
     openGraph: {
-      title: `${displayName} (@${username})`,
+      title: `${displayName} (@${handle})`,
       description,
-      url: `/${username}`,
+      url: `/${handle}`,
       images: [
         {
           url: profileImageUrl,
@@ -40,13 +36,13 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${displayName} (@${username})`,
+      title: `${displayName} (@${handle})`,
       description,
       images: [profileImageUrl],
-      creator: data.x_username ? `@${data.x_username}` : BRAND_HANDLE,
+      creator: creator.x_username ? `@${creator.x_username}` : BRAND_HANDLE,
     },
     alternates: {
-      canonical: `/${username}`,
+      canonical: `/${handle}`,
     },
     authors: [{ name: displayName }],
   };

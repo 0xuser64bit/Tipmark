@@ -1,20 +1,15 @@
 # Decentralized Protocol Testing Guide
 
-This guide explains how to test Tipmark's wallet-owned Solana protocol without
-confusing the legacy Google/PostgreSQL path with the new architecture. The
-protocol is feature-flagged and disabled by default. Nothing in this guide
-targets mainnet.
+This guide explains how to test Tipmark's wallet-owned Solana protocol. The
+protocol is the only payment and profile path; there is no alternative mode to
+compare against. Nothing in this guide targets mainnet.
 
 ## Current repository state
 
 - The Anchor program and generated TypeScript client are implemented.
 - Localnet program, receipt, indexer, deletion, and replay tests pass.
-- The browser protocol path exists behind
-  `NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED`.
-- No Tipmark protocol deployment or config initialization has been performed
-  on devnet or mainnet as part of this work.
-- Google, EdgeStore, and legacy database flows remain available while the
-  protocol flag is disabled.
+- The protocol is always on. `NEXT_PUBLIC_SOLANA_CLUSTER` accepts `devnet` and
+  `localnet` only, and a configured program address is required.
 - PostgreSQL is non-authoritative for profiles, payouts, and receipts, but the
   current browser publisher still uses a PostgreSQL-backed, one-time wallet
   challenge for replay protection. Removing that runtime dependency requires
@@ -86,12 +81,10 @@ truth.
 
 ## Browser rehearsal on devnet
 
-The browser path is enabled only when the server starts with a complete,
-reviewed devnet configuration. Set these values in a private local environment
-or pass them to the dev server process:
+The app requires a complete devnet configuration to start. Set these values in
+a private local environment or pass them to the dev server process:
 
 ```env
-NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED="true"
 NEXT_PUBLIC_SOLANA_CLUSTER="devnet"
 NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
 NEXT_PUBLIC_SOLANA_WS_URL="wss://api.devnet.solana.com"
@@ -126,8 +119,7 @@ does not send the landing page directly to `/home`.
 ### Creator scenario
 
 1. Open `http://localhost:3000`.
-2. Click **Start a page**. With the protocol flag enabled, the app goes to
-   `/claim` instead of Google OAuth.
+2. Click **Start a page**. The app goes to `/claim`.
 3. Connect a devnet wallet and choose an available handle.
 4. Enter a display name and payout wallet.
 5. Optionally upload profile and cover images. Irys charges the connected
@@ -162,15 +154,7 @@ finish if the challenge database is unavailable.
 7. Refresh the creator dashboard and compare chain-derived earnings with the
    optional indexer cache.
 
-## What each mode should show
-
-With `NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED="false"`:
-
-```text
-Start a page -> Google OAuth -> PostgreSQL user -> EdgeStore profile
-```
-
-With the flag enabled and a configured devnet program:
+## What the flow should show
 
 ```text
 Start a page -> /claim -> wallet signature -> Irys metadata
@@ -178,10 +162,10 @@ Start a page -> /claim -> wallet signature -> Irys metadata
              -> direct protocol tip -> verified chain receipt
 ```
 
-If the flag is enabled but `/claim` redirects to `/`, the running Next.js
-process did not receive the environment variable or was not restarted. If the
-page opens but publishing fails, check that the program address, cluster, RPC,
-initialized config PDA, wallet network, and devnet SOL all match.
+If a page fails to render at all, the running Next.js process is missing a
+required public variable or was not restarted. If the page opens but publishing
+fails, check that the program address, cluster, RPC, initialized config PDA,
+wallet network, and devnet SOL all match.
 
 ## Safety boundaries
 
@@ -230,7 +214,8 @@ program ID, and whether the program already exists on devnet. Do not access or
 request any private key or seed phrase. Do not touch mainnet. Before any signed
 transaction, show me the exact devnet deployment or initialization summary and
 wait for my explicit approval. After deployment, configure the local app with
-the protocol flag enabled, run the creator and supporter browser scenarios,
+the protocol configured for devnet, run the creator and supporter browser
+scenarios,
 verify the chain-derived receipt and database replay behavior, and document
 all signatures, failures, and remaining architecture gaps. Do not claim the
 system is database-free while wallet challenges still require PostgreSQL.

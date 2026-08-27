@@ -1,7 +1,7 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { SiteFooter } from "./site-footer";
@@ -13,7 +13,6 @@ import { PaidMark } from "./ui/stamp";
 import { Wordmark } from "./ui/logo";
 import { cn } from "@/lib/utils";
 import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
-import { getProtocolConfig } from "@/lib/protocol/config";
 
 /* ── Content ────────────────────────────────────────────────────────── */
 
@@ -86,8 +85,8 @@ const CAVEATS = [
 /* ── Page ───────────────────────────────────────────────────────────── */
 
 export function Landing({ priceUsd }: { priceUsd: number | null }) {
+  const router = useRouter();
   const [handle, setHandle] = useState("");
-  const protocolEnabled = getProtocolConfig().enabled;
 
   const start = (desired?: string) => {
     const slug = (desired ?? "")
@@ -95,16 +94,7 @@ export function Landing({ priceUsd }: { priceUsd: number | null }) {
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "-")
       .replace(/^-+|-+$/g, "");
-    const callbackUrl = slug
-      ? `/edit-profile?handle=${encodeURIComponent(slug)}`
-      : "/edit-profile";
-    if (protocolEnabled) {
-      window.location.assign(
-        slug ? `/claim?handle=${encodeURIComponent(slug)}` : "/claim",
-      );
-      return;
-    }
-    signIn("google", { redirect: true, callbackUrl });
+    router.push(slug ? `/claim?handle=${encodeURIComponent(slug)}` : "/claim");
   };
 
   return (

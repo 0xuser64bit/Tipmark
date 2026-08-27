@@ -1,67 +1,73 @@
 "use server";
 
-import db from "@/db";
 import { notFound } from "next/navigation";
-import { getProtocolConfig } from "@/lib/protocol/config";
 import {
   metadataGatewayUrl,
   PublicProfileResolutionError,
   resolveOnChainProfile,
 } from "@/lib/protocol/public-profile";
-import { isValidProtocolUsername } from "@/lib/protocol/username";
+import { isValidProtocolUsername, normalizeUsername } from "@/lib/protocol/username";
 
+export interface PublicCreator {
+  profileAddress: string;
+  profileOwner: string;
+  username: string;
+  displayName: string;
+  description: string;
+  profileImage: string;
+  coverImage: string;
+  x_username: string;
+  instagram_username: string;
+  github_username: string;
+  linkedin_username: string;
+  payoutWallet: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Resolve a public handle from Solana.
+ *
+ * A handle that no username PDA claims does not exist, and a claim whose
+ * account relationships or metadata hash fail verification is treated as
+ * unavailable rather than degraded — there is no second source of truth to
+ * fall back to, which is the point.
+ */
 export default async function getUserByUsername({
   username,
 }: {
   username: string;
-}) {
-  const normalized = username.trim().toLowerCase();
+}): Promise<PublicCreator> {
+  const normalized = normalizeUsername(username);
+  if (!isValidProtocolUsername(normalized)) notFound();
 
-  if (getProtocolConfig().enabled && isValidProtocolUsername(normalized)) {
-    let onChain;
-    try {
-      onChain = await resolveOnChainProfile(normalized);
-    } catch (error) {
-      if (error instanceof PublicProfileResolutionError) notFound();
-      throw error;
-    }
-    if (onChain) {
-      if (!onChain.active) notFound();
-      return {
-        id: onChain.address,
-        profile_owner: onChain.owner,
-        email: "",
-        username: onChain.username,
-        description: onChain.metadata.bio,
-        display_name: onChain.metadata.displayName,
-        profile_image: onChain.metadata.images.avatar
-          ? metadataGatewayUrl(onChain.metadata.images.avatar)
-          : "",
-        cover_image: onChain.metadata.images.cover
-          ? metadataGatewayUrl(onChain.metadata.images.cover)
-          : "",
-        x_username: onChain.metadata.links.x || "",
-        instagram_username: onChain.metadata.links.instagram || "",
-        github_username: onChain.metadata.links.github || "",
-        linkedin_username: onChain.metadata.links.linkedin || "",
-        solana_public_key: onChain.payoutWallet,
-        updates: false,
-        createdAt: onChain.createdAt,
-        updatedAt: onChain.updatedAt,
-        source: onChain.source,
-      };
-    }
+  let onChain;
+  try {
+    onChain = await resolveOnChainProfile(normalized);
+  } catch (error) {
+    if (error instanceof PublicProfileResolutionError) notFound();
+    throw error;
   }
+  if (!onChain || !onChain.active) notFound();
 
-  const user = await db.user.findFirst({
-    where: {
-      username: normalized,
-    },
-  });
-
-  if (!user) {
-    notFound();
-  }
-
-  return user;
+  return {
+    profileAddress: onChain.address,
+    profileOwner: onChain.owner,
+    username: onChain.username,
+    displayName: onChain.metadata.displayName,
+    description: onChain.metadata.bio,
+    profileImage: onChain.metadata.images.avatar
+      ? metadataGatewayUrl(onChain.metadata.images.avatar)
+      : "",
+    coverImage: onChain.metadata.images.cover
+      ? metadataGatewayUrl(onChain.metadata.images.cover)
+      : "",
+    x_username: onChain.metadata.links.x || "",
+    instagram_username: onChain.metadata.links.instagram || "",
+    github_username: onChain.metadata.links.github || "",
+    linkedin_username: onChain.metadata.links.linkedin || "",
+    payoutWallet: onChain.payoutWallet,
+    createdAt: onChain.createdAt,
+    updatedAt: onChain.updatedAt,
+  };
 }

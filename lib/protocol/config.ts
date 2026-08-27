@@ -16,7 +16,6 @@ import {
 export type TipmarkCluster = SolanaCluster;
 
 export interface TipmarkProtocolRuntimeConfig {
-  enabled: boolean;
   cluster: TipmarkCluster;
   programAddress: Address;
   rpcUrl: string;
@@ -24,24 +23,24 @@ export interface TipmarkProtocolRuntimeConfig {
   websocketUrl: string;
 }
 
+/**
+ * The protocol is the product; there is no non-protocol mode to fall back to.
+ * A misconfigured program address is therefore a deployment error rather than
+ * a degraded runtime, and is reported as one.
+ */
 export function getProtocolConfig(): TipmarkProtocolRuntimeConfig {
   const network = getSolanaNetworkConfig();
   const configuredProgram = process.env.NEXT_PUBLIC_TIPMARK_PROGRAM_ID?.trim();
   const configuredRpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim();
   const configuredWebsocket = process.env.NEXT_PUBLIC_SOLANA_WS_URL?.trim();
-  const enabled = process.env.NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED === "true";
 
-  if (enabled && network.cluster !== "devnet") {
-    throw new Error("The Tipmark protocol may only be enabled on Devnet.");
-  }
-  if (enabled && !configuredProgram) {
+  if (network.cluster !== "devnet" && network.cluster !== "localnet") {
     throw new Error(
-      "NEXT_PUBLIC_TIPMARK_PROGRAM_ID is required when the protocol is enabled.",
+      "Tipmark currently supports the Solana devnet and localnet clusters only.",
     );
   }
 
   return {
-    enabled,
     cluster: network.cluster,
     programAddress: address(
       configuredProgram || TIPMARK_PROTOCOL_PROGRAM_ADDRESS,

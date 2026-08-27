@@ -1,6 +1,5 @@
 "use client";
 
-import { addTransactionToDB } from "@/actions/addTransactionToDB";
 import { deriveProfilePda } from "@/lib/protocol/pdas";
 import { createTipReference } from "@/lib/protocol/reference";
 import {
@@ -8,12 +7,7 @@ import {
   simulateAndSendProtocolTransaction,
 } from "@/lib/protocol/transactions";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -48,15 +42,11 @@ type Choice = (typeof PRESETS)[number] | "custom";
 export function SupportPanel({
   displayName,
   solanaAddress,
-  email,
-  protocolEnabled = false,
   profileOwner,
 }: {
   displayName: string;
   solanaAddress: string;
-  email?: string;
-  protocolEnabled?: boolean;
-  profileOwner?: string;
+  profileOwner: string;
 }) {
   const router = useRouter();
   const { connection } = useConnection();
@@ -117,61 +107,27 @@ export function SupportPanel({
       setSending(true);
       try {
         const lamports = solToLamports(amount.toString());
-        let signature: string;
-
-        if (protocolEnabled) {
-          if (!profileOwner) {
-            throw new Error("This profile is not available on the protocol.");
-          }
-          const [profile] = await deriveProfilePda(profileOwner);
-          const instruction = buildTipInstruction({
-            supporter: publicKey!.toBase58(),
-            profile,
-            payoutWallet: solanaAddress,
-            amount: lamports,
-            reference: createTipReference(),
-          });
-          const result = await simulateAndSendProtocolTransaction({
-            connection,
-            sendTransaction,
-            feePayer: publicKey!,
-            instructions: [instruction],
-          });
-          signature = result.signature;
-          if (result.status !== "confirmed") {
-            toast.warning(
-              "The tip was submitted, but confirmation is still pending.",
-            );
-          }
-        } else {
-          const tx = new Transaction().add(
-            SystemProgram.transfer({
-              fromPubkey: publicKey!,
-              toPubkey: new PublicKey(solanaAddress),
-              lamports: Number(lamports),
-            }),
+        const [profile] = await deriveProfilePda(profileOwner);
+        const instruction = buildTipInstruction({
+          supporter: publicKey!.toBase58(),
+          profile,
+          payoutWallet: solanaAddress,
+          amount: lamports,
+          reference: createTipReference(),
+        });
+        const result = await simulateAndSendProtocolTransaction({
+          connection,
+          sendTransaction,
+          feePayer: publicKey!,
+          instructions: [instruction],
+        });
+        if (result.status !== "confirmed") {
+          toast.warning(
+            "The tip was submitted, but confirmation is still pending.",
           );
-
-          signature = await sendTransaction(tx, connection);
-
-          if (email) {
-            try {
-              await addTransactionToDB({
-                userId: email,
-                hash: signature,
-                amount: amount.toString(),
-                fromPublicKey: publicKey!.toString(),
-                toPublicKey: solanaAddress,
-              });
-            } catch {
-              toast.warning(
-                "The payment was sent, but dashboard indexing is still catching up.",
-              );
-            }
-          }
         }
 
-        router.push(`/check-explorer/${signature}`);
+        router.push(`/check-explorer/${result.signature}`);
       } catch (error) {
         const message =
           error instanceof Error && /reject|cancel|denied/i.test(error.message)
@@ -185,9 +141,7 @@ export function SupportPanel({
       amount,
       connected,
       connection,
-      email,
       profileOwner,
-      protocolEnabled,
       publicKey,
       router,
       sendTransaction,

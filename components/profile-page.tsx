@@ -28,11 +28,9 @@ export interface ProfilePageProps {
   instagram_username: string;
   linkedin_username: string;
   solana_address: string;
-  email: string;
   stats?: { supporters: number; contributions: number; totalSol: number };
   isOwner?: boolean;
-  protocolEnabled?: boolean;
-  profileOwner?: string;
+  profileOwner: string;
 }
 
 /**
@@ -51,10 +49,8 @@ export default function ProfilePage({
   instagram_username,
   linkedin_username,
   solana_address,
-  email,
   stats,
   isOwner = false,
-  protocolEnabled = false,
   profileOwner,
 }: ProfilePageProps) {
   const url = profileUrl(username);
@@ -215,8 +211,6 @@ export default function ProfilePage({
               <SupportPanel
                 displayName={displayName}
                 solanaAddress={solana_address}
-                email={email}
-                protocolEnabled={protocolEnabled}
                 profileOwner={profileOwner}
               />
               <p className="mt-3 px-1 text-[12px] leading-relaxed text-ink-faint">

@@ -6,8 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Statement } from "@/components/statement";
 import { auth } from "@/lib/auth";
-import { getProtocolConfig } from "@/lib/protocol/config";
-import { resolveOnChainProfile } from "@/lib/protocol/public-profile";
+import { metadataGatewayUrl, resolveOnChainProfile } from "@/lib/protocol/public-profile";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "Ledger" };
@@ -18,14 +17,13 @@ export default async function LedgerPage() {
   if (!email) redirect("/");
 
   const user = await getUserByEmail({ email });
-  const protocol = getProtocolConfig();
-  const onChain =
-    protocol.enabled && user?.username
-      ? await resolveOnChainProfile(user.username).catch(() => null)
-      : null;
-  if (protocol.enabled && !onChain) redirect("/edit-profile");
+  const onChain = user?.username
+    ? await resolveOnChainProfile(user.username).catch(() => null)
+    : null;
+  if (!onChain) redirect("/edit-profile");
+
   const [data, priceUsd] = await Promise.all([
-    getEarningData({ userId: email, profileAddress: onChain?.address }),
+    getEarningData({ profileAddress: onChain.address }),
     getSolPrice(),
   ]);
 
@@ -35,9 +33,13 @@ export default async function LedgerPage() {
       <Statement
         data={data}
         priceUsd={priceUsd}
-        username={user?.username?.toLowerCase() ?? null}
-        displayName={user?.display_name ?? "Your page"}
-        profileImage={user?.profile_image ?? ""}
+        username={onChain.username}
+        displayName={onChain.metadata.displayName}
+        profileImage={
+          onChain.metadata.images.avatar
+            ? metadataGatewayUrl(onChain.metadata.images.avatar)
+            : ""
+        }
       />
       <SiteFooter />
     </div>

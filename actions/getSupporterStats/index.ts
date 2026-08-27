@@ -1,39 +1,23 @@
 "use server";
 
-import db from "@/db";
-import { getProtocolConfig } from "@/lib/protocol/config";
 import { scanTipReceipts, summarizeChainTips } from "@/lib/protocol/earnings";
 
-/** Lightweight social-proof stats for a creator's public profile. */
+export interface SupporterStats {
+  contributions: number;
+  supporters: number;
+  totalSol: number;
+}
+
+/** Lightweight social-proof stats derived from verified on-chain tips. */
 export async function getSupporterStats(
-  email: string,
-  profileAddress?: string,
-) {
-  if (getProtocolConfig().enabled && profileAddress) {
-    const rows = await scanTipReceipts(profileAddress);
-    const summary = summarizeChainTips(rows);
-    return {
-      contributions: summary.contributions,
-      supporters: summary.supporters,
-      totalSol: summary.total,
-    };
-  }
-  if (!email) return { contributions: 0, supporters: 0, totalSol: 0 };
-
-  const txns = await db.transaction.findMany({
-    where: { user_id: email },
-    select: { amount: true, fromPublicKey: true },
-  });
-
-  const totalSol = txns.reduce(
-    (acc, t) => acc + (parseFloat(t.amount) || 0),
-    0,
-  );
-  const supporters = new Set(txns.map((t) => t.fromPublicKey)).size;
+  profileAddress: string,
+): Promise<SupporterStats> {
+  const rows = await scanTipReceipts(profileAddress);
+  const summary = summarizeChainTips(rows);
 
   return {
-    contributions: txns.length,
-    supporters,
-    totalSol,
+    contributions: summary.contributions,
+    supporters: summary.supporters,
+    totalSol: summary.total,
   };
 }

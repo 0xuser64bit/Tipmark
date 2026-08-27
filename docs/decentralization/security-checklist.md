@@ -27,8 +27,8 @@
 ## Release
 
 - [x] Upgrade and protocol authority are documented as multisig responsibilities.
-- [x] Release checks reject mainnet targeting, enabled flags, invalid addresses,
-      duplicate signers, and one-person thresholds.
+- [x] Release checks reject mainnet targeting, invalid addresses, duplicate
+      signers, and one-person thresholds.
 - [ ] Publish the multisig threshold, timelock, pause procedure, and rollback
       boundary for the selected deployment.
 - [ ] Complete migration rehearsal and independent review before mainnet.
