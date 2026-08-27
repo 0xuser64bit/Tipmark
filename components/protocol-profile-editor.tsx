@@ -3,18 +3,12 @@
 import { BRAND_DOMAIN } from "@/lib/brand";
 import {
   createIrysClient,
-  fundIrysUpload,
-  profileImageTags,
-  profileMetadataTags,
-  quoteIrysUpload,
   uploadPermanentImage,
   uploadPermanentMetadata,
 } from "@/lib/protocol/irys";
-import {
-  canonicalizeProfileMetadata,
-  normalizeProfileMetadata,
-} from "@/lib/protocol/metadata";
+import { normalizeProfileMetadata } from "@/lib/protocol/metadata";
 import { getProtocolConfig } from "@/lib/protocol/config";
+import { metadataGatewayUrl } from "@/lib/protocol/public-profile";
 import { deriveProfilePda, deriveUsernamePda } from "@/lib/protocol/pdas";
 import {
   buildCreateProfileInstruction,
@@ -74,15 +68,13 @@ function permanentUri(value: string): string {
   return /^(?:ar|ipfs):\/\/[^\s/]+$/i.test(value) ? value : "";
 }
 
+/** Resolve a permanent URI to something an <img> can load on this cluster. */
 function previewUri(value: string): string {
+  if (!value) return "";
   try {
     return /^(?:ar|ipfs):\/\//i.test(value)
-      ? new URL(
-          value
-            .replace(/^ar:\/\//i, "https://arweave.net/")
-            .replace(/^ipfs:\/\//i, "https://ipfs.io/ipfs/"),
-        ).toString()
-      : value;
+      ? metadataGatewayUrl(value)
+      : new URL(value).toString();
   } catch {
     return "";
   }
@@ -171,19 +163,11 @@ export default function ProtocolProfileEditor({
       const irys = await createIrysClient(
         wallet.adapter as MessageSignerWalletAdapter,
       );
-      const uploadKind = kind === "profile" ? "avatar" : "cover";
-      const quote = await quoteIrysUpload(irys, [
-        {
-          bytes: file.size,
-          tags: profileImageTags(publicKey.toBase58(), uploadKind),
-        },
-      ]);
-      await fundIrysUpload(irys, quote.fundingRequiredAtomic);
       const uri = await uploadPermanentImage(
         irys,
         file,
         publicKey.toBase58(),
-        uploadKind,
+        kind === "profile" ? "avatar" : "cover",
       );
       set(kind === "profile" ? "profileImage" : "coverImage", uri);
     } catch (error) {
@@ -221,14 +205,6 @@ export default function ProtocolProfileEditor({
       const irys = await createIrysClient(
         wallet.adapter as MessageSignerWalletAdapter,
       );
-      const body = canonicalizeProfileMetadata(metadata);
-      const quote = await quoteIrysUpload(irys, [
-        {
-          bytes: new TextEncoder().encode(body).byteLength,
-          tags: profileMetadataTags(connectedOwner),
-        },
-      ]);
-      await fundIrysUpload(irys, quote.fundingRequiredAtomic);
       const uploaded = await uploadPermanentMetadata(
         irys,
         metadata,
