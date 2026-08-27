@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { getSolanaNetworkConfig } from "@/lib/solana/cluster";
 import { Logo } from "./ui/logo";
 
 /**
@@ -18,6 +19,29 @@ const CREATOR_NAV = [
   { href: "/dashboard", label: "Ledger" },
   { href: "/home", label: "My page" },
 ];
+
+/**
+ * Non-production clusters are labelled so nobody mistakes test SOL for real
+ * money. Read from the configured cluster rather than hardcoded, so the badge
+ * cannot outlive the deployment it describes; mainnet shows nothing.
+ */
+function ClusterBadge({ compact }: { compact: boolean }) {
+  const { cluster } = getSolanaNetworkConfig();
+  if (cluster === "mainnet-beta") return null;
+
+  return (
+    <span
+      className={cn(
+        "field-label shrink-0 items-center rounded-[3px] border border-pending-edge bg-pending-soft px-1.5 py-0.5 text-[9.5px] text-pending",
+        /* With creator nav present the row is already tight on a phone. */
+        compact ? "hidden sm:inline-flex" : "inline-flex",
+      )}
+      title={`Connected to Solana ${cluster}. Balances and transfers are not real money.`}
+    >
+      {cluster.toUpperCase()}
+    </span>
+  );
+}
 
 export function SiteHeader({
   /** Right-hand action cluster. */
@@ -45,13 +69,7 @@ export function SiteHeader({
       >
         <Logo compact={nav} />
 
-        <span
-          className="field-label inline-flex items-center rounded-[3px] border border-stamp-edge bg-stamp-soft px-2 py-1 text-stamp"
-          title="Tipmark's decentralized protocol is available on Solana Devnet only."
-          aria-label="Solana Devnet only"
-        >
-          Devnet
-        </span>
+        <ClusterBadge compact={nav} />
 
         {nav && (
           <nav aria-label="Main" className="-mb-px flex items-end gap-0.5 sm:gap-1">

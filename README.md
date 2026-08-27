@@ -152,7 +152,8 @@ hosting provider and redeploy after changing any `NEXT_PUBLIC_*` value.
 | --- | --- | --- |
 | `DATABASE_URL` | Yes | A PostgreSQL database from Neon, Supabase, Railway, Render, or another managed provider. Run the committed Prisma migrations against it. |
 | `NEXTAUTH_URL` | Yes | The canonical deployed origin, such as `https://tipmark.xyz`. |
-| `NEXTAUTH_SECRET` | Yes | Generate locally with `openssl rand -base64 32` and store it as a deployment secret. |
+| `NEXTAUTH_SECRET` | Yes | Generate locally with `openssl rand -base64 32` and store it as a deployment secret. It also signs the wallet-authorization cookie, which falls back to a hardcoded development value when unset — never deploy without it. |
+| `AUTH_TRUST_HOST` | Outside Vercel | Set to `1`. Auth.js derives host trust from `AUTH_URL`, `AUTH_TRUST_HOST`, `VERCEL`, or a non-production `NODE_ENV`; `NEXTAUTH_URL` alone leaves every auth route returning `UntrustedHost`. |
 | `NEXT_PUBLIC_BRAND_DOMAIN` | Recommended | The production domain you control, without `https://`. |
 | `NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED` | Yes | Set to `true` only after the reviewed Devnet program and config PDA exist. |
 | `NEXT_PUBLIC_SOLANA_CLUSTER` | Yes | Set literally to `devnet`. Other clusters are rejected when the protocol is enabled. |
@@ -162,10 +163,10 @@ hosting provider and redeploy after changing any `NEXT_PUBLIC_*` value.
 | `NEXT_PUBLIC_SOLANA_WS_URL` | Recommended | The matching Devnet WebSocket endpoint supplied by the RPC provider. |
 | `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | Optional | Arweave/Irys gateways, comma-separated. Defaults are present in `.env.example`. |
 | `NEXT_PUBLIC_IPFS_GATEWAY_URLS` | Optional | IPFS gateways, comma-separated. Defaults are present in `.env.example`. |
-| `GOOGLE_CLIENT_ID` | Legacy mode | A Google Cloud OAuth 2.0 Web client. Add `<NEXTAUTH_URL>/api/auth/callback/google` as an authorized redirect URI. |
-| `GOOGLE_CLIENT_SECRET` | Legacy mode | The secret from the same Google OAuth client. |
-| `EDGE_STORE_ACCESS_KEY` | Legacy mode | The EdgeStore project dashboard. The protocol profile path does not use EdgeStore. |
-| `EDGE_STORE_SECRET_KEY` | Legacy mode | The EdgeStore project dashboard. |
+| `GOOGLE_CLIENT_ID` | Yes, for now | A Google Cloud OAuth 2.0 Web client. Add `<NEXTAUTH_URL>/api/auth/callback/google` as an authorized redirect URI. Required until the wallet-session migration lands: without it the creator dashboard, my-page, and profile editor are unreachable. |
+| `GOOGLE_CLIENT_SECRET` | Yes, for now | The secret from the same Google OAuth client. |
+| `EDGE_STORE_ACCESS_KEY` | Yes, for now | The EdgeStore project dashboard. The protocol profile path does not use EdgeStore, but `next build` fails without this because the EdgeStore route initializes its provider at module scope. |
+| `EDGE_STORE_SECRET_KEY` | Yes, for now | The EdgeStore project dashboard. |
 
 The current wallet authorization challenge still uses PostgreSQL for one-time
 nonce consumption, so `DATABASE_URL`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`
