@@ -2,6 +2,7 @@ import {
   address,
   fetchEncodedAccount,
   type Address,
+  type GetAccountInfoApi,
   type Rpc,
 } from "@solana/kit";
 import {
@@ -18,6 +19,9 @@ import {
   type ProfileMetadata,
 } from "./metadata";
 import { parseProtocolUsername } from "./username";
+
+/** The minimum RPC surface a profile read needs. */
+export type ProfileRpc = Rpc<GetAccountInfoApi>;
 
 const MAX_METADATA_BYTES = 64 * 1024;
 const USERNAME_RECORD_SIZE = 104n;
@@ -244,7 +248,7 @@ function assertProfile(
 export async function resolveOnChainProfile(
   rawUsername: string,
   options: {
-    rpc?: Rpc<any>;
+    rpc?: ProfileRpc;
     programAddress?: Address;
     fetchImpl?: ProfileFetch;
   } = {},
@@ -306,7 +310,7 @@ export async function resolveOnChainProfile(
 export async function resolveOnChainProfileByOwner(
   rawOwner: string | Address,
   options: {
-    rpc?: Rpc<any>;
+    rpc?: ProfileRpc;
     programAddress?: Address;
     fetchImpl?: ProfileFetch;
   } = {},

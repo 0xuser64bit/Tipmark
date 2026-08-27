@@ -91,9 +91,12 @@ export function RequireProfile({
     return <Resolving nav={nav} />;
   }
   if (resolution.phase === "unavailable") {
-    return <Unavailable nav={nav} message={resolution.message} onRetry={retry} />;
+    return (
+      <Unavailable nav={nav} message={resolution.message} onRetry={retry} />
+    );
   }
-  if (resolution.phase === "unclaimed") return <Shell nav={false}>{unclaimed}</Shell>;
+  if (resolution.phase === "unclaimed")
+    return <Shell nav={false}>{unclaimed}</Shell>;
 
   return <>{children(resolution.profile, owner)}</>;
 }
@@ -118,7 +121,9 @@ export function RequireWallet({
     return <Resolving nav={nav} />;
   }
   if (resolution.phase === "unavailable") {
-    return <Unavailable nav={nav} message={resolution.message} onRetry={retry} />;
+    return (
+      <Unavailable nav={nav} message={resolution.message} onRetry={retry} />
+    );
   }
 
   return (

@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  getContributionLedger,
-  withDates,
-} from "@/lib/protocol/contributions";
+import { getContributionLedger, withDates } from "@/lib/protocol/contributions";
 
 export interface EarningRow {
   hash: string;

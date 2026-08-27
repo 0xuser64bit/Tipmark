@@ -6,7 +6,10 @@ import {
   PublicProfileResolutionError,
   resolveOnChainProfile,
 } from "@/lib/protocol/public-profile";
-import { isValidProtocolUsername, normalizeUsername } from "@/lib/protocol/username";
+import {
+  isValidProtocolUsername,
+  normalizeUsername,
+} from "@/lib/protocol/username";
 
 export interface PublicCreator {
   profileAddress: string;

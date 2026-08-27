@@ -72,7 +72,10 @@ export function SiteHeader({
         <ClusterBadge compact={nav} />
 
         {nav && (
-          <nav aria-label="Main" className="-mb-px flex items-end gap-0.5 sm:gap-1">
+          <nav
+            aria-label="Main"
+            className="-mb-px flex items-end gap-0.5 sm:gap-1"
+          >
             {CREATOR_NAV.map(({ href, label }) => {
               const active = pathname === href;
               return (

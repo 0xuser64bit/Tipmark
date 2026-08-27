@@ -51,7 +51,10 @@ export async function scanTipReceipts(
   options: ScanTipOptions = {},
 ): Promise<ChainTipRow[]> {
   const profile = new PublicKey(profileAddress);
-  const maxPages = Math.max(1, Math.min(options.maxPages ?? DEFAULT_MAX_PAGES, 100));
+  const maxPages = Math.max(
+    1,
+    Math.min(options.maxPages ?? DEFAULT_MAX_PAGES, 100),
+  );
   const pageSize = Math.max(
     1,
     Math.min(options.pageSize ?? DEFAULT_PAGE_SIZE, 1_000),
@@ -141,7 +144,16 @@ export function summarizeChainTips(rows: ChainTipRow[]) {
       year,
       total: Number(total.toFixed(6)),
     })),
-    rows: rows.map(({ amountLamports: _amountLamports, ...row }) => row),
+    /* Lamports are the verified quantity but the UI works in SOL; drop the
+       raw value from summary rows so the two cannot disagree downstream. */
+    rows: rows.map((row) => ({
+      signature: row.signature,
+      amount: row.amount,
+      fromPublicKey: row.fromPublicKey,
+      toPublicKey: row.toPublicKey,
+      status: row.status,
+      createdAt: row.createdAt,
+    })),
   };
 }
 
