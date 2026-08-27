@@ -3,6 +3,7 @@
 import { WebUploader } from "@irys/web-upload";
 import { WebSolana } from "@irys/web-upload-solana";
 import type { MessageSignerWalletAdapter } from "@solana/wallet-adapter-base";
+import { getBase58Encoder } from "@solana/kit";
 import { BRAND_NAME } from "@/lib/brand";
 import { getSolanaNetworkConfig } from "@/lib/solana/cluster";
 import {
@@ -13,6 +14,9 @@ import {
 
 const MAX_PROFILE_IMAGE_BYTES = 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+/** An Irys data-item ID is a 32-byte SHA-256 of the item's signature. */
+const RECEIPT_ID_BYTES = 32;
 
 type IrysClient = Awaited<ReturnType<ReturnType<typeof WebUploader>["build"]>>;
 
@@ -46,9 +50,42 @@ function commonTags(owner: string, type: string): IrysTags {
   ];
 }
 
-function assertReceiptId(id: string): void {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(id)) {
-    throw new PermanentUploadError("Irys returned an invalid transaction ID.");
+/**
+ * Check that an upload receipt names a real data item.
+ *
+ * The ID is a 32-byte digest, but its text encoding is the SDK's choice:
+ * `@irys/bundles` currently returns base58 (43-44 characters), while receipts
+ * and Arweave tooling elsewhere use base64url (43 characters). Validate the
+ * decoded length rather than one alphabet, so a permanent upload is never
+ * discarded over a representation detail — the previous base64url-only check
+ * rejected every real base58 ID.
+ */
+export function assertReceiptId(id: unknown): asserts id is string {
+  if (typeof id !== "string" || !id) {
+    throw new PermanentUploadError("Irys did not return a transaction ID.");
+  }
+
+  for (const decode of [decodeBase58, decodeBase64Url]) {
+    if (decode(id) === RECEIPT_ID_BYTES) return;
+  }
+
+  throw new PermanentUploadError("Irys returned an invalid transaction ID.");
+}
+
+function decodeBase58(value: string): number | null {
+  try {
+    return getBase58Encoder().encode(value).length;
+  } catch {
+    return null;
+  }
+}
+
+function decodeBase64Url(value: string): number | null {
+  if (!/^[A-Za-z0-9_-]+$/.test(value)) return null;
+  try {
+    return Buffer.from(value, "base64url").length;
+  } catch {
+    return null;
   }
 }
 
@@ -117,6 +154,44 @@ export async function fundIrysUpload(
   }
 }
 
+/** Irys answers an underfunded upload with a 402 rather than a typed error. */
+function isPaymentRequired(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.includes("402") || /not enough balance/i.test(error.message))
+  );
+}
+
+/**
+ * Upload, paying only if Irys asks to be paid.
+ *
+ * Irys serves small uploads free — profile metadata is a few hundred bytes and
+ * always is — so quoting and funding up front charged the creator SOL and a
+ * confirmation wait for nothing, on a funding transaction that is itself the
+ * least reliable step in the flow. Attempt the upload first and fund only when
+ * a 402 says it is genuinely required, then retry exactly once.
+ */
+export async function uploadWithFunding<T>(
+  irys: Pick<IrysClient, "getPrice" | "getBalance" | "fund">,
+  attempt: () => Promise<T>,
+  quote: { bytes: number; tags: IrysTags },
+): Promise<T> {
+  try {
+    return await attempt();
+  } catch (error) {
+    if (!isPaymentRequired(error)) throw error;
+
+    const { fundingRequiredAtomic } = await quoteIrysUpload(irys, [quote]);
+    if (fundingRequiredAtomic <= 0n) {
+      /* Irys wants payment but the quote says the balance covers it: retrying
+         would loop, so surface the original refusal. */
+      throw error;
+    }
+    await fundIrysUpload(irys, fundingRequiredAtomic);
+    return attempt();
+  }
+}
+
 export function profileImageTags(
   owner: string,
   kind: "avatar" | "cover",
@@ -135,15 +210,18 @@ export function profileMetadataTags(owner: string): IrysTags {
 }
 
 export async function uploadPermanentImage(
-  irys: Pick<IrysClient, "uploadFile">,
+  irys: Pick<IrysClient, "uploadFile" | "getPrice" | "getBalance" | "fund">,
   file: File,
   owner: string,
   kind: "avatar" | "cover",
 ): Promise<string> {
   validatePermanentImage(file);
-  const receipt = await irys.uploadFile(file, {
-    tags: profileImageTags(owner, kind),
-  });
+  const tags = profileImageTags(owner, kind);
+  const receipt = await uploadWithFunding(
+    irys,
+    () => irys.uploadFile(file, { tags }),
+    { bytes: file.size, tags },
+  );
   assertReceiptId(receipt.id);
   if (!(await receipt.verify())) {
     throw new PermanentUploadError("Irys could not verify the image receipt.");
@@ -152,14 +230,17 @@ export async function uploadPermanentImage(
 }
 
 export async function uploadPermanentMetadata(
-  irys: Pick<IrysClient, "upload">,
+  irys: Pick<IrysClient, "upload" | "getPrice" | "getBalance" | "fund">,
   metadata: ProfileMetadata,
   owner: string,
 ): Promise<PermanentProfileUpload> {
   const body = canonicalizeProfileMetadata(metadata);
-  const receipt = await irys.upload(body, {
-    tags: profileMetadataTags(owner),
-  });
+  const tags = profileMetadataTags(owner);
+  const receipt = await uploadWithFunding(
+    irys,
+    () => irys.upload(body, { tags }),
+    { bytes: new TextEncoder().encode(body).byteLength, tags },
+  );
   assertReceiptId(receipt.id);
   if (!(await receipt.verify())) {
     throw new PermanentUploadError(
