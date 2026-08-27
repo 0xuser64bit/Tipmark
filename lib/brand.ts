@@ -4,7 +4,7 @@ export const BRAND_DOMAIN =
   process.env.NEXT_PUBLIC_BRAND_DOMAIN?.replace(/^https?:\/\//, "").replace(
     /\/$/,
     "",
-  ) || "tipmark.xyz";
+  ) || "tipmark-platform.vercel.app";
 export const BRAND_URL = `https://${BRAND_DOMAIN}`;
 export const BRAND_HANDLE = "@Tipmark";
 

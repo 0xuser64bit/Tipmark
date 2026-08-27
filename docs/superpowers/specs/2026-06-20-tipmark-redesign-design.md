@@ -7,7 +7,7 @@
 
 Tipmark is a **crypto-native creator support page** on Solana. The core loop:
 
-- A **creator** signs in (Google), claims `tipmark.xyz/<username>`, fills a profile, shares the link.
+- A **creator** signs in (Google), claims `tipmark-platform.vercel.app/<username>`, fills a profile, shares the link.
 - A **supporter** lands on the public page, connects a Solana wallet, sends SOL **wallet-to-wallet** (non-custodial, no middleman).
 - The creator tracks earnings in a dashboard and shares a downloadable QR "card".
 
@@ -80,7 +80,7 @@ Calm. Remove glitch/typewriter/particles/magnetic/3D-tilt/floating-icons. Keep: 
 
 ## 6. Pages
 
-- **Landing `/`** — Remove particles/glitch/fake testimonial. Hero ("Get paid in crypto. Keep all of it."), value line, primary CTA + inline `tipmark.xyz/<claim>` input. Show the real product (profile + QR card, gentle float). 3-step "How it works". Trust band (Non-custodial · Wallet-to-wallet · Verifiable on Solana). Clean footer.
+- **Landing `/`** — Remove particles/glitch/fake testimonial. Hero ("Get paid in crypto. Keep all of it."), value line, primary CTA + inline `tipmark-platform.vercel.app/<claim>` input. Show the real product (profile + QR card, gentle float). 3-step "How it works". Trust band (Non-custodial · Wallet-to-wallet · Verifiable on Solana). Clean footer.
 - **Onboarding `/edit-profile`** — Guided wizard + **live profile preview**: ① claim handle (real-time availability via existing 409 path) + name → ② avatar/cover/bio (markdown edit/preview retained) → ③ wallet + **optional** socials → ④ "You're live 🎉" share. Relax `/home` gate to require only handle + name + wallet.
 - **Money moment `/[username]` (+ authed `/home` self-view)** — Preset amounts with **live USD**, custom amount with USD, "Sending to: `<AddressChip>`" trust line, graceful wallet-connect state, confident CTA, light social proof ("N people supported"). Responsive: single column on mobile, support panel prominent.
 - **Success `/check-explorer/[signature]`** — Branded receipt: green check + tasteful confetti, amount SOL+USD, recipient, signature `AddressChip`, "View on Solscan", growth-loop CTA "Create your own page".

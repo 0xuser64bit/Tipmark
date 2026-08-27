@@ -81,7 +81,7 @@ which appears on the support panel, the receipt, and the dashboard.
 
 - **Zero platform fee**: direct wallet-to-wallet transfers, non-custodial
 - **No database**: every screen is read from Solana and permanent storage
-- **Personal pages**: a claimable `tipmark.xyz/<handle>` letterhead
+- **Personal pages**: a claimable `tipmark-platform.vercel.app/<handle>` letterhead
 - **Multi-wallet**: connect any Solana wallet, with an explainer for newcomers
 - **Verifiable receipts**: every contribution is rebuilt from its transaction
 - **Creator ledger**: real transaction table, 12-month history, live USD
@@ -175,7 +175,7 @@ supply a private key.
    signs the transaction and funds the permanent Arweave upload.
 
 3. **Share your link**:
-   Use `tipmark.xyz/yourhandle` to receive contributions.
+   Use `tipmark-platform.vercel.app/yourhandle` to receive contributions.
 
 4. **Track contributions**:
    The ledger recomputes your totals from verified on-chain tips each time you
@@ -222,5 +222,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  <a href="https://tipmark.xyz">Visit Tipmark</a>
+  <a href="https://tipmark-platform.vercel.app">Visit Tipmark</a>
 </p>
