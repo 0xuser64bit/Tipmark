@@ -12,6 +12,7 @@ import {
   type UsernameRecord,
 } from "@/clients/tipmark-protocol/src";
 import { createProtocolRpc, getProtocolConfig } from "./config";
+import { getSolanaNetworkConfig } from "@/lib/solana/cluster";
 import { deriveProfilePda, deriveUsernamePda } from "./pdas";
 import {
   hashProfileMetadata,
@@ -66,16 +67,37 @@ function configuredGateways(name: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Arweave gateways in preference order for the configured cluster.
+ *
+ * Devnet Irys uploads are free and are *not* settled to Arweave, so
+ * `arweave.net` returns 404 for them; only the Irys devnet node serves them.
+ * Ordering by cluster keeps image URLs — which get one URL, not a fallback
+ * list — pointing somewhere that actually has the bytes.
+ */
+function arweaveGateways(): string[] {
+  const configured = configuredGateways("NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS");
+  const isMainnet = getSolanaNetworkConfig().cluster === "mainnet-beta";
+  const defaults = isMainnet
+    ? ["https://arweave.net", "https://gateway.irys.xyz"]
+    : ["https://devnet.irys.xyz", "https://gateway.irys.xyz"];
+
+  /* A devnet deployment that inherited the mainnet-shaped default list would
+     otherwise put arweave.net first and 404 every image. */
+  const ordered = isMainnet
+    ? configured
+    : [
+        ...configured.filter((gateway) => gateway.includes("irys")),
+        ...configured.filter((gateway) => !gateway.includes("irys")),
+      ];
+
+  return [...new Set([...ordered, ...defaults])];
+}
+
 export function metadataGatewayUrls(uri: string): string[] {
   const resource = uri.slice(uri.indexOf("://") + 3);
   if (uri.startsWith("ar://")) {
-    return [
-      ...new Set([
-        ...configuredGateways("NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS"),
-        "https://arweave.net",
-        "https://gateway.irys.xyz",
-      ]),
-    ].map((gateway) => `${gateway}/${resource}`);
+    return arweaveGateways().map((gateway) => `${gateway}/${resource}`);
   }
   if (uri.startsWith("ipfs://")) {
     return [

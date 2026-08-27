@@ -8,6 +8,7 @@ import {
 import {
   fetchAndVerifyProfileMetadata,
   metadataGatewayUrl,
+  metadataGatewayUrls,
   PublicProfileResolutionError,
   resolveOnChainProfile,
 } from "./public-profile";
@@ -45,15 +46,74 @@ function copyBytes(data: ReadonlyUint8Array): Uint8Array {
   return copy;
 }
 
+/**
+ * Gateway choice reads the environment, and `bun test` loads `.env`, so each
+ * gateway test states the configuration it is asserting about rather than
+ * inheriting whatever the developer happens to have set.
+ */
+function withGatewayEnv(
+  env: { cluster?: string; arweave?: string },
+  assertion: () => void,
+) {
+  const previous = {
+    cluster: process.env.NEXT_PUBLIC_SOLANA_CLUSTER,
+    arweave: process.env.NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS,
+  };
+  if (env.cluster === undefined) delete process.env.NEXT_PUBLIC_SOLANA_CLUSTER;
+  else process.env.NEXT_PUBLIC_SOLANA_CLUSTER = env.cluster;
+  if (env.arweave === undefined)
+    delete process.env.NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS;
+  else process.env.NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS = env.arweave;
+
+  try {
+    assertion();
+  } finally {
+    process.env.NEXT_PUBLIC_SOLANA_CLUSTER = previous.cluster;
+    process.env.NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS = previous.arweave;
+  }
+}
+
 describe("public profile metadata verification", () => {
   test("maps permanent URIs to gateway URLs", () => {
-    expect(metadataGatewayUrl("ar://abc")).toBe("https://arweave.net/abc");
+    /* Devnet Irys uploads are free and never settle to Arweave, so
+       arweave.net 404s them. The first URL is the one an <img> gets, with no
+       fallback, so on a non-mainnet cluster it must be an Irys node. */
+    withGatewayEnv({ cluster: "devnet" }, () => {
+      expect(metadataGatewayUrl("ar://abc")).toBe(
+        "https://devnet.irys.xyz/abc",
+      );
+    });
     expect(metadataGatewayUrl("ipfs://bafyabc")).toBe(
       "https://ipfs.io/ipfs/bafyabc",
     );
     expect(() =>
       metadataGatewayUrl("https://example.com/profile.json"),
     ).toThrow("Unsupported");
+  });
+
+  test("prefers arweave.net only on mainnet", () => {
+    withGatewayEnv({ cluster: "mainnet-beta" }, () => {
+      expect(metadataGatewayUrl("ar://abc")).toBe("https://arweave.net/abc");
+    });
+  });
+
+  test("demotes a configured arweave.net ahead of an Irys node off mainnet", () => {
+    /* The shipped .env.example lists arweave.net first; a devnet deployment
+       that copied it must not have every image resolve to a 404. */
+    withGatewayEnv(
+      {
+        cluster: "devnet",
+        arweave: "https://arweave.net,https://gateway.irys.xyz",
+      },
+      () => {
+        expect(metadataGatewayUrls("ar://abc")[0]).toBe(
+          "https://gateway.irys.xyz/abc",
+        );
+        expect(metadataGatewayUrls("ar://abc")).toContain(
+          "https://arweave.net/abc",
+        );
+      },
+    );
   });
 
   test("accepts valid metadata and verifies its content hash", async () => {
@@ -64,7 +124,7 @@ describe("public profile metadata verification", () => {
     });
 
     expect(result.metadata).toEqual(metadata);
-    expect(result.gatewayUrl).toBe("https://arweave.net/metadata");
+    expect(result.gatewayUrl).toBe(metadataGatewayUrl("ar://metadata"));
   });
 
   test("rejects schema, size, and hash violations", async () => {

@@ -140,7 +140,7 @@ no API key, because there is no server-side state and no third-party account.
 | `NEXT_PUBLIC_SOLANA_RPC_URLS` | Recommended | Additional same-cluster HTTPS endpoints, comma-separated, for server read failover. |
 | `NEXT_PUBLIC_SOLANA_WS_URL` | Recommended | The matching WebSocket endpoint from the same provider. |
 | `NEXT_PUBLIC_BRAND_DOMAIN` | Recommended | The domain you control, without `https://`. Used for canonical links and share cards. |
-| `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | Optional | Arweave/Irys gateways, comma-separated. Defaults are in `.env.example`. |
+| `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | Optional | Arweave/Irys gateways, comma-separated. Devnet Irys uploads never settle to Arweave, so off mainnet an Irys node is tried first regardless of the order given. Defaults are in `.env.example`. |
 | `NEXT_PUBLIC_IPFS_GATEWAY_URLS` | Optional | IPFS gateways, comma-separated. Defaults are in `.env.example`. |
 
 Profile text and images are published from the creator's wallet to Arweave
