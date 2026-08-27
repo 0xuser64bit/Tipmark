@@ -7,13 +7,12 @@ compare against. Nothing in this guide targets mainnet.
 ## Current repository state
 
 - The Anchor program and generated TypeScript client are implemented.
-- Localnet program, receipt, indexer, deletion, and replay tests pass.
-- The protocol is always on. `NEXT_PUBLIC_SOLANA_CLUSTER` accepts `devnet` and
-  `localnet` only, and a configured program address is required.
-- PostgreSQL is non-authoritative for profiles, payouts, and receipts, but the
-  current browser publisher still uses a PostgreSQL-backed, one-time wallet
-  challenge for replay protection. Removing that runtime dependency requires
-  a separate stateless or decentralized challenge implementation.
+- Localnet program, receipt, and chain-scan tests pass.
+- `NEXT_PUBLIC_SOLANA_CLUSTER` accepts `devnet` and `localnet` only, and a
+  configured program address is required.
+- There is no database, session, or upload provider. Identity is the connected
+  wallet, profiles live in program accounts plus Arweave metadata, and
+  contributions are read from confirmed transactions.
 
 ## Test layers
 
@@ -21,24 +20,23 @@ There are two useful test layers:
 
 | Layer                | Cluster             | What it proves                                                                    | External wallet needed |
 | -------------------- | ------------------- | --------------------------------------------------------------------------------- | ---------------------- |
-| Automated smoke test | Disposable localnet | Program, PDAs, direct tips, receipts, and cache replay                            | No                     |
+| Automated smoke test | Disposable localnet | Program, PDAs, direct tips, receipts, and chain-only ledger reconstruction        | No                     |
 | Browser rehearsal    | Devnet              | Wallet UX, permanent Irys metadata, profile pages, and real wallet-to-wallet tips | Yes                    |
 
 Localnet is intentionally disposable. The browser rehearsal uses devnet
-because the permanent upload client supports Solana devnet and mainnet only;
-it rejects localnet.
+because the permanent upload client rejects localnet.
 
 ## Prerequisites
 
-- Bun, Rust, Anchor, Solana CLI, and PostgreSQL tooling installed.
+- Bun, Rust, Anchor, and Solana CLI installed.
 - Dependencies installed with `bun install`.
 - A Solana wallet extension such as Phantom, Solflare, or Backpack for the
   devnet browser rehearsal.
 - Devnet SOL only for browser testing. Never use a mainnet wallet for this
   rehearsal.
 
-Do not commit `.env`, wallet keypairs, OAuth credentials, RPC credentials, or
-Irys configuration. Use `.env.example` as the variable-name reference.
+Do not commit `.env`, wallet keypairs, or RPC credentials. Use `.env.example`
+as the variable-name reference.
 
 ## Automated localnet smoke test
 
@@ -58,26 +56,17 @@ creates fresh owner and supporter keypairs. It then:
 4. Reconstructs the receipt from the confirmed transaction.
 5. Verifies the profile owner, payout wallet, supporter, amount, event, and
    transfer.
-6. Stops the validator and removes its temporary ledger.
+6. Scans the profile PDA's signatures and checks that the ledger the creator's
+   statement would show contains exactly that tip, for exactly that amount.
+7. Stops the validator and removes its temporary ledger.
+
+Step 6 is the one that proves the architecture: it uses the same code path the
+dashboard does, from a process holding no state, so a pass means the ledger is
+reconstructable from chain alone.
 
 The command prints JSON containing the cluster, PDAs, transaction signatures,
-and receipt amount. The generated keypairs and ledger are disposable and are
-not written to the repository.
-
-## Disposable database and replay test
-
-Run:
-
-```bash
-NO_DNA=1 bun run protocol:integration:replay
-```
-
-This starts a temporary PostgreSQL cluster in addition to the temporary
-validator. It indexes the verified tip into PostgreSQL, deletes the protocol
-cache and checkpoint, backfills the same signatures from Solana, and checks
-that the exact tip is restored. A passing run demonstrates that PostgreSQL is
-an optional read cache rather than the source of ownership, payout, or receipt
-truth.
+receipt amount, and scanned totals. The generated keypairs and ledger are
+disposable and are not written to the repository.
 
 ## Browser rehearsal on devnet
 
@@ -89,15 +78,10 @@ NEXT_PUBLIC_SOLANA_CLUSTER="devnet"
 NEXT_PUBLIC_SOLANA_RPC_URL="https://api.devnet.solana.com"
 NEXT_PUBLIC_SOLANA_WS_URL="wss://api.devnet.solana.com"
 NEXT_PUBLIC_TIPMARK_PROGRAM_ID="<deployed-devnet-program-address>"
-
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="<local-development-secret>"
-DATABASE_URL="<local-postgresql-url>"
 ```
 
-The program must already be deployed and its config PDA initialized on the
-same devnet cluster. `NEXTAUTH_URL` must match the port in the browser. If the
-dev server uses port `3001`, use `http://localhost:3001` instead.
+That is the whole configuration. The program must already be deployed and its
+config PDA initialized on the same devnet cluster.
 
 Deploying and initializing the program are signed devnet transactions. In an
 agent-assisted session, the user must explicitly approve those transactions
@@ -113,8 +97,8 @@ Start the app:
 bun run dev
 ```
 
-Use a private browser window or sign out first so an existing Google session
-does not send the landing page directly to `/home`.
+Use a fresh browser profile, or disconnect any wallet already connected, so the
+run starts from a genuinely new creator.
 
 ### Creator scenario
 
@@ -125,21 +109,13 @@ does not send the landing page directly to `/home`.
 5. Optionally upload profile and cover images. Irys charges the connected
    wallet in devnet SOL for permanent uploads.
 6. Click **Publish my page**.
-7. Approve the wallet authorization message. This proves control of the
-   wallet; it is not a payment.
-8. Review the simulated `create_profile` transaction and approve it in the
-   wallet.
-9. Open `/<handle>` and confirm the page resolves from the profile and
+7. Review the simulated `create_profile` transaction and approve it in the
+   wallet. This is the only signature the flow asks for — the transaction that
+   does the work.
+8. Open `/<handle>` and confirm the page resolves from the profile and
    username PDAs plus hash-verified permanent metadata.
-
-The protocol editor may update a legacy database row as a convenience cache
-when an email session exists. A cache failure after a confirmed transaction is
-reported as a warning and must not make the on-chain profile disappear.
-
-The wallet authorization challenge itself currently requires PostgreSQL even
-without Google authentication. This challenge is short-lived and is not the
-authority for the resulting profile, but the browser publish flow will not
-finish if the challenge database is unavailable.
+9. Open `/dashboard` and `/home` with the same wallet, then disconnect and
+   confirm both fall back to the connect prompt.
 
 ### Supporter scenario
 
@@ -151,13 +127,13 @@ finish if the challenge database is unavailable.
 6. Open the receipt route and verify that the amount, signer, profile PDA,
    payout wallet, event, and CPI transfer are derived from the Solana
    transaction rather than from browser-submitted fields.
-7. Refresh the creator dashboard and compare chain-derived earnings with the
-   optional indexer cache.
+7. Refresh the creator dashboard and confirm the tip appears in the ledger with
+   the same amount, having been recomputed from chain.
 
 ## What the flow should show
 
 ```text
-Start a page -> /claim -> wallet signature -> Irys metadata
+Start a page -> /claim -> connect wallet -> Irys metadata
              -> Solana profile and username PDAs
              -> direct protocol tip -> verified chain receipt
 ```
@@ -185,15 +161,6 @@ NO_DNA=1 bun run protocol:generate
 NO_DNA=1 bun run protocol:test
 NO_DNA=1 bun run typecheck
 NO_DNA=1 bun run build
-bunx prisma validate
-```
-
-For operational cache checks after a devnet rehearsal:
-
-```bash
-TIPMARK_INDEXER_MODE=incremental bun run protocol:index
-TIPMARK_INDEXER_MODE=backfill TIPMARK_INDEXER_PAGES=100 bun run protocol:index
-bun run protocol:reconcile
 ```
 
 The authoritative architecture and operational assumptions are documented in
@@ -206,30 +173,30 @@ Start a fresh agent session from this repository and provide the following
 request:
 
 ```text
-Resume Tipmark's decentralized protocol browser rehearsal. Read
+Resume Tipmark's devnet browser rehearsal. Read
 docs/decentralization/testing-guide.md, architecture.md, operations.md,
 security-checklist.md, and task-plan.md before acting. Confirm the worktree,
-branch, remote PR, Solana CLI cluster, wallet public key, wallet devnet balance,
-program ID, and whether the program already exists on devnet. Do not access or
-request any private key or seed phrase. Do not touch mainnet. Before any signed
-transaction, show me the exact devnet deployment or initialization summary and
-wait for my explicit approval. After deployment, configure the local app with
-the protocol configured for devnet, run the creator and supporter browser
-scenarios,
-verify the chain-derived receipt and database replay behavior, and document
-all signatures, failures, and remaining architecture gaps. Do not claim the
-system is database-free while wallet challenges still require PostgreSQL.
+branch, Solana CLI cluster, wallet public key, wallet devnet balance, program
+ID, and whether the program and its config PDA already exist on devnet. Do not
+access or request any private key or seed phrase. Do not touch mainnet. Before
+any signed transaction, show me the exact devnet deployment or initialization
+summary and wait for my explicit approval. Then run the creator and supporter
+browser scenarios, verify the chain-derived receipt, and document all
+signatures, failures, and remaining architecture gaps. The app has no database,
+session, or upload provider; if you find any runtime dependency that
+contradicts that, record it rather than working around it.
 ```
 
 Expected completion evidence for that session:
 
 1. The devnet program account is executable at the configured program ID.
 2. The config PDA is initialized under the reviewed authority.
-3. **Start a page** opens `/claim` without Google OAuth.
-4. A wallet creates a username PDA and profile PDA with permanent metadata.
+3. **Start a page** opens `/claim` and asks only for a wallet connection.
+4. A wallet creates a username PDA and profile PDA with permanent metadata,
+   signing exactly one protocol transaction plus any Irys funding.
 5. A second wallet sends a small direct devnet SOL protocol tip.
 6. The receipt verifier reconstructs the exact signer, payout, amount,
    instruction, event, and CPI transfer.
-7. Protocol cache deletion and replay restore the same verified contribution.
-8. Any PostgreSQL, RPC, Irys, wallet, or UX dependency discovered during the
-   rehearsal is recorded rather than hidden.
+7. The creator ledger shows that tip after a full process restart.
+8. Any RPC, Irys, wallet, or UX dependency discovered during the rehearsal is
+   recorded rather than hidden.

@@ -11,8 +11,13 @@ link, shares it, and supporters send SOL straight from their wallet to the
 creator's. There is no platform cut or custody, and every contribution has a
 verifiable receipt.
 
-> **Devnet only.** The decentralized protocol currently targets Solana
-> Devnet for testing. Do not use mainnet funds with this application.
+There is no database, no login, and no upload provider. Ownership lives in a
+Solana program, profile content lives permanently on Arweave, and the connected
+wallet is the only identity. Delete the deployment and every page, payout
+route, and receipt is still intact and still verifiable.
+
+> **Devnet only.** The protocol currently targets Solana Devnet for testing.
+> Do not use mainnet funds with this application.
 
 <p align="center">
   <img src="public/tipmark-home.svg" alt="Tipmark brand preview" width="600"/>
@@ -65,9 +70,9 @@ which appears on the support panel, the receipt, and the dashboard.
 - **Styling**: Tailwind CSS v4 (CSS-first `@theme`) + `tw-animate-css`
 - **UI primitives**: Radix (dialog, dropdown, checkbox, label) + custom system
 - **Fonts**: Geist Sans, Geist Mono, Newsreader (`next/font/local`)
-- **Authentication**: NextAuth.js (Google)
-- **Database**: Prisma ORM (PostgreSQL)
-- **Blockchain**: Solana Web3.js + Solana Wallet Adapter
+- **Identity**: the connected Solana wallet — no accounts, no sessions
+- **State**: Solana program accounts, plus Arweave for profile metadata
+- **Blockchain**: Solana Web3.js + Kit + Solana Wallet Adapter
 - **Uploads**: Arweave via Irys, signed by the creator's wallet
 - **QR**: `qrcode.react` · **Export**: `html2canvas`
 - **Deployment**: Vercel
@@ -75,9 +80,10 @@ which appears on the support panel, the receipt, and the dashboard.
 ## ✨ Key Features
 
 - **Zero platform fee**: direct wallet-to-wallet transfers, non-custodial
+- **No database**: every screen is read from Solana and permanent storage
 - **Personal pages**: a claimable `tipmark.xyz/<handle>` letterhead
 - **Multi-wallet**: connect any Solana wallet, with an explainer for newcomers
-- **Verifiable receipts**: every contribution links to Solscan
+- **Verifiable receipts**: every contribution is rebuilt from its transaction
 - **Creator ledger**: real transaction table, 12-month history, live USD
 - **Share card**: a downloadable PNG with a scannable QR
 - **Responsive & accessible**: single design language across every screen
@@ -88,7 +94,7 @@ which appears on the support panel, the receipt, and the dashboard.
 
 - Node.js (v18 or higher)
 - Bun or npm
-- A Solana wallet (for testing)
+- A Solana wallet with Devnet SOL
 
 ### Installation
 
@@ -105,14 +111,9 @@ which appears on the support panel, the receipt, and the dashboard.
    npm install
    ```
 
-3. Set up the database:
+3. Copy the environment template and point it at your deployment:
    ```bash
-   # using docker
-   sudo docker run -d --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e  POSTGRES_DB=postgres -p 5432:5432 postgres
-   ```
-   ```bash
-   npx prisma generate
-   npx prisma db push
+   cp .env.example .env
    ```
 
 4. Start the development server:
@@ -122,95 +123,77 @@ which appears on the support panel, the receipt, and the dashboard.
    npm run dev
    ```
 
+There is no database to provision and no migration to run. The app reads
+Solana and Arweave directly.
+
 ### Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
-
-```env
-# Database
-DATABASE_URL="your-database-url"
-
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-nextauth-secret"
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-# Solana RPC (use a dedicated Devnet endpoint for protocol testing).
-NEXT_PUBLIC_SOLANA_RPC_URL=
-```
-
-### Devnet deployment variables
-
-The decentralized application is Devnet-only. Configure these values in the
-hosting provider and redeploy after changing any `NEXT_PUBLIC_*` value.
+Copy `.env.example` to `.env` and fill it in. **Every variable is public.** The
+deployment holds no secrets: there is no database password, no OAuth secret, and
+no API key, because there is no server-side state and no third-party account.
 
 | Variable | Required | Source |
 | --- | --- | --- |
-| `DATABASE_URL` | Yes | A PostgreSQL database from Neon, Supabase, Railway, Render, or another managed provider. Run the committed Prisma migrations against it. |
-| `NEXTAUTH_URL` | Yes | The canonical deployed origin, such as `https://tipmark.xyz`. |
-| `NEXTAUTH_SECRET` | Yes | Generate locally with `openssl rand -base64 32` and store it as a deployment secret. It also signs the wallet-authorization cookie, which falls back to a hardcoded development value when unset — never deploy without it. |
-| `AUTH_TRUST_HOST` | Outside Vercel | Set to `1`. Auth.js derives host trust from `AUTH_URL`, `AUTH_TRUST_HOST`, `VERCEL`, or a non-production `NODE_ENV`; `NEXTAUTH_URL` alone leaves every auth route returning `UntrustedHost`. |
-| `NEXT_PUBLIC_BRAND_DOMAIN` | Recommended | The production domain you control, without `https://`. |
-| `NEXT_PUBLIC_SOLANA_CLUSTER` | Yes | Set literally to `devnet`. Only `devnet` and `localnet` are accepted; anything else is rejected at startup. |
-| `NEXT_PUBLIC_TIPMARK_PROGRAM_ID` | Yes | The public program address produced by the Devnet Anchor deployment. It must match `Anchor.toml` and the generated IDL, and its config PDA must already be initialized. |
-| `NEXT_PUBLIC_SOLANA_RPC_URL` | Yes | A Devnet HTTPS endpoint from Helius, QuickNode, Triton, Alchemy, or another Solana RPC provider. |
-| `NEXT_PUBLIC_SOLANA_RPC_URLS` | Recommended | Additional same-cluster Devnet HTTPS endpoints, comma-separated, for server read failover. |
-| `NEXT_PUBLIC_SOLANA_WS_URL` | Recommended | The matching Devnet WebSocket endpoint supplied by the RPC provider. |
-| `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | Optional | Arweave/Irys gateways, comma-separated. Defaults are present in `.env.example`. |
-| `NEXT_PUBLIC_IPFS_GATEWAY_URLS` | Optional | IPFS gateways, comma-separated. Defaults are present in `.env.example`. |
-| `GOOGLE_CLIENT_ID` | Yes, for now | A Google Cloud OAuth 2.0 Web client. Add `<NEXTAUTH_URL>/api/auth/callback/google` as an authorized redirect URI. Required until the wallet-session migration lands: without it the creator dashboard, my-page, and profile editor are unreachable. |
-| `GOOGLE_CLIENT_SECRET` | Yes, for now | The secret from the same Google OAuth client. |
+| `NEXT_PUBLIC_SOLANA_CLUSTER` | Yes | Set to `devnet`. Only `devnet` and `localnet` are accepted; anything else is rejected. |
+| `NEXT_PUBLIC_TIPMARK_PROGRAM_ID` | Yes | The program address from the Anchor deployment. It must match `Anchor.toml` and the generated IDL, and its config PDA must already be initialized. |
+| `NEXT_PUBLIC_SOLANA_RPC_URL` | Yes | A Devnet HTTPS endpoint from Helius, QuickNode, Triton, Alchemy, or another provider. Prefer a domain-restricted key: this URL is served to the browser. |
+| `NEXT_PUBLIC_SOLANA_RPC_URLS` | Recommended | Additional same-cluster HTTPS endpoints, comma-separated, for server read failover. |
+| `NEXT_PUBLIC_SOLANA_WS_URL` | Recommended | The matching WebSocket endpoint from the same provider. |
+| `NEXT_PUBLIC_BRAND_DOMAIN` | Recommended | The domain you control, without `https://`. Used for canonical links and share cards. |
+| `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | Optional | Arweave/Irys gateways, comma-separated. Defaults are in `.env.example`. |
+| `NEXT_PUBLIC_IPFS_GATEWAY_URLS` | Optional | IPFS gateways, comma-separated. Defaults are in `.env.example`. |
 
-Profile and cover images are uploaded from the creator's wallet to Arweave
-through Irys, so there is no upload provider to configure and no API key to
-hold. The connected wallet signs and funds its own permanent uploads.
+Profile text and images are published from the creator's wallet to Arweave
+through Irys, so there is no upload provider to configure. The wallet signs and
+funds its own permanent uploads.
 
-The current wallet authorization challenge still uses PostgreSQL for one-time
-nonce consumption, so `DATABASE_URL`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`
-remain required.
+Redeploy after changing any `NEXT_PUBLIC_*` value — they are read at build time.
 
-Operational commands also accept the following non-runtime variables:
+### Release and governance variables
+
+These are consumed by `bun run protocol:release-check`, never by the running
+app. All of them are public addresses or published governance metadata; never
+supply a private key.
 
 | Variable | Purpose |
 | --- | --- |
 | `TIPMARK_RELEASE_CLUSTER` | Must be `devnet` for the release checker. |
-| `TIPMARK_PROGRAM_ADDRESS` | Program address supplied to `protocol:release-check`. |
-| `TIPMARK_UPGRADE_AUTHORITY` | Public upgrade-authority address. Never provide its private key. |
+| `TIPMARK_PROGRAM_ADDRESS` | Program address being released. |
+| `TIPMARK_UPGRADE_AUTHORITY` | Public upgrade-authority address. |
 | `TIPMARK_MULTISIG_ADDRESS` | Public governance multisig address. |
-| `TIPMARK_MULTISIG_THRESHOLD` | Required multisig approval count, at least 2. |
+| `TIPMARK_MULTISIG_THRESHOLD` | Required approval count, at least 2. |
 | `TIPMARK_MULTISIG_SIGNERS` | Comma-separated public signer addresses. |
-| `TIPMARK_INDEXER_MODE` | `incremental` or `backfill`. |
-| `TIPMARK_INDEXER_PAGES` | Number of signature pages processed per indexer run. |
-| `TIPMARK_INDEXER_PAGE_SIZE` | Signatures requested per page. |
-| `TIPMARK_INDEXER_RESET` | Set to `true` only for an intentional cache rebuild. |
-| `TIPMARK_RECONCILE_LIMIT` | Maximum cached receipts reverified in one reconciliation run. |
 
 ## 💻 Usage
 
-1. **Create an Account**:  
-   Sign up with a unique username and connect your crypto wallet.
+1. **Claim a handle**:
+   Connect a Solana wallet and pick your link. The wallet owns the page; there
+   is no account to create and no password to lose.
 
-2. **Customize Your Profile**:  
-   Add your details, social links, and a description of your work.
+2. **Publish your profile**:
+   Add a name, bio, images, and the wallet you want to be paid in. Your wallet
+   signs the transaction and funds the permanent Arweave upload.
 
-3. **Share Your Profile**:  
-   Use your unique link (tipmark.xyz/yourusername) to receive contributions.
+3. **Share your link**:
+   Use `tipmark.xyz/yourhandle` to receive contributions.
 
-4. **Track Your Contributions**:  
-   Access your personal dashboard to monitor earnings and manage transactions.
+4. **Track contributions**:
+   The ledger recomputes your totals from verified on-chain tips each time you
+   open it.
 
 ## 📂 Project Structure
 
 ```
 tipmark/
-├── actions/         # Server actions for data mutations
+├── actions/         # Server actions: chain reads, no writes
 ├── app/             # Next.js app directory with routes
+├── clients/         # Generated type-safe protocol client
 ├── components/      # Reusable UI components
-├── db/              # Database configuration
-├── lib/             # Utility functions and shared logic
-├── prisma/          # Prisma schema and migrations
+├── idls/            # Committed program IDL
+├── lib/protocol/    # PDAs, metadata, receipts, earnings, uploads
+├── programs/        # The Anchor program (Rust)
 ├── public/          # Static assets
+├── scripts/         # Build, codegen, localnet smoke, release checks
 └── ...
 ```
 

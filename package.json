@@ -4,26 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "postinstall": "prisma generate",
     "format": "prettier --write .",
     "protocol:build": "NO_DNA=1 anchor build --ignore-keys && bun scripts/normalize-protocol-idl.mjs target/idl/tipmark_protocol.json && cp target/idl/tipmark_protocol.json idls/tipmark_protocol.json",
     "protocol:generate": "bun scripts/generate-protocol-client.mjs",
     "protocol:test": "cargo test --workspace && cargo clippy --workspace --all-targets -- -D warnings && bun test lib/protocol",
     "protocol:integration": "NO_DNA=1 bun run protocol:build && NEXT_PUBLIC_SOLANA_CLUSTER=localnet NEXT_PUBLIC_SOLANA_RPC_URL=http://127.0.0.1:18899 NO_DNA=1 bun scripts/protocol-localnet-smoke.ts",
-    "protocol:integration:replay": "TIPMARK_PROTOCOL_REPLAY=true NO_DNA=1 bun run protocol:build && NEXT_PUBLIC_SOLANA_CLUSTER=localnet NEXT_PUBLIC_SOLANA_RPC_URL=http://127.0.0.1:18899 TIPMARK_PROTOCOL_REPLAY=true NO_DNA=1 bun scripts/protocol-localnet-smoke.ts",
-    "protocol:index": "bun scripts/index-protocol-tips.ts",
-    "protocol:reconcile": "bun scripts/reconcile-protocol-tips.ts",
     "protocol:release-check": "bun scripts/check-protocol-release.mjs"
   },
   "dependencies": {
     "@irys/web-upload": "0.0.15",
     "@irys/web-upload-solana": "0.1.8",
-    "@prisma/client": "^6.5.0",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -63,7 +58,6 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5.21",
     "postcss": "^8.4.49",
-    "prisma": "^6.5.0",
     "tailwindcss": "^4",
     "typescript": "^5.6.3"
   }

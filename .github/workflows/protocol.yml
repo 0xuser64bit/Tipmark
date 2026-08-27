@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      DATABASE_URL: postgresql://tipmark:tipmark@127.0.0.1:5432/tipmark_ci
+      # The app reads Solana and Arweave only; there is no database or secret
+      # to provision. The cluster and program address are public values.
+      NEXT_PUBLIC_SOLANA_CLUSTER: devnet
+      NEXT_PUBLIC_TIPMARK_PROGRAM_ID: 7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

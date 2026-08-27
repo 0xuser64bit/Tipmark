@@ -13,15 +13,18 @@
 - [x] Authority transfer is two-step and profile creation has a pause control.
 - [ ] Independent Anchor/Solana program audit.
 
-## Client and indexer
+## Client and reads
 
 - [x] Every wallet transaction is simulated before signing.
 - [x] Signed writes never fail over to another RPC provider.
 - [x] Receipt verification binds the instruction, event, transfer, signer,
       amount, reference, and profile PDA.
 - [x] RPC reads retry transient failures and preserve provider consistency.
-- [x] Index checkpoints use optimistic revisions and replay after cache deletion.
 - [x] Permanent metadata is content-addressed and hash-verified.
+- [x] No server-side account, session, or database participates in authorization;
+      every mutation is a wallet-signed instruction checked by the program.
+- [x] The deployment holds no secrets: every environment variable is a public
+      address, cluster name, or gateway list.
 - [ ] Independent client, metadata, and operational review.
 
 ## Release

@@ -23,31 +23,20 @@ repeat a read, but repeating an ambiguous write can create a duplicate payment.
    config once and record the program address, cluster, authority, and upgrade
    authority outside the repository.
 4. Exercise wallet claim, permanent image/metadata upload, profile update,
-   protocol tip, receipt verification, and indexer replay on that cluster.
-5. Compare chain-derived totals with the disposable cache, run reconciliation,
-   and test database deletion followed by a full backfill.
+   protocol tip, and receipt verification on that cluster.
+5. Confirm the creator ledger and public profile reproduce the same totals from
+   a fresh process, with no local state carried over.
 6. Obtain independent program/security review before opening the deployment to
    real users. No mainnet deployment is implied by a passing build.
 7. Run `bun run protocol:release-check` with the devnet program address and
    public multisig metadata. The check must pass before any deployment change.
 
-## Indexer and rebuild
+## Rebuilding a deployment
 
-The cache is optional. A fresh deployment can rebuild it with:
-
-```bash
-TIPMARK_INDEXER_MODE=incremental bun run protocol:index
-TIPMARK_INDEXER_MODE=backfill TIPMARK_INDEXER_PAGES=100 bun run protocol:index
-bun run protocol:reconcile
-```
-
-The checkpoint is scoped by cluster and program. Incremental mode follows the
-newest signature head; backfill mode walks older pages with a separate cursor.
-Rows are keyed by canonical transaction signature and are written only after
-`TipReceived` event, CPI transfer, signer, program, and success checks pass.
-Set `TIPMARK_INDEXER_RESET=true` only when intentionally rebuilding the cache
-from scratch. Keep the database migration and checkpoint backups until the
-rebuild has been compared against RPC results.
+There is nothing to restore. A new deployment needs the program address, the
+cluster, and an RPC endpoint; profiles, payout routing, and contribution history
+are read from Solana and Arweave on first request. Verify a rebuild by opening a
+known handle and its ledger and comparing the totals against the explorer.
 
 ## Incident response
 
@@ -55,11 +44,8 @@ rebuild has been compared against RPC results.
   `NEXT_PUBLIC_SOLANA_RPC_URLS`, restart server workers, and verify receipt
   lookups. Do not resend transactions whose signatures are unknown.
 - **Metadata gateway outage:** preserve the on-chain URI/hash and try the next
-  configured Arweave/IPFS gateway. Never replace metadata with a database row
-  when a username PDA exists.
-- **Indexer divergence:** stop scheduled indexing, run reconciliation, inspect
-  the affected signatures, then resume from the checkpoint. If necessary reset
-  and backfill; chain state remains authoritative.
+  configured Arweave/IPFS gateway. A profile whose metadata cannot be fetched or
+  whose hash does not match is unavailable, never substituted.
 - **Program vulnerability:** pause profile creation through the governed config
   authority, communicate the affected cluster, preserve signatures/logs, and
   follow the audited upgrade or migration policy. The tip instruction has no
@@ -68,17 +54,18 @@ rebuild has been compared against RPC results.
 ## Upgrade authority and keys
 
 The program upgrade authority and config authority must be held by a multisig
-with a documented threshold and timelock during development. Deployment
-keypairs, multisig signers, RPC credentials, Google secrets, Irys provider
-configuration, and database credentials are operational secrets and must not
+with a documented threshold and timelock during development. This is now the
+only meaningful centralisation left in the system: the deployment holds no
+secrets, but a single upgrade key could replace the program under everyone.
+Deployment keypairs and multisig signers are operational secrets and must never
 be committed or requested from users. Revoke upgrade authority only after an
 independent audit, migration freeze, recovery drill, and published rollback
 boundary.
 
 ## Data retention
 
-PostgreSQL `User`, `Transaction`, `ProtocolTip`, and checkpoint rows are cache
-or convenience state. The protocol profile PDA, username PDA, permanent
-metadata object, and verified Solana transaction are authoritative. Deleting
-the database must not change ownership, payout routing, public profile content,
-or receipt validity.
+There is no application data to retain. The profile PDA, username PDA,
+permanent metadata object, and confirmed Solana transactions are the entire
+record, and none of them are ours to delete. Deleting or losing the deployment
+cannot change ownership, payout routing, public profile content, or receipt
+validity.

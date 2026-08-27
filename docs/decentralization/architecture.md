@@ -17,9 +17,11 @@ instruction.
 ## Canonical data model
 
 The Solana program is authoritative for ownership and payment routing. Permanent
-metadata storage is authoritative for profile presentation. Any database or
-indexer is a rebuildable read cache and must not be required to prove ownership,
-route funds, or validate a payment.
+metadata storage is authoritative for profile presentation. The application
+holds no state of its own: there is no database, and every product surface is
+derived from program accounts, permanent metadata, and confirmed transactions.
+Any cache introduced later must be rebuildable from public state and must not be
+required to prove ownership, route funds, or validate a payment.
 
 ### Profile PDA
 
@@ -95,12 +97,16 @@ treated as an unavailable profile rather than silently replaced.
 
 ## Indexing and reads
 
-The first implementation reads profile accounts and transaction signatures
-from an RPC provider. A disposable indexer then consumes program logs and
-confirmed signatures into PostgreSQL for fast dashboards. Indexer rows include
-the source slot and signature and are periodically reconciled against chain
-state. Deleting the database must not delete protocol state or break receipt
-verification.
+Reads go to an RPC provider: profile and username accounts for identity,
+program signatures and parsed transactions for contributions. Server reads use
+an ordered failover list; signed writes never fail over, because repeating an
+ambiguous write can duplicate a payment.
+
+Creator totals are recomputed from verified `TipReceived` events on each read
+rather than stored. This is slower than a maintained index and is the intended
+trade: there is no derived total that can drift from the ledger, and nothing to
+rebuild after an outage. Response caching is acceptable where it is ephemeral,
+keyed by profile address, and reconstructable from chain.
 
 Receipts validate the transaction from Solana, including the program
 instruction, profile PDA, payout wallet, lamport amount, and confirmation
@@ -119,7 +125,7 @@ proof.
   separately governed emergency mechanism is later approved.
 - Upgrade authority is a multisig with a timelock during development and is
   revoked only after an external audit and migration freeze.
-- RPC responses, metadata, and indexer rows are treated as untrusted input.
+- RPC responses and permanent metadata are treated as untrusted input.
 
 ## Rollout boundaries
 

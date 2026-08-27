@@ -21,6 +21,7 @@ import {
 } from "@/lib/protocol/pdas";
 import { createTipReference } from "@/lib/protocol/reference";
 import { readTipReceipt } from "@/lib/protocol/tip-receipt";
+import { scanTipReceipts, summarizeChainTips } from "@/lib/protocol/earnings";
 
 const RPC_URL =
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "http://127.0.0.1:18899";
@@ -33,7 +34,6 @@ const UPGRADEABLE_LOADER = new PublicKey(
   "BPFLoaderUpgradeab1e11111111111111111111111",
 );
 const PROGRAM_SO = join(process.cwd(), "target/deploy/tipmark_protocol.so");
-const REPLAY_ENABLED = process.env.TIPMARK_PROTOCOL_REPLAY === "true";
 
 function copyBytes(value: {
   readonly [index: number]: number;
@@ -73,82 +73,6 @@ async function waitForValidator(
     }
   }
   throw new Error("local validator RPC did not become ready within 30 seconds");
-}
-
-async function runCommand(
-  command: string[],
-  environment: Record<string, string>,
-) {
-  const result = Bun.spawnSync(command, {
-    env: { ...process.env, ...environment },
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  if (result.exitCode !== 0) {
-    throw new Error(
-      `${command.join(" ")} failed:\n${Buffer.from(result.stderr).toString()}`,
-    );
-  }
-}
-
-async function createReplayDatabase(port: number) {
-  const directory = await mkdtemp(join(tmpdir(), "tipmark-postgres-"));
-  try {
-    await runCommand(
-      [
-        "initdb",
-        "--auth=trust",
-        "--no-locale",
-        "--username=tipmark",
-        "--pgdata",
-        directory,
-      ],
-      {},
-    );
-    await runCommand(
-      [
-        "pg_ctl",
-        "--pgdata",
-        directory,
-        "--options",
-        `-h 127.0.0.1 -p ${port}`,
-        "--log",
-        join(directory, "postgres.log"),
-        "--wait",
-        "start",
-      ],
-      {},
-    );
-    const database = "tipmark_smoke";
-    const environment = {
-      PGHOST: "127.0.0.1",
-      PGPORT: String(port),
-      PGUSER: "tipmark",
-    };
-    await runCommand(["createdb", database], environment);
-    const url = `postgresql://tipmark@127.0.0.1:${port}/${database}`;
-    await runCommand(["bunx", "prisma", "migrate", "deploy"], {
-      DATABASE_URL: url,
-    });
-    return { directory, url };
-  } catch (error) {
-    await runCommand(
-      ["pg_ctl", "--pgdata", directory, "--wait", "stop"],
-      {},
-    ).catch(() => undefined);
-    await rm(directory, { recursive: true, force: true });
-    throw error;
-  }
-}
-
-async function stopReplayDatabase(
-  database: Awaited<ReturnType<typeof createReplayDatabase>>,
-) {
-  await runCommand(
-    ["pg_ctl", "--pgdata", database.directory, "--wait", "stop"],
-    {},
-  ).catch(() => undefined);
-  await rm(database.directory, { recursive: true, force: true });
 }
 
 async function airdrop(connection: Connection, recipient: PublicKey) {
@@ -217,11 +141,7 @@ async function preFundPda(
   );
 }
 
-const runSmoke = async (
-  connection: Connection,
-  authority: Keypair,
-  replayDatabaseUrl?: string,
-) => {
+const runSmoke = async (connection: Connection, authority: Keypair) => {
   assertLocalnet();
   const genesisHash = await connection.getGenesisHash();
   if (!genesisHash) {
@@ -334,37 +254,20 @@ const runSmoke = async (
     throw new Error("tip receipt reconstruction did not match the transaction");
   }
 
-  let replay;
-  if (replayDatabaseUrl) {
-    process.env.DATABASE_URL = replayDatabaseUrl;
-    process.env.NEXT_PUBLIC_SOLANA_CLUSTER = "localnet";
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL = RPC_URL;
-    const { default: db } = await import("@/db");
-    const { indexProtocolTips, resetProtocolIndex } = await import(
-      "@/lib/protocol/indexer"
-    );
-    try {
-      await indexProtocolTips({ mode: "incremental", pages: 10, connection });
-      const indexed = await db.protocolTip.findMany({
-        select: { signature: true },
-      });
-      await resetProtocolIndex();
-      await indexProtocolTips({ mode: "backfill", pages: 10, connection });
-      const rebuilt = await db.protocolTip.findMany({
-        select: { signature: true },
-      });
-      if (
-        indexed.length !== 1 ||
-        rebuilt.length !== 1 ||
-        indexed[0].signature !== tip.signature ||
-        rebuilt[0].signature !== tip.signature
-      ) {
-        throw new Error("protocol index replay did not restore the exact tip");
-      }
-      replay = { indexed: indexed.length, rebuilt: rebuilt.length };
-    } finally {
-      await db.$disconnect();
-    }
+  /* The ledger must be reconstructable from the chain alone. Scanning the
+     profile PDA's signatures has to find exactly this tip, with the same
+     amount — this is the same code path the creator's statement uses, so a
+     pass here is what makes local state disposable rather than load-bearing. */
+  const scanned = await scanTipReceipts(String(profilePda), { connection });
+  const summary = summarizeChainTips(scanned);
+  if (
+    scanned.length !== 1 ||
+    scanned[0].signature !== tip.signature ||
+    scanned[0].amountLamports !== 1_000_000n ||
+    summary.contributions !== 1 ||
+    summary.supporters !== 1
+  ) {
+    throw new Error("chain scan did not reconstruct exactly the sent tip");
   }
 
   console.log(
@@ -376,7 +279,8 @@ const runSmoke = async (
       updateSignature: update.signature,
       tipSignature: tip.signature,
       receiptAmountLamports: receipt.event.amount.toString(),
-      replay,
+      scannedTips: scanned.length,
+      scannedTotalSol: summary.total,
     }),
   );
 };
@@ -393,9 +297,6 @@ const main = async () => {
   }
 
   const authority = Keypair.generate();
-  const replayDatabase = REPLAY_ENABLED
-    ? await createReplayDatabase(rpcPort + 4_000)
-    : null;
   const ledger = await mkdtemp(join(tmpdir(), "tipmark-localnet-"));
   const validator = Bun.spawn(
     [
@@ -425,7 +326,7 @@ const main = async () => {
   try {
     const connection = new Connection(RPC_URL, "confirmed");
     await waitForValidator(connection, validator);
-    await runSmoke(connection, authority, replayDatabase?.url);
+    await runSmoke(connection, authority);
   } catch (error) {
     validator.kill();
     await validator.exited;
@@ -438,9 +339,6 @@ const main = async () => {
       await validator.exited;
     }
     await rm(ledger, { recursive: true, force: true });
-    if (replayDatabase) {
-      await stopReplayDatabase(replayDatabase);
-    }
   }
 };
 
