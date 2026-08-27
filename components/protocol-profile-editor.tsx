@@ -1,11 +1,6 @@
 "use client";
 
-import cacheProtocolProfile from "@/actions/cacheProtocolProfile";
-import {
-  createWalletChallenge,
-  verifyWalletChallenge,
-} from "@/actions/walletAuth";
-import { BRAND_DOMAIN, BRAND_NAME } from "@/lib/brand";
+import { BRAND_DOMAIN } from "@/lib/brand";
 import {
   createIrysClient,
   fundIrysUpload,
@@ -42,11 +37,9 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
-import { AccountMenu } from "./account-menu";
 import { LetterheadPreview } from "./letterhead-preview";
 import { SiteHeader } from "./site-header";
 import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
 import { Field } from "./ui/field";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -65,13 +58,12 @@ type InitialProfile = {
   instagram: string;
   github: string;
   linkedin: string;
-  updates: boolean;
 };
 
 export interface ProtocolProfileEditorProps {
-  email?: string;
   initial: InitialProfile;
   mode: "setup" | "edit";
+  /** Present once a profile exists; the wallet that must sign every update. */
   profileOwner?: string;
 }
 
@@ -96,14 +88,7 @@ function previewUri(value: string): string {
   }
 }
 
-function encodeSignature(signature: Uint8Array): string {
-  let binary = "";
-  for (const byte of signature) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-
 export default function ProtocolProfileEditor({
-  email,
   initial,
   mode,
   profileOwner,
@@ -221,31 +206,8 @@ export default function ProtocolProfileEditor({
       toast.error("Connect the wallet that owns this Solana profile.");
       return;
     }
-    if (!profileOwner && initial.solana && connectedOwner !== initial.solana) {
-      toast.error(
-        "Migration requires the wallet already stored on this legacy profile.",
-      );
-      return;
-    }
     setSaving(true);
     try {
-      const messageSigner = wallet.adapter as MessageSignerWalletAdapter;
-      if (!messageSigner.signMessage) {
-        throw new Error("This wallet cannot sign authorization messages.");
-      }
-      const challenge = await createWalletChallenge({
-        wallet: connectedOwner,
-        uri: window.location.origin + window.location.pathname,
-      });
-      const walletSignature = await messageSigner.signMessage(
-        new TextEncoder().encode(challenge.message),
-      );
-      await verifyWalletChallenge({
-        challengeId: challenge.challengeId,
-        wallet: connectedOwner,
-        signatureBase64: encodeSignature(walletSignature),
-      });
-
       const metadata = normalizeProfileMetadata({
         displayName: form.displayName,
         bio: form.description,
@@ -273,6 +235,9 @@ export default function ProtocolProfileEditor({
         connectedOwner,
       );
 
+      /* Read the account back rather than trusting the mode this component
+         was rendered with: between load and save the profile may already
+         exist, and a create against an initialized PDA would fail. */
       const [profilePda] = await deriveProfilePda(connectedOwner);
       const profileKey = new PublicKey(profilePda);
       const profileAccount = await connection.getAccountInfo(profileKey);
@@ -309,34 +274,12 @@ export default function ProtocolProfileEditor({
         toast.warning("Submitted to Solana; confirmation is still pending.");
         return;
       }
-      if (email) {
-        try {
-          await cacheProtocolProfile({
-            email,
-            username: handle,
-            profile_image: metadata.images.avatar || "",
-            cover_image: metadata.images.cover || "",
-            display_name: metadata.displayName,
-            description: metadata.bio,
-            x_username: metadata.links.x || "",
-            instagram_username: metadata.links.instagram || "",
-            github_username: metadata.links.github || "",
-            linkedin_username: metadata.links.linkedin || "",
-            solana_public_key: form.solana.trim(),
-            owner: connectedOwner,
-          });
-        } catch {
-          toast.warning(
-            "Published on Solana; the dashboard cache will catch up.",
-          );
-        }
-      }
       toast.success(
         mode === "setup"
           ? "Your page is live on Solana."
           : "Changes saved on Solana.",
       );
-      router.push(email ? "/home" : `/${handle}`);
+      router.push("/home");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "That did not save.",
@@ -355,15 +298,7 @@ export default function ProtocolProfileEditor({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader
-        nav={mode === "edit"}
-        actions={
-          <div className="flex items-center gap-2">
-            <WalletTrigger />
-            {email && <AccountMenu />}
-          </div>
-        }
-      />
+      <SiteHeader nav={mode === "edit"} actions={<WalletTrigger />} />
       <main
         id="main"
         className="mx-auto w-full max-w-[1120px] flex-1 px-5 pb-28 sm:px-8"
@@ -373,8 +308,8 @@ export default function ProtocolProfileEditor({
             {mode === "setup" ? "Set up your page" : "Edit your page"}
           </h1>
           <p className="mt-2 max-w-[52ch] text-[14px] leading-relaxed text-ink-faint">
-            Your wallet owns the profile and permanent metadata. PostgreSQL is
-            only a cache.
+            Your wallet owns the profile, and the text and images are published
+            permanently to Arweave. Publishing costs a small amount of SOL.
           </p>
         </header>
         <div className="grid grid-cols-1 items-start gap-10 pt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14">
@@ -498,17 +433,6 @@ export default function ProtocolProfileEditor({
                   />
                 ))}
               </div>
-              {email && (
-                <label className="flex cursor-pointer items-start gap-2.5 pt-1">
-                  <Checkbox
-                    checked={form.updates}
-                    onCheckedChange={(value) => set("updates", Boolean(value))}
-                  />
-                  <span className="text-[13px] leading-snug text-ink-soft">
-                    Email me when {BRAND_NAME} ships something.
-                  </span>
-                </label>
-              )}
             </section>
             <div className="flex items-center justify-end border-t border-rule pt-6">
               <Button

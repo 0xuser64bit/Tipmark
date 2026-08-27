@@ -1,11 +1,10 @@
-import { AccountMenu } from "@/components/account-menu";
 import { SiteHeader } from "@/components/site-header";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader nav actions={<AccountMenu />} />
+      <SiteHeader nav />
       <div className="mx-auto w-full max-w-[1120px] px-5 sm:px-8">
         <div className="border-b border-rule py-8">
           <Skeleton className="h-2.5 w-24" />

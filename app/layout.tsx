@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import "./globals.css";
-import Providers from "./provider";
 import { BRAND_HANDLE, BRAND_NAME, BRAND_URL } from "@/lib/brand";
 
 /* Three voices. Sans is the interface, mono is the machine, serif is the
@@ -110,27 +109,24 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <Providers>
-          {children}
-          <Toaster
-            position="bottom-right"
-            gap={10}
-            toastOptions={{
-              unstyled: true,
-              classNames: {
-                toast:
-                  "flex w-full items-start gap-2.5 border border-rule bg-sheet px-3.5 py-3 text-[13.5px] leading-snug text-ink shadow-lifted rounded-[4px]",
-                title: "font-medium",
-                description: "text-ink-faint",
-                icon: "mt-px shrink-0 [&>svg]:size-4",
-                success: "[&_svg]:text-stamp",
-                error: "[&_svg]:text-seal",
-                closeButton:
-                  "border-rule bg-sheet text-ink-faint hover:text-ink",
-              },
-            }}
-          />
-        </Providers>
+        {children}
+        <Toaster
+          position="bottom-right"
+          gap={10}
+          toastOptions={{
+            unstyled: true,
+            classNames: {
+              toast:
+                "flex w-full items-start gap-2.5 border border-rule bg-sheet px-3.5 py-3 text-[13.5px] leading-snug text-ink shadow-lifted rounded-[4px]",
+              title: "font-medium",
+              description: "text-ink-faint",
+              icon: "mt-px shrink-0 [&>svg]:size-4",
+              success: "[&_svg]:text-stamp",
+              error: "[&_svg]:text-seal",
+              closeButton: "border-rule bg-sheet text-ink-faint hover:text-ink",
+            },
+          }}
+        />
       </body>
     </html>
   );

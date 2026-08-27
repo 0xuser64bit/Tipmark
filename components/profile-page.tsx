@@ -12,7 +12,6 @@ import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import { Button } from "./ui/button";
 import { WalletTrigger } from "./ui/wallet-button";
-import { AccountMenu } from "./account-menu";
 import { formatSol } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { BRAND_NAME, profileUrl } from "@/lib/brand";
@@ -58,15 +57,7 @@ export default function ProfilePage({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader
-        nav={isOwner}
-        actions={
-          <>
-            <WalletTrigger />
-            {isOwner && <AccountMenu />}
-          </>
-        }
-      />
+      <SiteHeader nav={isOwner} actions={<WalletTrigger />} />
 
       <main id="main" className="flex-1">
         {/* ── Owner notice: your page, as others see it ─────────────── */}
