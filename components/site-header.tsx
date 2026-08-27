@@ -45,6 +45,14 @@ export function SiteHeader({
       >
         <Logo compact={nav} />
 
+        <span
+          className="field-label inline-flex items-center rounded-[3px] border border-stamp-edge bg-stamp-soft px-2 py-1 text-stamp"
+          title="Tipmark's decentralized protocol is available on Solana Devnet only."
+          aria-label="Solana Devnet only"
+        >
+          Devnet
+        </span>
+
         {nav && (
           <nav aria-label="Main" className="-mb-px flex items-end gap-0.5 sm:gap-1">
             {CREATOR_NAV.map(({ href, label }) => {

@@ -62,9 +62,9 @@ export async function createIrysClient(
   }
 
   const network = getSolanaNetworkConfig();
-  if (network.cluster !== "devnet" && network.cluster !== "mainnet-beta") {
+  if (network.cluster !== "devnet") {
     throw new PermanentUploadError(
-      "Permanent uploads are supported on Solana devnet and mainnet only.",
+      "Permanent uploads are supported on Solana Devnet only.",
     );
   }
 
@@ -73,9 +73,7 @@ export async function createIrysClient(
     .withRpc(network.rpcUrl)
     .timeout(30_000);
 
-  return network.cluster === "mainnet-beta"
-    ? builder.mainnet().build()
-    : builder.devnet().build();
+  return builder.devnet().build();
 }
 
 export function validatePermanentImage(file: File): void {

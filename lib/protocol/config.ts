@@ -29,9 +29,19 @@ export function getProtocolConfig(): TipmarkProtocolRuntimeConfig {
   const configuredProgram = process.env.NEXT_PUBLIC_TIPMARK_PROGRAM_ID?.trim();
   const configuredRpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim();
   const configuredWebsocket = process.env.NEXT_PUBLIC_SOLANA_WS_URL?.trim();
+  const enabled = process.env.NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED === "true";
+
+  if (enabled && network.cluster !== "devnet") {
+    throw new Error("The Tipmark protocol may only be enabled on Devnet.");
+  }
+  if (enabled && !configuredProgram) {
+    throw new Error(
+      "NEXT_PUBLIC_TIPMARK_PROGRAM_ID is required when the protocol is enabled.",
+    );
+  }
 
   return {
-    enabled: process.env.NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED === "true",
+    enabled,
     cluster: network.cluster,
     programAddress: address(
       configuredProgram || TIPMARK_PROTOCOL_PROGRAM_ADDRESS,

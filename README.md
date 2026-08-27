@@ -8,8 +8,11 @@
 
 Tipmark is a non-custodial creator support page for Solana. A creator claims a
 link, shares it, and supporters send SOL straight from their wallet to the
-creator's — no platform cut, no custody, and a verifiable receipt for every
-contribution.
+creator's. There is no platform cut or custody, and every contribution has a
+verifiable receipt.
+
+> **Devnet only.** The decentralized protocol currently targets Solana
+> Devnet for testing. Do not use mainnet funds with this application.
 
 <p align="center">
   <img src="public/tipmark-home.svg" alt="Tipmark brand preview" width="600"/>
@@ -136,10 +139,55 @@ EDGE_STORE_SECRET_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# Solana RPC (recommended: a dedicated mainnet RPC such as Helius/QuickNode).
-# Falls back to the public mainnet cluster when empty.
+# Solana RPC (use a dedicated Devnet endpoint for protocol testing).
 NEXT_PUBLIC_SOLANA_RPC_URL=
 ```
+
+### Devnet deployment variables
+
+The decentralized application is Devnet-only. Configure these values in the
+hosting provider and redeploy after changing any `NEXT_PUBLIC_*` value.
+
+| Variable | Required | Source |
+| --- | --- | --- |
+| `DATABASE_URL` | Yes | A PostgreSQL database from Neon, Supabase, Railway, Render, or another managed provider. Run the committed Prisma migrations against it. |
+| `NEXTAUTH_URL` | Yes | The canonical deployed origin, such as `https://tipmark.xyz`. |
+| `NEXTAUTH_SECRET` | Yes | Generate locally with `openssl rand -base64 32` and store it as a deployment secret. |
+| `NEXT_PUBLIC_BRAND_DOMAIN` | Recommended | The production domain you control, without `https://`. |
+| `NEXT_PUBLIC_TIPMARK_PROTOCOL_ENABLED` | Yes | Set to `true` only after the reviewed Devnet program and config PDA exist. |
+| `NEXT_PUBLIC_SOLANA_CLUSTER` | Yes | Set literally to `devnet`. Other clusters are rejected when the protocol is enabled. |
+| `NEXT_PUBLIC_TIPMARK_PROGRAM_ID` | Yes | The public program address produced by the Devnet Anchor deployment. It must match `Anchor.toml` and the generated IDL. |
+| `NEXT_PUBLIC_SOLANA_RPC_URL` | Yes | A Devnet HTTPS endpoint from Helius, QuickNode, Triton, Alchemy, or another Solana RPC provider. |
+| `NEXT_PUBLIC_SOLANA_RPC_URLS` | Recommended | Additional same-cluster Devnet HTTPS endpoints, comma-separated, for server read failover. |
+| `NEXT_PUBLIC_SOLANA_WS_URL` | Recommended | The matching Devnet WebSocket endpoint supplied by the RPC provider. |
+| `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | Optional | Arweave/Irys gateways, comma-separated. Defaults are present in `.env.example`. |
+| `NEXT_PUBLIC_IPFS_GATEWAY_URLS` | Optional | IPFS gateways, comma-separated. Defaults are present in `.env.example`. |
+| `GOOGLE_CLIENT_ID` | Legacy mode | A Google Cloud OAuth 2.0 Web client. Add `<NEXTAUTH_URL>/api/auth/callback/google` as an authorized redirect URI. |
+| `GOOGLE_CLIENT_SECRET` | Legacy mode | The secret from the same Google OAuth client. |
+| `EDGE_STORE_ACCESS_KEY` | Legacy mode | The EdgeStore project dashboard. The protocol profile path does not use EdgeStore. |
+| `EDGE_STORE_SECRET_KEY` | Legacy mode | The EdgeStore project dashboard. |
+
+The current wallet authorization challenge still uses PostgreSQL for one-time
+nonce consumption, so `DATABASE_URL`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`
+remain required even when Google login is bypassed. Irys does not need an API
+key in the current browser flow: the connected Devnet wallet signs and funds
+its own permanent uploads.
+
+Operational commands also accept the following non-runtime variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `TIPMARK_RELEASE_CLUSTER` | Must be `devnet` for the release checker. |
+| `TIPMARK_PROGRAM_ADDRESS` | Program address supplied to `protocol:release-check`. |
+| `TIPMARK_UPGRADE_AUTHORITY` | Public upgrade-authority address. Never provide its private key. |
+| `TIPMARK_MULTISIG_ADDRESS` | Public governance multisig address. |
+| `TIPMARK_MULTISIG_THRESHOLD` | Required multisig approval count, at least 2. |
+| `TIPMARK_MULTISIG_SIGNERS` | Comma-separated public signer addresses. |
+| `TIPMARK_INDEXER_MODE` | `incremental` or `backfill`. |
+| `TIPMARK_INDEXER_PAGES` | Number of signature pages processed per indexer run. |
+| `TIPMARK_INDEXER_PAGE_SIZE` | Signatures requested per page. |
+| `TIPMARK_INDEXER_RESET` | Set to `true` only for an intentional cache rebuild. |
+| `TIPMARK_RECONCILE_LIMIT` | Maximum cached receipts reverified in one reconciliation run. |
 
 ## 💻 Usage
 
