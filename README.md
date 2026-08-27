@@ -68,7 +68,8 @@ which appears on the support panel, the receipt, and the dashboard.
 - **Authentication**: NextAuth.js (Google)
 - **Database**: Prisma ORM (PostgreSQL)
 - **Blockchain**: Solana Web3.js + Solana Wallet Adapter
-- **Uploads**: EdgeStore · **QR**: `qrcode.react` · **Export**: `html2canvas`
+- **Uploads**: Arweave via Irys, signed by the creator's wallet
+- **QR**: `qrcode.react` · **Export**: `html2canvas`
 - **Deployment**: Vercel
 
 ## ✨ Key Features
@@ -132,10 +133,6 @@ DATABASE_URL="your-database-url"
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-nextauth-secret"
-
-# Other services
-EDGE_STORE_ACCESS_KEY=
-EDGE_STORE_SECRET_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
@@ -164,14 +161,14 @@ hosting provider and redeploy after changing any `NEXT_PUBLIC_*` value.
 | `NEXT_PUBLIC_IPFS_GATEWAY_URLS` | Optional | IPFS gateways, comma-separated. Defaults are present in `.env.example`. |
 | `GOOGLE_CLIENT_ID` | Yes, for now | A Google Cloud OAuth 2.0 Web client. Add `<NEXTAUTH_URL>/api/auth/callback/google` as an authorized redirect URI. Required until the wallet-session migration lands: without it the creator dashboard, my-page, and profile editor are unreachable. |
 | `GOOGLE_CLIENT_SECRET` | Yes, for now | The secret from the same Google OAuth client. |
-| `EDGE_STORE_ACCESS_KEY` | Yes, for now | The EdgeStore project dashboard. The protocol profile path does not use EdgeStore, but `next build` fails without this because the EdgeStore route initializes its provider at module scope. |
-| `EDGE_STORE_SECRET_KEY` | Yes, for now | The EdgeStore project dashboard. |
+
+Profile and cover images are uploaded from the creator's wallet to Arweave
+through Irys, so there is no upload provider to configure and no API key to
+hold. The connected wallet signs and funds its own permanent uploads.
 
 The current wallet authorization challenge still uses PostgreSQL for one-time
 nonce consumption, so `DATABASE_URL`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`
-remain required even when Google login is bypassed. Irys does not need an API
-key in the current browser flow: the connected Devnet wallet signs and funds
-its own permanent uploads.
+remain required.
 
 Operational commands also accept the following non-runtime variables:
 

@@ -21,8 +21,6 @@
     "protocol:release-check": "bun scripts/check-protocol-release.mjs"
   },
   "dependencies": {
-    "@edgestore/react": "^0.2.2",
-    "@edgestore/server": "^0.2.2",
     "@irys/web-upload": "0.0.15",
     "@irys/web-upload-solana": "0.1.8",
     "@prisma/client": "^6.5.0",
