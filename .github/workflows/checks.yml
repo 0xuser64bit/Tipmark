@@ -27,16 +27,18 @@ jobs:
           components: clippy, rustfmt
 
       # Solana CLI provides cargo-build-sbf, which anchor build delegates to.
-      # v2.1.21 avoids the io_uring kernel requirement introduced in Agave 3.x.
-      - name: Cache Solana CLI
+      # v3.1.10 is the version recommended for Anchor 1.0.x.
+      - name: Cache Solana toolchain
         id: cache-solana
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/solana
-          key: solana-cli-v2.1.21
+          path: |
+            ~/.local/share/solana
+            ~/.cache/solana
+          key: solana-v3.1.10
       - name: Install Solana CLI
         if: steps.cache-solana.outputs.cache-hit != 'true'
-        run: sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.21/install)"
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/v3.1.10/install)"
       - name: Add Solana to PATH
         run: echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
 
