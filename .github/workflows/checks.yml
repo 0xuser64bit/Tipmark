@@ -25,6 +25,28 @@ jobs:
           # rust-toolchain.toml asks for clippy, but the action pins the
           # toolchain explicitly and installs no components unless told to.
           components: clippy, rustfmt
+
+      # Solana CLI provides cargo-build-sbf, which anchor build delegates to.
+      # v2.1.21 avoids the io_uring kernel requirement introduced in Agave 3.x.
+      - name: Cache Solana CLI
+        id: cache-solana
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/solana
+          key: solana-cli-v2.1.21
+      - name: Install Solana CLI
+        if: steps.cache-solana.outputs.cache-hit != 'true'
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/v2.1.21/install)"
+      - name: Add Solana to PATH
+        run: echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      # Anchor CLI — download the prebuilt binary matching Anchor.toml.
+      - name: Install Anchor CLI
+        run: |
+          curl -sSfL -o /usr/local/bin/anchor \
+            https://github.com/otter-sec/anchor/releases/download/v1.0.1/anchor-1.0.1-x86_64-unknown-linux-gnu
+          chmod +x /usr/local/bin/anchor
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Formatting
