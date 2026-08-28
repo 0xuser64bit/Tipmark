@@ -14,8 +14,10 @@ type Tone = "settled" | "pending" | "failed" | "neutral";
 
 const TONE: Record<Tone, string> = {
   settled: "text-ink-ghost",
-  pending: "rounded-[2px] border border-pending-edge bg-pending-soft px-1.5 py-[3px] text-pending",
-  failed: "rounded-[2px] border border-seal-edge bg-seal-soft px-1.5 py-[3px] text-seal",
+  pending:
+    "rounded-[2px] border border-pending-edge bg-pending-soft px-1.5 py-[3px] text-pending",
+  failed:
+    "rounded-[2px] border border-seal-edge bg-seal-soft px-1.5 py-[3px] text-seal",
   neutral: "rounded-[2px] border border-rule px-1.5 py-[3px] text-ink-faint",
 };
 
@@ -33,7 +35,7 @@ export function isSettled(status?: string) {
 }
 
 export interface StampProps {
-  /** Raw status string from the chain / database. */
+  /** Raw confirmation status as reported by the chain. */
   status?: string;
   /** Or drive it directly. */
   tone?: Tone;

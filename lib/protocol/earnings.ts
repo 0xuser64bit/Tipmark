@@ -2,7 +2,6 @@ import { PublicKey, Connection } from "@solana/web3.js";
 import { lamportsToSol } from "@/lib/solana/amount";
 import { readTipReceipts, type VerifiedTipReceipt } from "./tip-receipt";
 import { readWithRpcFailover } from "@/lib/solana/rpc";
-import { deriveProfilePda } from "./pdas";
 
 export interface ChainTipRow {
   signature: string;
@@ -155,12 +154,4 @@ export function summarizeChainTips(rows: ChainTipRow[]) {
       createdAt: row.createdAt,
     })),
   };
-}
-
-export async function scanProfileTipsByOwner(
-  owner: string,
-  options: ScanTipOptions = {},
-) {
-  const [profile] = await deriveProfilePda(owner);
-  return scanTipReceipts(profile, options);
 }

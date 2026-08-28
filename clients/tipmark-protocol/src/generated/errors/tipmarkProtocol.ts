@@ -57,8 +57,7 @@ export type TipmarkProtocolError =
   | typeof TIPMARK_PROTOCOL_ERROR__SELF_TIP_NOT_ALLOWED;
 
 let tipmarkProtocolErrorMessages:
-  | Record<TipmarkProtocolError, string>
-  | undefined;
+  Record<TipmarkProtocolError, string> | undefined;
 if (process.env["NODE_ENV"] !== "production") {
   tipmarkProtocolErrorMessages = {
     [TIPMARK_PROTOCOL_ERROR__INVALID_METADATA_HASH]: `Metadata hash cannot be empty`,

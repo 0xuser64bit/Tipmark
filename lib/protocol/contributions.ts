@@ -31,10 +31,6 @@ export interface ContributionLedger {
 /** How long a scan may be reused. Short: a creator watches for a new tip. */
 const REVALIDATE_SECONDS = 30;
 
-export function contributionCacheTag(profileAddress: string): string {
-  return `contributions:${profileAddress}`;
-}
-
 async function readContributionLedger(
   profileAddress: string,
 ): Promise<ContributionLedger> {

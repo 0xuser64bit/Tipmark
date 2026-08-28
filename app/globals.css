@@ -37,7 +37,6 @@
   /* ── Rules: hairlines that structure the page ─────────────────────── */
   --color-rule: #e2ddd1; /* default hairline                  */
   --color-rule-strong: #cdc5b4; /* emphasis / hover                  */
-  --color-rule-ink: #17150f; /* a deliberate heavy rule           */
 
   /* ── Stamp: the one spot colour. Engraved banknote green. ─────────── */
   --color-stamp: #14573c;
@@ -55,27 +54,6 @@
   --color-pending-soft: #f7ecd8;
   --color-pending-edge: #e3d0ac;
 
-  /* ── shadcn / Radix aliases → mapped onto the ledger palette ─────── */
-  --color-background: #faf8f4;
-  --color-foreground: #17150f;
-  --color-card: #ffffff;
-  --color-card-foreground: #17150f;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #17150f;
-  --color-primary: #14573c;
-  --color-primary-foreground: #f7fbf8;
-  --color-secondary: #f2efe8;
-  --color-secondary-foreground: #17150f;
-  --color-muted: #f2efe8;
-  --color-muted-foreground: #8c8474;
-  --color-accent: #f2efe8;
-  --color-accent-foreground: #17150f;
-  --color-destructive: #9a2b18;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #e2ddd1;
-  --color-input: #e2ddd1;
-  --color-ring: #14573c;
-
   /* ── Radius: printed, not pillowy ─────────────────────────────────── */
   --radius-xs: 2px;
   --radius-sm: 3px;
@@ -91,12 +69,15 @@
     0 1px 2px rgba(23, 21, 15, 0.04), 0 16px 40px -12px rgba(23, 21, 15, 0.16);
 
   /* ── Type ─────────────────────────────────────────────────────────── */
-  --font-serif: var(--font-newsreader), "Iowan Old Style", "Palatino Linotype",
-    Palatino, Georgia, ui-serif, serif;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", SFMono-Regular,
-    Menlo, monospace;
+  --font-serif:
+    var(--font-newsreader), "Iowan Old Style", "Palatino Linotype", Palatino,
+    Georgia, ui-serif, serif;
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, "SF Mono", SFMono-Regular, Menlo,
+    monospace;
 
   /* ── Motion: two curves, short durations, few uses ────────────────── */
   --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -232,7 +213,9 @@
 @utility figure {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "ss01" 1;
+  font-feature-settings:
+    "tnum" 1,
+    "ss01" 1;
   letter-spacing: -0.02em;
 }
 
@@ -468,11 +451,4 @@
 }
 .prose-ledger-sm > * + * {
   margin-top: 0.5em;
-}
-
-/* ═══ html2canvas export ════════════════════════════════════════════
-   html2canvas cannot rasterise `mask-image`, so anything being captured
-   drops its torn edge and exports square. */
-.exporting .perforated {
-  mask-image: none;
 }

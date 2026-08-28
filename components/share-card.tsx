@@ -73,7 +73,6 @@ export function ShareCard({
             style={{ border: "1px solid #e2ddd1", backgroundColor: "#f2efe8" }}
           >
             {imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imageUrl}
                 alt=""

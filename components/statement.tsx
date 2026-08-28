@@ -10,6 +10,7 @@ import { Money } from "./ui/money";
 import { Panel, PanelHeader, PanelTitle } from "./ui/panel";
 import { Stamp, isSettled } from "./ui/stamp";
 import { formatUsd } from "@/lib/format";
+import { getSolscanTransactionUrl } from "@/lib/solana/cluster";
 import { cn } from "@/lib/utils";
 import { profileUrl } from "@/lib/brand";
 
@@ -279,7 +280,7 @@ function formatDay(date: Date) {
 function SolscanLink({ hash }: { hash: string }) {
   return (
     <a
-      href={`https://solscan.io/tx/${hash}`}
+      href={getSolscanTransactionUrl(hash)}
       target="_blank"
       rel="noopener noreferrer"
       className="inline-flex size-6 items-center justify-center rounded-[3px] text-ink-ghost transition-colors hover:bg-well-deep hover:text-ink"

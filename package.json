@@ -10,16 +10,16 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "protocol:build": "NO_DNA=1 anchor build --ignore-keys && bun scripts/normalize-protocol-idl.mjs target/idl/tipmark_protocol.json && cp target/idl/tipmark_protocol.json idls/tipmark_protocol.json",
     "protocol:generate": "bun scripts/generate-protocol-client.mjs",
-    "protocol:test": "cargo test --workspace && cargo clippy --workspace --all-targets -- -D warnings && bun test lib/protocol",
+    "protocol:test": "NO_DNA=1 cargo test --workspace && NO_DNA=1 cargo clippy --workspace --all-targets -- -D warnings && bun test",
     "protocol:integration": "NO_DNA=1 bun run protocol:build && NEXT_PUBLIC_SOLANA_CLUSTER=localnet NEXT_PUBLIC_SOLANA_RPC_URL=http://127.0.0.1:18899 NO_DNA=1 bun scripts/protocol-localnet-smoke.ts",
     "protocol:release-check": "bun scripts/check-protocol-release.mjs"
   },
   "dependencies": {
     "@irys/web-upload": "0.0.15",
     "@irys/web-upload-solana": "0.1.8",
-    "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-label": "^2.1.0",
@@ -29,7 +29,6 @@
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
-    "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.95.5",
     "@tailwindcss/postcss": "^4",
     "class-variance-authority": "^0.7.0",
@@ -37,7 +36,6 @@
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.461.0",
     "next": "15.5.21",
-    "prettier": "^3.5.3",
     "qrcode.react": "^4.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -58,6 +56,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5.21",
     "postcss": "^8.4.49",
+    "prettier": "3.5.3",
     "tailwindcss": "^4",
     "typescript": "^5.6.3"
   }

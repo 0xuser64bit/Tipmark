@@ -46,11 +46,11 @@ describe("Solana RPC read failover", () => {
         ["https://primary.example", "https://secondary.example"],
         async (_connection, endpoint) => {
           calls.push(endpoint);
-          throw new NonRetryableRpcReadError("checkpoint conflict");
+          throw new NonRetryableRpcReadError("receipt verification failed");
         },
         { attemptsPerEndpoint: 2, retryDelayMs: 0 },
       ),
-    ).rejects.toThrow("checkpoint conflict");
+    ).rejects.toThrow("receipt verification failed");
     expect(calls).toEqual(["https://primary.example"]);
   });
 });

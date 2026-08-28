@@ -31,9 +31,10 @@ export function SocialLinks({
 }: {
   handles: Partial<Record<(typeof NETWORKS)[number]["key"], string>>;
 }) {
-  const links = NETWORKS.map((n) => ({ ...n, value: clean(handles[n.key]) })).filter(
-    (n) => n.value,
-  );
+  const links = NETWORKS.map((n) => ({
+    ...n,
+    value: clean(handles[n.key]),
+  })).filter((n) => n.value);
 
   if (links.length === 0) return null;
 

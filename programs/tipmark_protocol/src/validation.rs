@@ -37,24 +37,33 @@ pub fn is_valid_metadata_hash(hash: &[u8; 32]) -> bool {
 mod tests {
     use super::*;
 
+    /// These fixtures are the parity contract with the client validator.
+    ///
+    /// The grammar is implemented twice — here and in `lib/protocol/username.ts`
+    /// — because a handle that one side accepts and the other rejects is either
+    /// an unclaimable page or a failed transaction. These lists must stay
+    /// identical to `ACCEPTED` and `REJECTED` in `lib/protocol/username.test.ts`.
+    const ACCEPTED: [&str; 4] = ["ab", "ada", "ada-lovelace", "creator-42"];
+    const REJECTED: [&str; 7] = [
+        "a",
+        "Ada",
+        "ada_lovelace",
+        "-ada",
+        "ada-",
+        "ada--lovelace",
+        "this-handle-is-longer-than-thirty-characters",
+    ];
+
     #[test]
     fn accepts_canonical_usernames() {
-        for username in ["ab", "ada", "ada-lovelace", "creator-42"] {
+        for username in ACCEPTED {
             assert!(is_valid_username(username), "{username}");
         }
     }
 
     #[test]
     fn rejects_ambiguous_or_noncanonical_usernames() {
-        for username in [
-            "a",
-            "Ada",
-            "ada_lovelace",
-            "-ada",
-            "ada-",
-            "ada--lovelace",
-            "this-handle-is-longer-than-thirty-characters",
-        ] {
+        for username in REJECTED {
             assert!(!is_valid_username(username), "{username}");
         }
     }

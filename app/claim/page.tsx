@@ -1,27 +1,6 @@
-import { CreatorProfileEditor } from "@/components/creator-profile-editor";
-import { WalletAdapterWrapper } from "@/components/wallet-adapter-wrapper";
-import { normalizeUsername } from "@/lib/protocol/username";
+import { ProfileEditorRoute } from "@/components/profile-editor-route";
 
 export const metadata = { title: "Claim your page" };
 
-/**
- * The entry point for a new creator. It is the same editor as `/edit-profile`
- * — the connected wallet decides whether that means creating or updating —
- * but it keeps a URL worth putting in a link.
- */
-export default async function ClaimPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ handle?: string }>;
-}) {
-  const { handle: desired } = await searchParams;
-  const seeded = normalizeUsername(desired ?? "")
-    .replace(/[^a-z0-9-]/g, "")
-    .slice(0, 30);
-
-  return (
-    <WalletAdapterWrapper>
-      <CreatorProfileEditor seededHandle={seeded} />
-    </WalletAdapterWrapper>
-  );
-}
+/** The entry point for a new creator, and the link worth putting in a bio. */
+export default ProfileEditorRoute;

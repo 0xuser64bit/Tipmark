@@ -89,7 +89,6 @@ export function WalletTrigger({ className }: { className?: string }) {
           )}
         >
           {wallet?.adapter.icon ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={wallet.adapter.icon}
               alt=""

@@ -18,5 +18,3 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "cargo test --workspace"
-
-[hooks]

@@ -1,4 +1,4 @@
-name: protocol
+name: checks
 
 on:
   push:
@@ -15,20 +15,29 @@ jobs:
       NEXT_PUBLIC_SOLANA_CLUSTER: devnet
       NEXT_PUBLIC_TIPMARK_PROGRAM_ID: 7ZNWrEBx3QnTamR8ZZKwbksKvHhby3bg3W3akiz183TT
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: 1.89.0
+          # rust-toolchain.toml asks for clippy, but the action pins the
+          # toolchain explicitly and installs no components unless told to.
+          components: clippy, rustfmt
       - name: Install dependencies
         run: bun install --frozen-lockfile
+      - name: Formatting
+        run: bun run format:check
+      - name: Lint
+        run: bun run lint
       - name: Rust tests and clippy
         run: NO_DNA=1 cargo test --workspace && NO_DNA=1 cargo clippy --workspace --all-targets -- -D warnings
       - name: Generate protocol artifacts
         run: bun run protocol:build && bun run protocol:generate
-      - name: TypeScript and protocol tests
-        run: bun run typecheck && bun test lib/protocol lib/solana
+      - name: Committed IDL and client are up to date
+        run: git diff --exit-code -- idls clients
+      - name: TypeScript and unit tests
+        run: bun run typecheck && bun test
       - name: Application build
         run: bun run build

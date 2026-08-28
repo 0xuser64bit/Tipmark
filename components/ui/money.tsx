@@ -76,7 +76,9 @@ export function Money({
       {sign}
       {formatSol(value, decimals)}
       {unit && (
-        <span className={cn("font-normal text-ink-faint", UNIT[size])}>SOL</span>
+        <span className={cn("font-normal text-ink-faint", UNIT[size])}>
+          SOL
+        </span>
       )}
     </span>
   );

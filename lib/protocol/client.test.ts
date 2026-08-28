@@ -5,7 +5,7 @@ import {
   getTipInstructionDataEncoder,
 } from "@/clients/tipmark-protocol/src";
 import { deriveProfilePda, deriveUsernamePda } from "./pdas";
-import { decodeTipReference, encodeTipReference } from "./reference";
+import { createTipReference } from "./reference";
 
 describe("generated protocol client", () => {
   test("derives deterministic and domain-separated PDAs", async () => {
@@ -30,8 +30,10 @@ describe("generated protocol client", () => {
     expect(decoded.reference).toEqual(reference);
   });
 
-  test("round-trips the receipt reference", () => {
-    const reference = Uint8Array.from({ length: 32 }, (_, index) => index + 1);
-    expect(decodeTipReference(encodeTipReference(reference))).toEqual(reference);
+  test("generates references of the width the instruction encodes", () => {
+    const reference = createTipReference();
+    expect(reference).toBeInstanceOf(Uint8Array);
+    expect(reference.length).toBe(32);
+    expect(createTipReference()).not.toEqual(reference);
   });
 });

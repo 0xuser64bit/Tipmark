@@ -15,10 +15,7 @@ const Label = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn(
-      "field-label block peer-disabled:opacity-50",
-      className,
-    )}
+    className={cn("field-label block peer-disabled:opacity-50", className)}
     {...props}
   />
 ));

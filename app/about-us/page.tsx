@@ -22,8 +22,8 @@ const SECTIONS = [
     id: "money",
     heading: "Where the money goes",
     body: [
-      "Straight to the Solana address you saved. We store that address so your page knows where to point a transfer — nothing else. We never see a private key, never hold a balance, and could not move your funds if we wanted to.",
-      "The flip side is that we cannot recover anything either. If you lose access to that wallet, the contributions in it are gone. Use a wallet you control and have backed up.",
+      "Straight to the Solana address in your page's on-chain record. That record lives in a Solana program account your wallet owns, not in a database of ours. We never see a private key, never hold a balance, and could not move your funds if we wanted to.",
+      "The flip side is that we cannot recover anything either. If you lose access to that wallet, the contributions in it are gone, and so is the ability to edit your page. Use a wallet you control and have backed up.",
     ],
   },
   {
@@ -57,8 +57,9 @@ const SECTIONS = [
     id: "data",
     heading: "What we know about you",
     body: [
-      "You sign in with Google, so we have your email address. You give us a handle, a display name, whatever you write in your bio, the images you upload and your public Solana address. Contributions to your page are recorded with their amount, signature, sender address and time.",
-      "That is the whole list. Wallet connections happen in your browser between your wallet and Solana; we are not in the middle of them.",
+      "Nothing you have not published. There is no sign-up, no password and no email address, because there is no account — connecting your wallet is how you prove the page is yours. We have no database, so there is nowhere for us to keep anything.",
+      "Your handle, display name, bio, images and payout address are written to Solana and to permanent public storage by your own wallet. That is a deliberate trade: it is what makes the page outlive us, and it also means those fields are public and cannot be unpublished.",
+      "Contributions are recorded by Solana, not by us. Your ledger is recomputed from the chain each time you open it, so the amounts, signatures, sender addresses and times you see there are the same ones anyone else can read.",
     ],
   },
 ];

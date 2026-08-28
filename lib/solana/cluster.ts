@@ -9,19 +9,11 @@ const DEFAULT_RPC_URLS: Record<SolanaCluster, string> = {
   "mainnet-beta": clusterApiUrl("mainnet-beta"),
 };
 
-const DEFAULT_WEBSOCKET_URLS: Record<SolanaCluster, string> = {
-  localnet: "ws://127.0.0.1:8900",
-  devnet: "wss://api.devnet.solana.com",
-  testnet: "wss://api.testnet.solana.com",
-  "mainnet-beta": "wss://api.mainnet-beta.solana.com",
-};
-
 export interface SolanaNetworkConfig {
   cluster: SolanaCluster;
   label: string;
   rpcUrl: string;
   rpcUrls: string[];
-  websocketUrl: string;
 }
 
 export function parseSolanaCluster(value: string | undefined): SolanaCluster {
@@ -54,9 +46,6 @@ export function getSolanaNetworkConfig(): SolanaNetworkConfig {
     label: cluster === "mainnet-beta" ? "Solana mainnet" : `Solana ${cluster}`,
     rpcUrl,
     rpcUrls,
-    websocketUrl:
-      process.env.NEXT_PUBLIC_SOLANA_WS_URL?.trim() ||
-      DEFAULT_WEBSOCKET_URLS[cluster],
   };
 }
 

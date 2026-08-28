@@ -15,7 +15,10 @@ export async function generateMetadata({
   const description =
     creator.description ||
     `Support ${displayName} on ${BRAND_NAME} — direct creator support with a verifiable receipt`;
-  const profileImageUrl = creator.profileImage || "/tipmark-mark.svg";
+  /* The avatar is a square upload, so its dimensions are left undeclared
+     rather than misreported as a 1200x630 card. Without one, fall back to the
+     brand card: the mark is an SVG, which most OG consumers reject. */
+  const shareImage = creator.profileImage || "/opengraph-image";
 
   return {
     title: displayName,
@@ -24,21 +27,14 @@ export async function generateMetadata({
       title: `${displayName} (@${handle})`,
       description,
       url: `/${handle}`,
-      images: [
-        {
-          url: profileImageUrl,
-          width: 1200,
-          height: 630,
-          alt: `${displayName}'s profile picture`,
-        },
-      ],
+      images: [{ url: shareImage, alt: `${displayName} on ${BRAND_NAME}` }],
       type: "profile",
     },
     twitter: {
       card: "summary_large_image",
       title: `${displayName} (@${handle})`,
       description,
-      images: [profileImageUrl],
+      images: [shareImage],
       creator: creator.x_username ? `@${creator.x_username}` : BRAND_HANDLE,
     },
     alternates: {

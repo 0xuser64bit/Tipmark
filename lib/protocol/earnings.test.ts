@@ -13,7 +13,7 @@ import {
 } from "./earnings";
 
 describe("chain-derived earnings", () => {
-  test("summarizes verified tips without database fields", () => {
+  test("summarizes verified tips from chain rows alone", () => {
     const now = new Date();
     const rows: ChainTipRow[] = [
       {
