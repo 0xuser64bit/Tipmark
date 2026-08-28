@@ -12,6 +12,10 @@ import {
   PublicProfileResolutionError,
   resolveOnChainProfile,
 } from "./public-profile";
+import {
+  NonRetryableRpcReadError,
+  withEndpointFailover,
+} from "@/lib/solana/rpc";
 import { hashProfileMetadata, normalizeProfileMetadata } from "./metadata";
 import { deriveProfilePda, deriveUsernamePda } from "./pdas";
 
@@ -207,5 +211,33 @@ describe("public profile metadata verification", () => {
     expect(result?.owner).toBe(owner);
     expect(result?.payoutWallet).toBe(payout);
     expect(result?.metadata.displayName).toBe("Ada");
+  });
+
+  test("does not shop a verification failure around other endpoints", async () => {
+    /* Account reads fail over so an endpoint outage does not make every
+       claimed page look unclaimed. A profile that fails verification is a
+       different thing: the bytes are already in hand and no other provider can
+       change the answer, so it must be rejected on the first endpoint. */
+    const attempted: string[] = [];
+
+    expect(new PublicProfileResolutionError("x")).toBeInstanceOf(
+      NonRetryableRpcReadError,
+    );
+
+    await expect(
+      withEndpointFailover(
+        ["https://primary.example", "https://secondary.example"],
+        (endpoint) => endpoint,
+        async (endpoint: string) => {
+          attempted.push(endpoint);
+          throw new PublicProfileResolutionError(
+            "Profile metadata hash mismatch.",
+          );
+        },
+        { attemptsPerEndpoint: 2, retryDelayMs: 0 },
+      ),
+    ).rejects.toBeInstanceOf(PublicProfileResolutionError);
+
+    expect(attempted).toEqual(["https://primary.example"]);
   });
 });

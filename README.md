@@ -42,16 +42,16 @@ what the code is organised around:
 
 ## Stack
 
-| Layer        | Choice                                                                                   |
-| ------------ | ---------------------------------------------------------------------------------------- |
-| App          | Next.js 15 App Router, React 18, TypeScript                                              |
-| Styling      | Tailwind CSS v4 (CSS-first `@theme`), Radix primitives                                   |
-| Chain reads  | `@solana/kit` for accounts, `@solana/web3.js` for signature scans with endpoint failover |
-| Chain writes | `@solana/web3.js` + Wallet Adapter, simulated before signing                             |
-| Program      | Anchor 1.0.1 (Rust), client generated with Codama                                        |
-| Storage      | Arweave via Irys, funded and signed by the creator's wallet                              |
-| Identity     | The connected wallet. No accounts, no sessions, no database                              |
-| Tooling      | Bun (package manager and test runner)                                                    |
+| Layer        | Choice                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------ |
+| App          | Next.js 15 App Router, React 18, TypeScript                                                            |
+| Styling      | Tailwind CSS v4 (CSS-first `@theme`), Radix primitives                                                 |
+| Chain reads  | `@solana/kit` for accounts, `@solana/web3.js` for signature scans, both with ordered endpoint failover |
+| Chain writes | `@solana/web3.js` + Wallet Adapter, simulated before signing                                           |
+| Program      | Anchor 1.0.1 (Rust), client generated with Codama                                                      |
+| Storage      | Arweave via Irys, funded and signed by the creator's wallet                                            |
+| Identity     | The connected wallet. No accounts, no sessions, no database                                            |
+| Tooling      | Bun (package manager and test runner)                                                                  |
 
 ## Running it
 
@@ -81,7 +81,7 @@ browser.
 | `NEXT_PUBLIC_SOLANA_RPC_URL`       | any real deployment      | A Devnet HTTPS endpoint. Prefer a domain-restricted key — this URL reaches the browser. Defaults to the public Devnet endpoint.               |
 | `NEXT_PUBLIC_TIPMARK_PROGRAM_ID`   | a deployment of your own | Must match `Anchor.toml` and `idls/tipmark_protocol.json`, and its config PDA must already be initialized. Defaults to the committed address. |
 | `NEXT_PUBLIC_SOLANA_CLUSTER`       | localnet work            | `devnet` or `localnet`. `testnet` and `mainnet-beta` throw; an unrecognized value falls back to `devnet`. Defaults to `devnet`.               |
-| `NEXT_PUBLIC_SOLANA_RPC_URLS`      | read failover            | Extra same-cluster endpoints, comma-separated. Covers the signature scans behind receipts and earnings, not profile resolution.               |
+| `NEXT_PUBLIC_SOLANA_RPC_URLS`      | read failover            | Extra same-cluster endpoints, comma-separated. Tried in order for reads. Writes never fail over.                                              |
 | `NEXT_PUBLIC_BRAND_DOMAIN`         | your own domain          | Without `https://`. Used for canonical links and share cards.                                                                                 |
 | `NEXT_PUBLIC_ARWEAVE_GATEWAY_URLS` | overriding gateways      | Comma-separated. Devnet Irys uploads never settle to Arweave, so off mainnet an Irys node is tried first regardless of order.                 |
 | `NEXT_PUBLIC_IPFS_GATEWAY_URLS`    | overriding gateways      | Comma-separated fallback gateways.                                                                                                            |

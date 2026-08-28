@@ -10,7 +10,10 @@ export type TipmarkCluster = Extract<SolanaCluster, "devnet" | "localnet">;
 export interface TipmarkProtocolRuntimeConfig {
   cluster: TipmarkCluster;
   programAddress: Address;
+  /** The write and wallet endpoint. Never failed over. */
   rpcUrl: string;
+  /** Ordered read endpoints, `rpcUrl` first. */
+  rpcUrls: string[];
 }
 
 /**
@@ -33,26 +36,28 @@ export function getProtocolConfig(): TipmarkProtocolRuntimeConfig {
     );
   }
 
+  const rpcUrl = configuredRpc || network.rpcUrl;
+
   return {
     cluster: network.cluster,
     programAddress: address(
       configuredProgram || TIPMARK_PROTOCOL_PROGRAM_ADDRESS,
     ),
-    rpcUrl: configuredRpc || network.rpcUrl,
+    rpcUrl,
+    rpcUrls: [rpcUrl, ...network.rpcUrls.filter((url) => url !== rpcUrl)],
   };
 }
 
-/**
- * Account reads go to the primary endpoint only.
- *
- * `NEXT_PUBLIC_SOLANA_RPC_URLS` covers the signature and transaction reads in
- * `lib/solana/rpc.ts`; it does not cover this path yet. Extending it here would
- * need the same non-retryable-error discipline, because a verification failure
- * must not be retried against another provider.
- */
+/** A Kit RPC client for one endpoint, cluster-tagged where Kit wants it. */
+export function createProtocolRpcForEndpoint(
+  endpoint: string,
+  cluster: TipmarkCluster,
+) {
+  return cluster === "devnet"
+    ? createSolanaRpc(devnet(endpoint))
+    : createSolanaRpc(endpoint);
+}
+
 export function createProtocolRpc(config = getProtocolConfig()) {
-  if (config.cluster === "devnet") {
-    return createSolanaRpc(devnet(config.rpcUrl));
-  }
-  return createSolanaRpc(config.rpcUrl);
+  return createProtocolRpcForEndpoint(config.rpcUrl, config.cluster);
 }

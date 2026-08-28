@@ -1,6 +1,7 @@
 import {
   address,
   fetchEncodedAccount,
+  type Account,
   type Address,
   type GetAccountInfoApi,
   type Rpc,
@@ -11,8 +12,16 @@ import {
   type CreatorProfile,
   type UsernameRecord,
 } from "@/clients/tipmark-protocol/src";
-import { createProtocolRpc, getProtocolConfig } from "./config";
+import {
+  createProtocolRpcForEndpoint,
+  getProtocolConfig,
+  type TipmarkProtocolRuntimeConfig,
+} from "./config";
 import { getSolanaNetworkConfig } from "@/lib/solana/cluster";
+import {
+  NonRetryableRpcReadError,
+  withEndpointFailover,
+} from "@/lib/solana/rpc";
 import { deriveProfilePda, deriveUsernamePda } from "./pdas";
 import {
   hashProfileMetadata,
@@ -28,7 +37,16 @@ const MAX_METADATA_BYTES = 64 * 1024;
 const USERNAME_RECORD_SIZE = 104n;
 const CREATOR_PROFILE_SIZE = 423n;
 
-export class PublicProfileResolutionError extends Error {
+/**
+ * A profile that does not verify.
+ *
+ * Non-retryable on purpose: every one of these is a statement about bytes that
+ * are already in hand — a wrong owner, a wrong size, a hash that does not
+ * match. Asking a second provider cannot produce a different answer, and
+ * treating it as a transport failure would turn a definite rejection into a
+ * slow one.
+ */
+export class PublicProfileResolutionError extends NonRetryableRpcReadError {
   constructor(message: string) {
     super(message);
     this.name = "PublicProfileResolutionError";
@@ -266,6 +284,55 @@ function assertProfile(
   }
 }
 
+/**
+ * Run an account read across the configured endpoints.
+ *
+ * Reads reach for a fallback provider for the same reason the signature scans
+ * do: an outage at one endpoint should not make every claimed page look
+ * unclaimed. Verification failures are `PublicProfileResolutionError`, which is
+ * non-retryable, so a bad account is rejected on the first endpoint rather than
+ * re-fetched from each in turn.
+ *
+ * An injected `rpc` bypasses failover entirely — that is how the tests and the
+ * localnet smoke script supply a single fake.
+ */
+function readProfileAccounts<T>(
+  config: TipmarkProtocolRuntimeConfig,
+  injectedRpc: ProfileRpc | undefined,
+  operation: (rpc: ProfileRpc) => Promise<T>,
+): Promise<T> {
+  if (injectedRpc) return operation(injectedRpc);
+  return withEndpointFailover(
+    config.rpcUrls,
+    (endpoint) => createProtocolRpcForEndpoint(endpoint, config.cluster),
+    (rpc) => operation(rpc),
+  );
+}
+
+/** The chain half of a resolution: everything before the metadata fetch. */
+type DecodedProfileAccount = Account<CreatorProfile>;
+
+function toResolvedProfile(
+  profileAccount: DecodedProfileAccount,
+  metadata: ProfileMetadata,
+): ResolvedOnChainProfile {
+  return {
+    source: "on-chain",
+    address: profileAccount.address,
+    owner: profileAccount.data.owner,
+    payoutWallet: profileAccount.data.payoutWallet,
+    username: profileAccount.data.username,
+    active: profileAccount.data.active,
+    metadataUri: profileAccount.data.metadataUri,
+    metadataHash: copyBytes(
+      profileAccount.data.metadataHash as unknown as ByteArrayLike,
+    ),
+    metadata,
+    createdAt: new Date(Number(profileAccount.data.createdAt) * 1000),
+    updatedAt: new Date(Number(profileAccount.data.updatedAt) * 1000),
+  };
+}
+
 /** Resolve a claimed handle from Solana and verify its permanent metadata. */
 export async function resolveOnChainProfile(
   rawUsername: string,
@@ -278,32 +345,43 @@ export async function resolveOnChainProfile(
   const username = parseProtocolUsername(rawUsername);
   const config = getProtocolConfig();
   const programAddress = options.programAddress || config.programAddress;
-  const rpc = options.rpc || createProtocolRpc({ ...config, programAddress });
-  const usernameAddress = await deriveUsernamePda(username, programAddress);
-  const encodedUsername = await fetchEncodedAccount(rpc, usernameAddress[0]);
-  if (!encodedUsername.exists) return null;
-  assertProgramOwned(encodedUsername, programAddress, USERNAME_RECORD_SIZE);
-  const usernameAccount = decodeUsernameRecord(encodedUsername);
 
-  const owner = usernameAccount.data.owner;
-  const profileAddress = await deriveProfilePda(owner, programAddress);
-  assertUsernameRecord(
-    usernameAccount.data,
-    username,
-    owner,
-    profileAddress[0],
-    usernameAddress[1],
+  const profileAccount = await readProfileAccounts(
+    config,
+    options.rpc,
+    async (rpc) => {
+      const usernameAddress = await deriveUsernamePda(username, programAddress);
+      const encodedUsername = await fetchEncodedAccount(
+        rpc,
+        usernameAddress[0],
+      );
+      if (!encodedUsername.exists) return null;
+      assertProgramOwned(encodedUsername, programAddress, USERNAME_RECORD_SIZE);
+      const usernameAccount = decodeUsernameRecord(encodedUsername);
+
+      const owner = usernameAccount.data.owner;
+      const profileAddress = await deriveProfilePda(owner, programAddress);
+      assertUsernameRecord(
+        usernameAccount.data,
+        username,
+        owner,
+        profileAddress[0],
+        usernameAddress[1],
+      );
+
+      const encodedProfile = await fetchEncodedAccount(rpc, profileAddress[0]);
+      if (!encodedProfile.exists) {
+        throw new PublicProfileResolutionError(
+          "Username points to a missing profile.",
+        );
+      }
+      assertProgramOwned(encodedProfile, programAddress, CREATOR_PROFILE_SIZE);
+      const decoded = decodeCreatorProfile(encodedProfile);
+      assertProfile(decoded.data, username, owner, profileAddress[1]);
+      return decoded;
+    },
   );
-
-  const encodedProfile = await fetchEncodedAccount(rpc, profileAddress[0]);
-  if (!encodedProfile.exists) {
-    throw new PublicProfileResolutionError(
-      "Username points to a missing profile.",
-    );
-  }
-  assertProgramOwned(encodedProfile, programAddress, CREATOR_PROFILE_SIZE);
-  const profileAccount = decodeCreatorProfile(encodedProfile);
-  assertProfile(profileAccount.data, username, owner, profileAddress[1]);
+  if (!profileAccount) return null;
 
   const metadata = await fetchAndVerifyProfileMetadata(
     profileAccount.data.metadataUri,
@@ -311,21 +389,7 @@ export async function resolveOnChainProfile(
     { fetchImpl: options.fetchImpl },
   );
 
-  return {
-    source: "on-chain",
-    address: profileAccount.address,
-    owner: profileAccount.data.owner,
-    payoutWallet: profileAccount.data.payoutWallet,
-    username: profileAccount.data.username,
-    active: profileAccount.data.active,
-    metadataUri: profileAccount.data.metadataUri,
-    metadataHash: copyBytes(
-      profileAccount.data.metadataHash as unknown as ByteArrayLike,
-    ),
-    metadata: metadata.metadata,
-    createdAt: new Date(Number(profileAccount.data.createdAt) * 1000),
-    updatedAt: new Date(Number(profileAccount.data.updatedAt) * 1000),
-  };
+  return toResolvedProfile(profileAccount, metadata.metadata);
 }
 
 /** Resolve a protocol profile when a verified event gives only its owner. */
@@ -340,38 +404,49 @@ export async function resolveOnChainProfileByOwner(
   const owner = address(rawOwner);
   const config = getProtocolConfig();
   const programAddress = options.programAddress || config.programAddress;
-  const rpc = options.rpc || createProtocolRpc({ ...config, programAddress });
-  const profileAddress = await deriveProfilePda(owner, programAddress);
-  const encodedProfile = await fetchEncodedAccount(rpc, profileAddress[0]);
-  if (!encodedProfile.exists) return null;
-  assertProgramOwned(encodedProfile, programAddress, CREATOR_PROFILE_SIZE);
-  const profileAccount = decodeCreatorProfile(encodedProfile);
-  assertProfile(
-    profileAccount.data,
-    profileAccount.data.username,
-    owner,
-    profileAddress[1],
-  );
 
-  const usernameAddress = await deriveUsernamePda(
-    profileAccount.data.username,
-    programAddress,
+  const profileAccount = await readProfileAccounts(
+    config,
+    options.rpc,
+    async (rpc) => {
+      const profileAddress = await deriveProfilePda(owner, programAddress);
+      const encodedProfile = await fetchEncodedAccount(rpc, profileAddress[0]);
+      if (!encodedProfile.exists) return null;
+      assertProgramOwned(encodedProfile, programAddress, CREATOR_PROFILE_SIZE);
+      const decoded = decodeCreatorProfile(encodedProfile);
+      assertProfile(
+        decoded.data,
+        decoded.data.username,
+        owner,
+        profileAddress[1],
+      );
+
+      const usernameAddress = await deriveUsernamePda(
+        decoded.data.username,
+        programAddress,
+      );
+      const encodedUsername = await fetchEncodedAccount(
+        rpc,
+        usernameAddress[0],
+      );
+      if (!encodedUsername.exists) {
+        throw new PublicProfileResolutionError(
+          "Profile is missing its username record.",
+        );
+      }
+      assertProgramOwned(encodedUsername, programAddress, USERNAME_RECORD_SIZE);
+      const usernameAccount = decodeUsernameRecord(encodedUsername);
+      assertUsernameRecord(
+        usernameAccount.data,
+        decoded.data.username,
+        owner,
+        profileAddress[0],
+        usernameAddress[1],
+      );
+      return decoded;
+    },
   );
-  const encodedUsername = await fetchEncodedAccount(rpc, usernameAddress[0]);
-  if (!encodedUsername.exists) {
-    throw new PublicProfileResolutionError(
-      "Profile is missing its username record.",
-    );
-  }
-  assertProgramOwned(encodedUsername, programAddress, USERNAME_RECORD_SIZE);
-  const usernameAccount = decodeUsernameRecord(encodedUsername);
-  assertUsernameRecord(
-    usernameAccount.data,
-    profileAccount.data.username,
-    owner,
-    profileAddress[0],
-    usernameAddress[1],
-  );
+  if (!profileAccount) return null;
 
   const metadata = await fetchAndVerifyProfileMetadata(
     profileAccount.data.metadataUri,
@@ -379,19 +454,5 @@ export async function resolveOnChainProfileByOwner(
     { fetchImpl: options.fetchImpl },
   );
 
-  return {
-    source: "on-chain",
-    address: profileAccount.address,
-    owner: profileAccount.data.owner,
-    payoutWallet: profileAccount.data.payoutWallet,
-    username: profileAccount.data.username,
-    active: profileAccount.data.active,
-    metadataUri: profileAccount.data.metadataUri,
-    metadataHash: copyBytes(
-      profileAccount.data.metadataHash as unknown as ByteArrayLike,
-    ),
-    metadata: metadata.metadata,
-    createdAt: new Date(Number(profileAccount.data.createdAt) * 1000),
-    updatedAt: new Date(Number(profileAccount.data.updatedAt) * 1000),
-  };
+  return toResolvedProfile(profileAccount, metadata.metadata);
 }

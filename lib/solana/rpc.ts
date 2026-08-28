@@ -9,6 +9,14 @@ export interface RpcReadOptions {
   retryDelayMs?: number;
 }
 
+/**
+ * An error a different provider cannot answer differently.
+ *
+ * Failing over on one of these turns a definite "no" into several slow
+ * requests and then the same "no". Verification failures extend this, so a
+ * forged receipt or an unverifiable profile is reported immediately rather than
+ * shopped around.
+ */
 export class NonRetryableRpcReadError extends Error {}
 
 function isRetryable(error: unknown): boolean {
@@ -21,6 +29,47 @@ function isRetryable(error: unknown): boolean {
 
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+/**
+ * Walk ordered endpoints, retrying transient failures, for any client type.
+ *
+ * The transport is a parameter because the two read paths use different ones:
+ * signature scans use `@solana/web3.js` `Connection`, account reads use
+ * `@solana/kit`. The failover policy is the part that must not diverge.
+ */
+export async function withEndpointFailover<Client, T>(
+  endpoints: readonly string[],
+  createClient: (endpoint: string) => Client,
+  operation: (client: Client, endpoint: string) => Promise<T>,
+  options: RpcReadOptions = {},
+): Promise<T> {
+  const attempts = Math.max(
+    1,
+    Math.min(options.attemptsPerEndpoint ?? DEFAULT_ATTEMPTS_PER_ENDPOINT, 4),
+  );
+  const retryDelayMs = Math.max(
+    0,
+    Math.min(options.retryDelayMs ?? RETRY_DELAY_MS, 2_000),
+  );
+  let lastError: unknown;
+
+  for (const endpoint of endpoints) {
+    const client = createClient(endpoint);
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      try {
+        return await operation(client, endpoint);
+      } catch (error) {
+        lastError = error;
+        if (!isRetryable(error)) throw error;
+        if (attempt + 1 < attempts) await delay(retryDelayMs);
+      }
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("All configured Solana RPC endpoints failed.");
 }
 
 /** Run a read against ordered RPC endpoints without moving transaction writes. */
@@ -40,32 +89,12 @@ export async function withRpcReadFailoverFromEndpoints<T>(
   operation: (connection: Connection, endpoint: string) => Promise<T>,
   options: RpcReadOptions = {},
 ): Promise<T> {
-  const attempts = Math.max(
-    1,
-    Math.min(options.attemptsPerEndpoint ?? DEFAULT_ATTEMPTS_PER_ENDPOINT, 4),
+  return withEndpointFailover(
+    endpoints,
+    (endpoint) => new Connection(endpoint, "confirmed"),
+    operation,
+    options,
   );
-  const retryDelayMs = Math.max(
-    0,
-    Math.min(options.retryDelayMs ?? RETRY_DELAY_MS, 2_000),
-  );
-  let lastError: unknown;
-
-  for (const endpoint of endpoints) {
-    const connection = new Connection(endpoint, "confirmed");
-    for (let attempt = 0; attempt < attempts; attempt += 1) {
-      try {
-        return await operation(connection, endpoint);
-      } catch (error) {
-        lastError = error;
-        if (!isRetryable(error)) throw error;
-        if (attempt + 1 < attempts) await delay(retryDelayMs);
-      }
-    }
-  }
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("All configured Solana RPC endpoints failed.");
 }
 
 export async function readWithRpcFailover<T>(

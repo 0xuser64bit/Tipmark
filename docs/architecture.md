@@ -117,15 +117,20 @@ verifies program ownership, exact account sizes, version, canonical bumps, and
 the cross-links in both directions (the record's profile is the derived PDA; the
 record's owner is the profile's owner).
 
-Two read paths exist, and only one has failover today. The signature and
-transaction reads behind receipts and earnings go through an ordered endpoint
-list with bounded retries (`lib/solana/rpc.ts`, two attempts per endpoint by
-default). Profile resolution goes through `@solana/kit` against the primary
-endpoint alone; `NEXT_PUBLIC_SOLANA_RPC_URLS` does not cover it yet.
+Both read paths fail over across `NEXT_PUBLIC_SOLANA_RPC_URLS`, in order, with
+bounded retries — two attempts per endpoint by default. They use different
+transports, `@solana/kit` for accounts and `@solana/web3.js` for signature scans,
+so `withEndpointFailover` in `lib/solana/rpc.ts` takes the client factory as a
+parameter: the transport varies, the policy must not.
 
-Deterministic errors — a malformed signature, a failed verification — are never
-retried and never failed over, because trying another provider cannot change the
-answer. **Signed writes never fail over at all**: repeating an ambiguous write can
+Deterministic errors are never retried and never failed over, because trying
+another provider cannot change the answer. That is enforced by type, not by
+convention: `TipReceiptVerificationError` and `PublicProfileResolutionError` both
+extend `NonRetryableRpcReadError`, so a forged receipt or a profile whose hash
+does not match is rejected on the first endpoint. An outage makes a page slow; a
+verification failure makes it unavailable, immediately.
+
+**Signed writes never fail over at all**: repeating an ambiguous write can
 duplicate a payment. If a signature's fate is unknown, look the signature up.
 
 Receipt verification (`lib/protocol/tip-receipt.ts`) is the strongest check in

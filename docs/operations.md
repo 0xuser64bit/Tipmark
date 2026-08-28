@@ -6,14 +6,17 @@ why the system is shaped this way.
 ## Clusters and endpoints
 
 Keep `NEXT_PUBLIC_SOLANA_CLUSTER` explicit: `localnet` for program tests,
-`devnet` for wallet and Irys rehearsal. Those are the only values the protocol
-layer accepts — anything else throws — so mainnet is a deliberate code change
-rather than an environment typo.
+`devnet` for wallet and Irys rehearsal. `testnet` and `mainnet-beta` throw, so
+mainnet is a deliberate code change rather than an environment typo. An
+unrecognised value falls back to `devnet` rather than failing, so a typo here is
+quiet — check it when a deployment behaves unexpectedly.
 
 `NEXT_PUBLIC_SOLANA_RPC_URL` is the primary endpoint, used by browser wallet
 connections and by writes. `NEXT_PUBLIC_SOLANA_RPC_URLS` is an ordered
-comma-separated server read-failover list; every entry must be the same cluster
-with compatible transaction history.
+comma-separated read-failover list covering both read paths — account reads and
+signature scans. Every entry must be the same cluster with compatible transaction
+history. **Set at least one.** With a single endpoint, that endpoint's outage is
+the site's outage.
 
 Browser bundles inline every `NEXT_PUBLIC_*` value at build time. Redeploy after
 changing one.
