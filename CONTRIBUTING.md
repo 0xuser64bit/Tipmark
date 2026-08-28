@@ -28,9 +28,15 @@ bun test
 bun run protocol:test # Rust tests, clippy, then the TypeScript suite
 ```
 
-`clients/`, `idls/`, and `target/` are excluded from Prettier: Codama and Anchor
-format their own output, and reformatting it produces a diff that the next
-`protocol:generate` reverts. Regenerate rather than hand-editing anything there.
+`clients/`, `idls/`, and `target/` are excluded from Prettier and ESLint: Codama
+and Anchor format their own output, and reformatting it produces a diff that the
+next `protocol:generate` reverts. Regenerate rather than hand-editing anything
+there.
+
+Lint runs through the ESLint CLI on a flat config (`eslint.config.mjs`), not
+`next lint`, which is deprecated and gone in Next 16. Warnings fail the run —
+`--max-warnings 0` — because a warning nobody fails on is a warning nobody
+reads.
 
 ## Changing the program
 
