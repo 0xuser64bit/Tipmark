@@ -74,7 +74,7 @@ port, deploys, initializes the config PDA, then creates a profile, updates it,
 sends a tip, verifies the receipt, and scans the profile's signatures to confirm
 the creator's statement contains exactly that tip for exactly that amount. The
 scan step is the one that proves the architecture: it uses the same code path the
-dashboard does, from a process holding no state. Keypairs and the ledger are
+statement does, from a process holding no state. Keypairs and the ledger are
 temporary and are removed afterwards.
 
 ### Devnet browser rehearsal
@@ -95,14 +95,14 @@ bundle is compiled.
 Creator pass: open `/`, start a page, connect a devnet wallet, choose a handle,
 enter a display name and payout wallet, optionally upload images (Irys charges the
 connected wallet in devnet SOL), publish, then confirm `/<handle>` resolves from
-the PDAs plus hash-verified metadata and that `/dashboard` and `/home` fall back
-to the connect prompt once disconnected.
+the PDAs plus hash-verified metadata and that `/ledger` and `/me` fall back to
+the connect prompt once disconnected.
 
 Supporter pass: open the handle in a second browser profile with a different
 wallet, send a small tip, confirm the payout wallet receives the lamports
 directly, open the receipt route and check that every field is derived from the
-transaction, then refresh the creator dashboard and confirm the tip appears with
-the same amount.
+transaction, then refresh `/ledger` and confirm the tip appears with the same
+amount.
 
 Use a fresh browser profile so the run starts from a genuinely new creator.
 

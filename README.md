@@ -93,7 +93,7 @@ addresses and published governance metadata — never a private key.
 ## Layout
 
 ```
-app/                 Routes. /[username] is the public page, /dashboard the ledger
+app/                 Routes. /[username] is the public page, /ledger the statement
 components/          UI. components/ui/* are the design-system primitives
 actions/             Server actions — chain and price reads, no writes
 lib/protocol/        PDAs, metadata hashing, receipt verification, earnings, uploads

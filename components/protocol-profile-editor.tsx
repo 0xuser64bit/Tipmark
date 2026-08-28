@@ -255,7 +255,7 @@ export default function ProtocolProfileEditor({
           ? "Your page is live on Solana."
           : "Changes saved on Solana.",
       );
-      router.push("/home");
+      router.push("/me");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "That did not save.",

@@ -16,8 +16,8 @@ import { Logo } from "./ui/logo";
  */
 
 const CREATOR_NAV = [
-  { href: "/dashboard", label: "Ledger" },
-  { href: "/home", label: "My page" },
+  { href: "/ledger", label: "Ledger" },
+  { href: "/me", label: "My page" },
 ];
 
 /**
